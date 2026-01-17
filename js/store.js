@@ -341,35 +341,18 @@ document.addEventListener('alpine:init', () => {
         },
 
         shareConfig() {
-            // Формируем объект состояния для Deep Link
-            const state = {
-                s: this.selectedSizeId,
-                m: this.selectedMaterialId,
-                st: this.selectedStoveId,
-                f: this.selectedFinishId,
-                l: this.selectedLadderId,
-                c: this.selectedChimneyId,
-                e: this.selectedExtrasIds
-            };
-
-            // Кодируем в Base64 для передачи в startapp
-            // btoa создает ASCII строку из бинарных данных. JSON.stringify выдает UTF-16, но наши ID на латинице/цифрах.
-            // Если будут кириллические ID - надо будет encodeURIComponent перед btoa. Но у нас ID (aisi430, stairs...) - безопасные.
-            const base64Str = btoa(JSON.stringify(state));
-
-            // Формируем "Магическую ссылку" для Telegram кнопки
-            // Используем 'app' как дефолтное shortname.
-            const deepLink = `https://t.me/MySuperChan_bot/app?startapp=${base64Str}`;
-
+            const url = this.updateUrl(); // Обновляем и берем текущую ссылку
             const title = 'Мой банный чан';
-            const text = `Посмотри, какой чан я собрал(а): ${this.selectedSize.name}, ${this.selectedStove.name}`;
+            // Безопасная проверка на наличие selectedSize (вдруг share нажали на заглушке)
+            const sizeName = this.selectedSize ? this.selectedSize.name : 'Чан';
+            const text = `Посмотри, какой чан я собрал(а): ${sizeName}`;
 
             if (navigator.share) {
-                navigator.share({ title, text, url: deepLink })
+                navigator.share({ title, text, url })
                     .catch((error) => console.log('Error sharing', error));
             } else {
-                navigator.clipboard.writeText(deepLink).then(() => {
-                    alert('Магическая ссылка скопирована! Отправьте её в Telegram.');
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Ссылка скопирована! Отправьте её другу.');
                 });
             }
         }
