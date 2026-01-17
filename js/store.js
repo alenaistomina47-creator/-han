@@ -309,7 +309,7 @@ document.addEventListener('alpine:init', () => {
         shareConfig() {
             const url = this.updateUrl(); // Ensure URL is latest
             const title = 'Мой банный чан';
-            const text = `Посмотри, какой чан я собрал: ${this.selectedSize.name}, ${this.selectedStove.name}`;
+            const text = `Посмотри, какой чан я собрал(а): ${this.selectedSize.name}, ${this.selectedStove.name}`;
 
             if (navigator.share) {
                 navigator.share({ title, text, url })
