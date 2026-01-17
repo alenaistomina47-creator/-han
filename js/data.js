@@ -10,12 +10,16 @@ const appData = {
         aisi430: {
             name: 'AISI 430 (Техническая)',
             image: 'https://i.1.creatium.io/disk2/b7/67/b3/42079feb0e160e1182d325c2db6f527181/aysi304_result.webp',
-            imageInside: 'https://i.1.creatium.io/disk2/ea/63/72/53ba66df206714cb5682424a35405569a4/vverh_aysi304_result.webp'
+            imageInside: 'https://i.1.creatium.io/disk2/ea/63/72/53ba66df206714cb5682424a35405569a4/vverh_aysi304_result.webp',
+            description: 'Чан из этой стали надежен и прослужит до 15 лет. Требует обработки швов минимум 1 раз в два месяца.',
+            life: 'СРОК СЛУЖБЫ 15 ЛЕТ'
         },
         aisi304: {
             name: 'AISI 304 (Пищевая)',
             image: 'https://i.1.creatium.io/disk2/b7/67/b3/42079feb0e160e1182d325c2db6f527181/aysi304_result.webp',
-            imageInside: 'https://i.1.creatium.io/disk2/ea/63/72/53ba66df206714cb5682424a35405569a4/vverh_aysi304_result.webp'
+            imageInside: 'https://i.1.creatium.io/disk2/ea/63/72/53ba66df206714cb5682424a35405569a4/vverh_aysi304_result.webp',
+            description: 'Чан из этой нержавеющей стали прослужит более 30 лет. Он не требует специального ухода и не подвержен коррозии.',
+            life: 'СРОК СЛУЖБЫ 30+ ЛЕТ'
         }
     },
     // Цены материалов (зависят от размера)

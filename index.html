@@ -174,11 +174,19 @@
                             Банный чан — это уникальная купель на дровах для купания на свежем воздухе круглый год.
                             Вода нагревается до комфортных 38-40 градусов.
                         </p>
-                        <ul class="list-disc list-inside text-gray-600 space-y-2">
+                        <ul class="list-disc list-inside text-gray-600 space-y-2 mb-6">
                             <li>Вместимость: <span x-text="selectedSize.people"></span></li>
                             <li>Материал: <span x-text="selectedMaterial.name"></span></li>
                             <li>Гарантия качества и долговечности</li>
                         </ul>
+
+                        <!-- Описание материала -->
+                        <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                            <h4 class="font-bold text-[#333] mb-2" x-text="selectedMaterial.name"></h4>
+                            <p class="text-sm text-gray-600 mb-3" x-text="selectedMaterial.description"></p>
+                            <p class="text-xs font-bold text-[#5fb856] uppercase tracking-wider"
+                                x-text="selectedMaterial.life"></p>
+                        </div>
                     </div>
                 </div>
             </div>

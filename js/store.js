@@ -142,8 +142,8 @@ document.addEventListener('alpine:init', () => {
             const prices = appData.materials[this.selectedSizeId];
             if (!prices) return [];
             return [
-                { id: 'aisi430', name: 'AISI 430 (Техническая)', price: prices.aisi430 },
-                { id: 'aisi304', name: 'AISI 304 (Пищевая)', price: prices.aisi304 }
+                { id: 'aisi430', price: prices.aisi430, ...appData.materialMetadata.aisi430 },
+                { id: 'aisi304', price: prices.aisi304, ...appData.materialMetadata.aisi304 }
             ];
         },
         get selectedMaterial() {
