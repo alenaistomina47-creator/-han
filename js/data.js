@@ -1,9 +1,9 @@
 // Все данные калькулятора (Data-Driven подход)
 const appData = {
     sizes: [
-        { id: 'small', name: 'Малый (170 см)', people: '2-4 чел', image: 'https://i.1.creatium.io/disk2/e9/49/7e/dbb9520cfd83659cc13189c6c39eed5871/st3_result.webp', imageInside: 'https://i.1.creatium.io/disk2/5a/83/6b/1bdf52e2d8e7d3457b44b9c853d9d65e78/vverh_st3_result.webp' },
-        { id: 'medium', name: 'Средний (200 см)', people: '4-6 чел', image: 'https://i.1.creatium.io/disk2/e9/49/7e/dbb9520cfd83659cc13189c6c39eed5871/st3_result.webp', imageInside: 'https://i.1.creatium.io/disk2/5a/83/6b/1bdf52e2d8e7d3457b44b9c853d9d65e78/vverh_st3_result.webp' },
-        { id: 'large', name: 'Большой (230 см)', people: '6-10 чел', image: 'https://i.1.creatium.io/disk2/e9/49/7e/dbb9520cfd83659cc13189c6c39eed5871/st3_result.webp', imageInside: 'https://i.1.creatium.io/disk2/5a/83/6b/1bdf52e2d8e7d3457b44b9c853d9d65e78/vverh_st3_result.webp' }
+        { id: 'small', name: 'Малый (170 см)', people: '2-4 чел', image: 'https://i.1.creatium.io/disk2/b7/67/b3/42079feb0e160e1182d325c2db6f527181/aysi304_result.webp', imageInside: 'https://i.1.creatium.io/disk2/ea/63/72/53ba66df206714cb5682424a35405569a4/vverh_aysi304_result.webp' },
+        { id: 'medium', name: 'Средний (200 см)', people: '4-6 чел', image: 'https://i.1.creatium.io/disk2/b7/67/b3/42079feb0e160e1182d325c2db6f527181/aysi304_result.webp', imageInside: 'https://i.1.creatium.io/disk2/ea/63/72/53ba66df206714cb5682424a35405569a4/vverh_aysi304_result.webp' },
+        { id: 'large', name: 'Большой (230 см)', people: '6-10 чел', image: 'https://i.1.creatium.io/disk2/b7/67/b3/42079feb0e160e1182d325c2db6f527181/aysi304_result.webp', imageInside: 'https://i.1.creatium.io/disk2/ea/63/72/53ba66df206714cb5682424a35405569a4/vverh_aysi304_result.webp' }
     ],
     // Метаданные материалов (картинки)
     materialMetadata: {

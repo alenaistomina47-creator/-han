@@ -154,7 +154,7 @@ document.addEventListener('alpine:init', () => {
             const metadata = appData.materialMetadata ? appData.materialMetadata[materialId] : null;
 
             // Fallback if no metadata
-            if (!metadata) return 'https://i.1.creatium.io/disk2/e9/49/7e/dbb9520cfd83659cc13189c6c39eed5871/st3_result.webp';
+            if (!metadata) return 'https://i.1.creatium.io/disk2/b7/67/b3/42079feb0e160e1182d325c2db6f527181/aysi304_result.webp';
 
             if (this.activeTab === 'inside') {
                 return metadata.imageInside || metadata.image;
