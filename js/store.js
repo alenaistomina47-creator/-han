@@ -19,6 +19,12 @@ document.addEventListener('alpine:init', () => {
         init() {
             console.log('Калькулятор запущен.');
 
+            // Авто-сворачивание визуализатора при скролле
+            window.addEventListener('scroll', () => {
+                // Если прокрутили больше 50px - сворачиваем, если вернулись наверх - разворачиваем
+                this.isVisualizerMinimized = window.scrollY > 50;
+            });
+
             if (typeof appData !== 'undefined') {
                 if (appData.sizes?.length) this.selectedSizeId = appData.sizes[0].id;
                 // if (appData.stoves?.length) this.selectedStoveId = appData.stoves[0].id;
