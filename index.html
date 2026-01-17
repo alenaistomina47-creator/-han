@@ -162,7 +162,7 @@
                         *</label>
                     <div class="relative">
                         <select x-model="selectedSizeId"
-                            class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-[#5fb856] focus:border-[#5fb856] block p-3 pr-8 cursor-pointer font-medium">
+                            class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
                             <template x-for="size in appData.sizes" :key="size.id">
                                 <option :value="size.id" x-text="`${size.name.split('(')[0]} (${size.people})`">
                                 </option>
@@ -185,7 +185,7 @@
                         *</label>
                     <div class="relative">
                         <select x-model="selectedMaterialId"
-                            class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-[#5fb856] focus:border-[#5fb856] block p-3 pr-8 cursor-pointer font-medium">
+                            class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
                             <template x-for="material in currentMaterials" :key="material.id">
                                 <option :value="material.id" x-text="material.name"></option>
                             </template>
@@ -206,7 +206,8 @@
                     <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите тип
                         подогрева *</label>
                     <div class="relative">
-                        <select x-model="selectedStoveId" class="custom-select">
+                        <select x-model="selectedStoveId"
+                            class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
                             <option value="">Не выбрано</option>
                             <template x-for="stove in appData.stoves" :key="stove.id">
                                 <option :value="stove.id"
@@ -230,7 +231,8 @@
                     <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите отделку
                         чана *</label>
                     <div class="relative">
-                        <select x-model="selectedFinishId" class="custom-select">
+                        <select x-model="selectedFinishId"
+                            class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
                             <option value="">Не выбрано</option>
                             <template x-for="finish in appData.finishes" :key="finish.id">
                                 <option :value="finish.id"
@@ -254,7 +256,8 @@
                     <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите
                         лестницу</label>
                     <div class="relative">
-                        <select x-model="selectedLadderId" class="custom-select">
+                        <select x-model="selectedLadderId"
+                            class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
                             <option value="">Не выбрано</option>
                             <template x-for="ladder in ladders" :key="ladder.id">
                                 <option :value="ladder.id"
@@ -279,7 +282,8 @@
                     <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите
                         дымоход</label>
                     <div class="relative">
-                        <select x-model="selectedChimneyId" class="custom-select">
+                        <select x-model="selectedChimneyId"
+                            class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
                             <option value="">Не выбрано</option>
                             <template x-for="chimney in chimneys" :key="chimney.id">
                                 <option :value="chimney.id"
@@ -371,6 +375,15 @@
 
             </div>
         </div>
+    </div>
+
+    <!-- Подвал -->
+    <div class="mt-12 text-center text-gray-400 pb-8">
+        <p class="text-[10px] uppercase tracking-wider font-bold mb-1">Реквизиты</p>
+        <p class="text-[10px]">ИП Фамилия Имя Отчество</p>
+        <p class="text-[10px]">ИНН: 0000000000 | ОГРНИП: 000000000000000</p>
+        <a href="#" class="text-[10px] underline hover:text-gray-600 mt-2 block">Политика конфиденциальности</a>
+    </div>
     </div>
 
     <script src="js/data.js?v=2"></script>
