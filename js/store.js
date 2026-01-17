@@ -231,6 +231,58 @@ document.addEventListener('alpine:init', () => {
             return total;
         },
 
+        // Детализация цены (Смета)
+        get priceDetails() {
+            const details = [];
+
+            // 1. Чаша (Размер + Материал)
+            if (this.selectedSize && this.selectedMaterial && appData.materials[this.selectedSizeId]) {
+                const basePrice = appData.materials[this.selectedSizeId][this.selectedMaterialId] || 0;
+                details.push({
+                    name: `Чан: ${this.selectedSize.name}, ${this.selectedMaterial.name}`,
+                    price: basePrice
+                });
+            }
+
+            // 2. Печь
+            if (this.selectedStove) {
+                details.push({ name: this.selectedStove.name, price: this.selectedStove.price || 0 });
+            }
+
+            // 3. Отделка
+            if (this.selectedFinish && this.selectedFinish.price) {
+                let finishPrice = 0;
+                if (typeof this.selectedFinish.price === 'object') {
+                    finishPrice = this.selectedFinish.price[this.selectedSizeId] || 0;
+                } else {
+                    finishPrice = this.selectedFinish.price || 0;
+                }
+                if (finishPrice > 0) {
+                    details.push({ name: `Отделка: ${this.selectedFinish.name}`, price: finishPrice });
+                }
+            }
+
+            // 4. Лестница
+            if (this.selectedLadder) {
+                details.push({ name: this.selectedLadder.name, price: this.selectedLadder.price || 0 });
+            }
+
+            // 5. Дымоход
+            if (this.selectedChimney) {
+                details.push({ name: this.selectedChimney.name, price: this.selectedChimney.price || 0 });
+            }
+
+            // 6. Дополнительные опции
+            this.selectedExtrasIds.forEach(id => {
+                const extra = appData.extras.find(e => e.id === id);
+                if (extra) {
+                    details.push({ name: extra.name, price: extra.price || 0 });
+                }
+            });
+
+            return details;
+        },
+
         // Цена со скидкой (оригинальная из data.js) - показываем внизу зеленым
         get discountedPrice() {
             return this.totalPrice;
