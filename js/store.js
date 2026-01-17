@@ -236,40 +236,48 @@ document.addEventListener('alpine:init', () => {
             const details = [];
 
             // 1. Чаша (Размер + Материал)
-            if (this.selectedSize && this.selectedMaterial && appData.materials[this.selectedSizeId]) {
-                const basePrice = appData.materials[this.selectedSizeId][this.selectedMaterialId] || 0;
+            const size = appData.sizes.find(s => s.id === this.selectedSizeId);
+            // Use currentMaterials helper if available, or finding manually
+            const material = this.currentMaterials ? this.currentMaterials.find(m => m.id === this.selectedMaterialId) : null;
+
+            if (size && material) {
+                const basePrice = (appData.materials[this.selectedSizeId] && appData.materials[this.selectedSizeId][this.selectedMaterialId]) || 0;
                 details.push({
-                    name: `Чан: ${this.selectedSize.name}, ${this.selectedMaterial.name}`,
+                    name: `Чан: ${size.name}, ${material.name}`,
                     price: basePrice
                 });
             }
 
             // 2. Печь
-            if (this.selectedStove) {
-                details.push({ name: this.selectedStove.name, price: this.selectedStove.price || 0 });
+            const stove = appData.stoves.find(s => s.id === this.selectedStoveId);
+            if (stove) {
+                details.push({ name: stove.name, price: stove.price || 0 });
             }
 
             // 3. Отделка
-            if (this.selectedFinish && this.selectedFinish.price) {
+            const finish = appData.finishes.find(f => f.id === this.selectedFinishId);
+            if (finish && finish.price) {
                 let finishPrice = 0;
-                if (typeof this.selectedFinish.price === 'object') {
-                    finishPrice = this.selectedFinish.price[this.selectedSizeId] || 0;
+                if (typeof finish.price === 'object') {
+                    finishPrice = finish.price[this.selectedSizeId] || 0;
                 } else {
-                    finishPrice = this.selectedFinish.price || 0;
+                    finishPrice = finish.price || 0;
                 }
                 if (finishPrice > 0) {
-                    details.push({ name: `Отделка: ${this.selectedFinish.name}`, price: finishPrice });
+                    details.push({ name: `Отделка: ${finish.name}`, price: finishPrice });
                 }
             }
 
             // 4. Лестница
-            if (this.selectedLadder) {
-                details.push({ name: this.selectedLadder.name, price: this.selectedLadder.price || 0 });
+            const ladder = appData.extras.find(e => e.id === this.selectedLadderId);
+            if (ladder) {
+                details.push({ name: ladder.name, price: ladder.price || 0 });
             }
 
             // 5. Дымоход
-            if (this.selectedChimney) {
-                details.push({ name: this.selectedChimney.name, price: this.selectedChimney.price || 0 });
+            const chimney = appData.extras.find(e => e.id === this.selectedChimneyId);
+            if (chimney) {
+                details.push({ name: chimney.name, price: chimney.price || 0 });
             }
 
             // 6. Дополнительные опции
