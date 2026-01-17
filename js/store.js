@@ -252,24 +252,17 @@ document.addEventListener('alpine:init', () => {
                 `💰 Сумма заказа: ${this.formatPrice(this.totalPrice)}`;
 
             // Если открыто в Telegram Mini App
-            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
-                window.Telegram.WebApp.sendData(text);
+            if (this.isTelegram) {
+                // Открываем личку с менеджером с предзаполненным текстом
+                const url = `https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`;
+                window.Telegram.WebApp.openTelegramLink(url);
             } else {
-                // Fallback для браузера
-                const encodedText = encodeURIComponent(text);
-                const url = `https://t.me/Ban_chan_bot?start=${encodedText}`;
-                // Note: start param has length limits, but deeply links often use a DB ID. 
-                // Since we don't have a backend to save ID, we can trying sending text to a prompt or just copy to clipboard.
-                // Or use share link.
-
-                // Let's stick to simple link or alert
-
-                // Copy to clipboard for better UX in browser
+                // Fallback для браузера - копируем и открываем
                 navigator.clipboard.writeText(text).then(() => {
-                    alert('Заказ скопирован! Переходим в Telegram...');
-                    window.open(`https://t.me/Ban_chan_bot`, '_blank');
+                    alert('Заказ скопирован! Открываю чат с менеджером...');
+                    window.open(`https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`, '_blank');
                 }).catch(() => {
-                    window.open(`https://t.me/Ban_chan_bot`, '_blank');
+                    window.open(`https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`, '_blank');
                 });
             }
         }
