@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Калькулятор Банного Чана</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/visualizer.css">
+    <link rel="stylesheet" href="css/controls.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+
+<body class="bg-[#F3F5F6] text-[#333] font-body min-h-screen pb-32">
+    <div x-data="calculator()" class="max-w-[1200px] mx-auto px-4 py-8 lg:px-8">
+
+        <!-- Заголовок -->
+        <div class="text-center mb-8 flex flex-col items-center">
+            <img src="https://i.1.creatium.io/disk2/06/1c/38/527e3e8070543a6b740baa2d13ab5211ec/logotip_chernii.png"
+                alt="Logo" class="h-16 mb-4">
+            <h1 class="font-oswald font-bold uppercase text-4xl lg:text-5xl mb-2">СОБЕРИТЕ СВОЙ ЧАН</h1>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+            <!-- Левая колонка: Визуализация + Табы (7 колонок) -->
+            <div class="lg:col-span-8 lg:sticky lg:top-4 bg-white rounded-[30px] p-6 shadow-sm">
+
+                <!-- Табы -->
+                <div class="flex justify-center mb-6">
+                    <div class="bg-gray-100 p-1 rounded-full flex gap-1">
+                        <button @click="activeTab = 'outside'"
+                            :class="activeTab === 'outside' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-gray-700'"
+                            class="px-6 py-2 rounded-full text-sm font-medium transition-all">
+                            Вид снаружи
+                        </button>
+                        <button @click="activeTab = 'inside'"
+                            :class="activeTab === 'inside' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-gray-700'"
+                            class="px-6 py-2 rounded-full text-sm font-medium transition-all">
+                            Вид внутри
+                        </button>
+                        <button @click="activeTab = 'desc'"
+                            :class="activeTab === 'desc' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-gray-700'"
+                            class="px-6 py-2 rounded-full text-sm font-medium transition-all">
+                            Описание
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Контент визуализации -->
+                <div
+                    class="relative w-full aspect-[4/3] rounded-2xl overflow-hidden bg-gray-50 flex items-center justify-center">
+
+                    <!-- Вид снаружи (Слои) -->
+                    <div x-show="activeTab === 'outside'" class="w-full h-full relative">
+
+
+                        <!-- Базовый чан (Main) -->
+                        <img :src="selectedSize.image" alt="Основа"
+                            class="absolute inset-0 w-full h-full object-contain pointer-events-none z-10">
+
+                        <!-- Наложение материала (Нержавейка) -->
+                        <img :src="getMaterialOverlay()" x-show="getMaterialOverlay()" alt="Материал"
+                            class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                            style="z-index: 11;">
+
+                        <!-- Отделка -->
+                        <template x-for="finish in appData.finishes" :key="finish.id">
+                            <img x-show="selectedFinishId === finish.id && finish.image" :src="finish.image"
+                                class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                                :style="`z-index: ${finish.zIndex};`">
+                        </template>
+
+
+
+                        <!-- Печи (Main) -->
+                        <template x-for="stove in appData.stoves" :key="stove.id">
+                            <img x-show="selectedStoveId === stove.id && stove.image" :src="stove.image"
+                                class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                                :style="`z-index: ${stove.zIndex};`">
+                        </template>
+
+                        <!-- Лестница -->
+                        <template x-if="selectedLadder && selectedLadder.image">
+                            <img :src="selectedLadder.image"
+                                class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                                :style="`z-index: ${selectedLadder.zIndex};`">
+                        </template>
+
+                        <!-- Дымоход -->
+                        <template x-if="selectedChimney && selectedChimney.image">
+                            <img :src="selectedChimney.image"
+                                class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                                :style="`z-index: ${selectedChimney.zIndex};`">
+                        </template>
+
+                        <!-- Остальные допы -->
+                        <template x-for="extra in otherExtras.filter(e => e.image)" :key="extra.id">
+                            <img x-show="selectedExtrasIds.includes(extra.id)" :src="extra.image"
+                                class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                                :style="`z-index: ${extra.zIndex};`">
+                        </template>
+                    </div>
+
+                    <!-- Вид внутри -->
+                    <div x-show="activeTab === 'inside'" class="w-full h-full relative">
+
+                        <!-- Базовый чан внутри (Основа) -->
+                        <img :src="selectedSize.imageInside" alt="Основа внутри"
+                            class="absolute inset-0 w-full h-full object-contain pointer-events-none z-10">
+
+                        <!-- Наложение материала внутри -->
+                        <img :src="getMaterialOverlay()" x-show="getMaterialOverlay()" alt="Материал внутри"
+                            class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                            style="z-index: 11;">
+
+                        <!-- Отделка внутри -->
+                        <template x-for="finish in appData.finishes" :key="finish.id">
+                            <img x-show="selectedFinishId === finish.id && finish.imageInside" :src="finish.imageInside"
+                                class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                                :style="`z-index: ${finish.zIndex};`">
+                        </template>
+
+                        <!-- Допы внутри (если есть imageInside) -->
+                        <template x-for="id in selectedExtrasIds" :key="id">
+                            <div x-data="{ extra: appData.extras.find(e => e.id === id) }" class="contents">
+                                <img x-show="extra && extra.imageInside" :src="extra.imageInside"
+                                    class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                                    :style="`z-index: ${extra.zIndex};`">
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Описание -->
+                    <div x-show="activeTab === 'desc'" class="absolute inset-0 p-8 overflow-y-auto text-left"
+                        x-transition.opacity>
+                        <h3 class="font-oswald text-2xl font-bold mb-4" x-text="selectedSize.name"></h3>
+                        <p class="text-gray-600 mb-4">
+                            Банный чан — это уникальная купель на дровах для купания на свежем воздухе круглый год.
+                            Вода нагревается до комфортных 38-40 градусов.
+                        </p>
+                        <ul class="list-disc list-inside text-gray-600 space-y-2">
+                            <li>Вместимость: <span x-text="selectedSize.people"></span></li>
+                            <li>Материал: <span x-text="selectedMaterial.name"></span></li>
+                            <li>Гарантия качества и долговечности</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Правая колонка: Форма (4 колонки) -->
+            <div class="lg:col-span-4 space-y-4">
+
+                <!-- Размер -->
+                <div
+                    class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors">
+                    <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите размер
+                        *</label>
+                    <div class="relative">
+                        <select x-model="selectedSizeId"
+                            class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-[#5fb856] focus:border-[#5fb856] block p-3 pr-8 cursor-pointer font-medium">
+                            <template x-for="size in appData.sizes" :key="size.id">
+                                <option :value="size.id" x-text="`${size.name.split('(')[0]} (${size.people})`">
+                                </option>
+                            </template>
+                        </select>
+                        <div
+                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Материал -->
+                <div
+                    class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors">
+                    <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите материал
+                        *</label>
+                    <div class="relative">
+                        <select x-model="selectedMaterialId"
+                            class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-[#5fb856] focus:border-[#5fb856] block p-3 pr-8 cursor-pointer font-medium">
+                            <template x-for="material in currentMaterials" :key="material.id">
+                                <option :value="material.id" x-text="material.name"></option>
+                            </template>
+                        </select>
+                        <div
+                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Тип подогрева (Печь) -->
+                <div
+                    class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors">
+                    <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите тип
+                        подогрева *</label>
+                    <div class="relative">
+                        <select x-model="selectedStoveId" class="custom-select">
+                            <option value="">Не выбрано</option>
+                            <template x-for="stove in appData.stoves" :key="stove.id">
+                                <option :value="stove.id"
+                                    x-text="`${stove.name} (+${formatOriginalPrice(stove.price)})`">
+                                </option>
+                            </template>
+                        </select>
+                        <div
+                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Отделка -->
+                <div
+                    class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors">
+                    <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите отделку
+                        чана *</label>
+                    <div class="relative">
+                        <select x-model="selectedFinishId" class="custom-select">
+                            <option value="">Не выбрано</option>
+                            <template x-for="finish in appData.finishes" :key="finish.id">
+                                <option :value="finish.id"
+                                    x-text="`${finish.name} (+${formatOriginalPrice(typeof finish.price === 'object' ? (finish.price[selectedSizeId] || 0) : finish.price)})`">
+                                </option>
+                            </template>
+                        </select>
+                        <div
+                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Лестница -->
+                <div
+                    class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors">
+                    <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите
+                        лестницу</label>
+                    <div class="relative">
+                        <select x-model="selectedLadderId" class="custom-select">
+                            <option value="">Не выбрано</option>
+                            <template x-for="ladder in ladders" :key="ladder.id">
+                                <option :value="ladder.id"
+                                    x-text="`${ladder.name} (+${formatOriginalPrice(ladder.price)})`"
+                                    :disabled="ladder.id === 'stairs_wood' && selectedExtrasIds.includes('rim_finish')">
+                                </option>
+                            </template>
+                        </select>
+                        <div
+                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Дымоход -->
+                <div
+                    class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors">
+                    <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите
+                        дымоход</label>
+                    <div class="relative">
+                        <select x-model="selectedChimneyId" class="custom-select">
+                            <option value="">Не выбрано</option>
+                            <template x-for="chimney in chimneys" :key="chimney.id">
+                                <option :value="chimney.id"
+                                    x-text="`${chimney.name} (+${formatOriginalPrice(chimney.price)})`">
+                                </option>
+                            </template>
+                        </select>
+                        <div
+                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Комплектация (Чекбоксы) -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm mt-4">
+                    <label class="block text-xs uppercase font-bold text-gray-500 mb-3 tracking-wider">Выберите
+                        комплектацию</label>
+                    <div class="grid grid-cols-1 gap-2">
+                        <template x-for="extra in otherExtras" :key="extra.id">
+                            <label
+                                class="flex items-center p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors group"
+                                :class="{ 'opacity-50 cursor-not-allowed': (extra.id === 'protection' && selectedChimneyId === 'pipe_sandwich') || (extra.id === 'thermometer' && selectedExtrasIds.includes('rim_finish')) || ((extra.id === 'jacuzzi' || extra.id === 'rim_finish') && selectedStoveId && selectedStoveId !== 'jacket') }">
+                                <input type="checkbox" :value="extra.id" x-model="selectedExtrasIds"
+                                    :disabled="(extra.id === 'protection' && selectedChimneyId === 'pipe_sandwich') || (extra.id === 'thermometer' && selectedExtrasIds.includes('rim_finish')) || ((extra.id === 'jacuzzi' || extra.id === 'rim_finish') && selectedStoveId && selectedStoveId !== 'jacket')"
+                                    class="w-4 h-4 text-[#5fb856] focus:ring-[#5fb856] rounded border-gray-300 cursor-pointer disabled:cursor-not-allowed">
+                                <div class="ml-3 flex flex-col flex-1">
+                                    <span class="text-sm text-gray-700 font-medium group-hover:text-gray-900">
+                                        <span x-text="extra.name"></span>
+                                    </span>
+                                    <!-- Warning Message: Protection -->
+                                    <template x-if="extra.id === 'protection' && selectedChimneyId === 'pipe_sandwich'">
+                                        <span class="text-xs text-red-500 mt-0.5">Недоступно для сэндвич-трубы</span>
+                                    </template>
+                                    <!-- Warning Message: Thermometer -->
+                                    <template
+                                        x-if="extra.id === 'thermometer' && selectedExtrasIds.includes('rim_finish')">
+                                        <span class="text-xs text-red-500 mt-0.5">Несовместимо с внешней отделкой</span>
+                                    </template>
+                                    <!-- Warning Message: Jacuzzi/Rim requires Water Jacket -->
+                                    <template
+                                        x-if="(extra.id === 'jacuzzi' || extra.id === 'rim_finish') && selectedStoveId && selectedStoveId !== 'jacket'">
+                                        <span class="text-xs text-red-500 mt-0.5">Доступно только для печи с водяной
+                                            рубашкой</span>
+                                    </template>
+                                </div>
+                                <span class="text-xs text-gray-500 font-bold"
+                                    x-text="formatOriginalPrice(extra.price)"></span>
+                            </label>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Итого и кнопка (на десктопе внизу, чтобы не перекрывать) -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 mt-6 border border-gray-100">
+                    <p class="text-xs text-gray-400 uppercase tracking-wide font-bold mb-1">Сумма заказа</p>
+
+                    <!-- Оригинальная цена (зачеркнутая) -->
+                    <p class="text-lg font-oswald text-gray-400 line-through mb-1" x-text="formatPrice(originalPrice)">
+                    </p>
+
+                    <!-- Цена со скидкой -->
+                    <p class="text-3xl font-oswald font-bold text-[#5fb856] mb-2" x-text="formatPrice(totalPrice)"></p>
+
+                    <!-- Промо-текст -->
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 mb-4">
+                        <p class="text-xs font-bold text-yellow-800">🔥 Цена 2025 года</p>
+                        <p class="text-xs text-yellow-700">Актуальна до конца недели</p>
+                    </div>
+
+                    <button @click="sendToTelegram()" x-show="!isTelegram"
+                        class="w-full border-2 border-[#5fb856] text-[#5fb856] hover:bg-[#5fb856] hover:text-white rounded-xl py-3 font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 group">
+                        <span>Зафиксировать условия</span>
+                        <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                            </path>
+                        </svg>
+                    </button>
+                    <div class="mt-3 text-center">
+                        <p class="text-[10px] text-gray-500 font-medium">🎁 Получите подарки на <span
+                                class="text-[#5fb856] font-bold">25 000 ₽</span></p>
+                        <p class="text-[9px] text-gray-400">при фиксации условий сегодня</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="js/data.js?v=2"></script>
+    <script src="js/store.js?v=2"></script>
+</body>
+
+</html>
