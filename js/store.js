@@ -12,6 +12,7 @@ document.addEventListener('alpine:init', () => {
 
         // Вкладки визуализации
         activeTab: 'outside', // 'outside', 'inside', 'desc'
+        showPriceModal: false, // Модалка детализации цены
 
         // Инициализация
         init() {
