@@ -29,6 +29,19 @@ document.addEventListener('alpine:init', () => {
 
                 this.preloadImages();
 
+                // --- URL STATE SYNC START ---
+                this.loadFromUrl();
+
+                // Watchers for URL update
+                this.$watch('selectedSizeId', () => this.updateUrl());
+                this.$watch('selectedMaterialId', () => this.updateUrl());
+                this.$watch('selectedStoveId', () => this.updateUrl());
+                this.$watch('selectedFinishId', () => this.updateUrl());
+                this.$watch('selectedLadderId', () => this.updateUrl());
+                this.$watch('selectedChimneyId', () => this.updateUrl());
+                this.$watch('selectedExtrasIds', () => this.updateUrl());
+                // --- URL STATE SYNC END ---
+
                 // Инициализация Telegram Mini App
                 if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
                     this.isTelegram = true;
@@ -265,6 +278,32 @@ document.addEventListener('alpine:init', () => {
                     window.open(`https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`, '_blank');
                 });
             }
+        },
+
+        // --- URL SYNC HELPERS ---
+        updateUrl() {
+            const params = new URLSearchParams();
+            if (this.selectedSizeId) params.set('s', this.selectedSizeId);
+            if (this.selectedMaterialId) params.set('m', this.selectedMaterialId);
+            if (this.selectedStoveId) params.set('st', this.selectedStoveId);
+            if (this.selectedFinishId) params.set('f', this.selectedFinishId);
+            if (this.selectedLadderId) params.set('l', this.selectedLadderId);
+            if (this.selectedChimneyId) params.set('c', this.selectedChimneyId);
+            if (this.selectedExtrasIds.length) params.set('e', this.selectedExtrasIds.join(','));
+
+            const newUrl = `${window.location.pathname}?${params.toString()}`;
+            window.history.replaceState({}, '', newUrl);
+        },
+
+        loadFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('s')) this.selectedSizeId = params.get('s');
+            if (params.has('m')) this.selectedMaterialId = params.get('m');
+            if (params.has('st')) this.selectedStoveId = params.get('st');
+            if (params.has('f')) this.selectedFinishId = params.get('f');
+            if (params.has('l')) this.selectedLadderId = params.get('l');
+            if (params.has('c')) this.selectedChimneyId = params.get('c');
+            if (params.has('e')) this.selectedExtrasIds = params.get('e').split(',');
         }
     }));
 });
