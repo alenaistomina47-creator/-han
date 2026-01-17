@@ -89,104 +89,146 @@
                     <!-- Вид снаружи (Слои) -->
                     <div x-show="activeTab === 'outside'" class="w-full h-full relative">
 
+                        <!-- Placeholder: Если ничего не выбрано -->
+                        <div x-show="!selectedSizeId"
+                            class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 z-20"
+                            x-transition.opacity>
+                            <div
+                                class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-gray-100 max-w-xs transform transition-all hover:scale-105">
+                                <div
+                                    class="w-12 h-12 bg-[#5fb856]/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <svg class="w-6 h-6 text-[#5fb856]" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                    </svg>
+                                </div>
+                                <p class="text-lg font-bold text-gray-800 mb-1">Соберите свой чан</p>
+                                <p class="text-xs text-gray-500">Выберите размер в меню справа, чтобы начать</p>
+                            </div>
+                        </div>
 
-                        <!-- Базовый чан (Main) -->
-                        <img :src="selectedSize.image" alt="Основа"
-                            class="absolute inset-0 w-full h-full object-contain pointer-events-none z-10">
+                        <!-- Контент визуализатора (только если выбран размер) -->
+                        <div x-show="selectedSizeId" class="contents" x-transition.opacity>
+                            <!-- Базовый чан (Main) -->
+                            <img :src="selectedSize.image" alt="Основа"
+                                class="absolute inset-0 w-full h-full object-contain pointer-events-none z-10">
 
-                        <!-- Наложение материала (Нержавейка) -->
-                        <img :src="getMaterialOverlay()" x-show="getMaterialOverlay()" alt="Материал"
-                            class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                            style="z-index: 11;">
-
-                        <!-- Отделка -->
-                        <template x-for="finish in appData.finishes" :key="finish.id">
-                            <img x-show="selectedFinishId === finish.id && finish.image" :src="finish.image"
+                            <!-- Наложение материала (Нержавейка) -->
+                            <img :src="getMaterialOverlay()" x-show="getMaterialOverlay()" alt="Материал"
                                 class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                :style="`z-index: ${finish.zIndex};`">
-                        </template>
+                                style="z-index: 11;">
 
+                            <!-- Отделка -->
+                            <template x-for="finish in appData.finishes" :key="finish.id">
+                                <img x-show="selectedFinishId === finish.id && finish.image" :src="finish.image"
+                                    class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                                    :style="`z-index: ${finish.zIndex};`">
+                            </template>
 
+                            <!-- Печи (Main) -->
+                            <template x-for="stove in appData.stoves" :key="stove.id">
+                                <img x-show="selectedStoveId === stove.id && stove.image" :src="stove.image"
+                                    class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                                    :style="`z-index: ${stove.zIndex};`">
+                            </template>
 
-                        <!-- Печи (Main) -->
-                        <template x-for="stove in appData.stoves" :key="stove.id">
-                            <img x-show="selectedStoveId === stove.id && stove.image" :src="stove.image"
-                                class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                :style="`z-index: ${stove.zIndex};`">
-                        </template>
+                            <!-- Лестница -->
+                            <template x-if="selectedLadder && selectedLadder.image">
+                                <img :src="selectedLadder.image"
+                                    class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                                    :style="`z-index: ${selectedLadder.zIndex};`">
+                            </template>
 
-                        <!-- Лестница -->
-                        <template x-if="selectedLadder && selectedLadder.image">
-                            <img :src="selectedLadder.image"
-                                class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                :style="`z-index: ${selectedLadder.zIndex};`">
-                        </template>
+                            <!-- Дымоход -->
+                            <template x-if="selectedChimney && selectedChimney.image">
+                                <img :src="selectedChimney.image"
+                                    class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                                    :style="`z-index: ${selectedChimney.zIndex};`">
+                            </template>
 
-                        <!-- Дымоход -->
-                        <template x-if="selectedChimney && selectedChimney.image">
-                            <img :src="selectedChimney.image"
-                                class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                :style="`z-index: ${selectedChimney.zIndex};`">
-                        </template>
-
-                        <!-- Остальные допы -->
-                        <template x-for="extra in otherExtras.filter(e => e.image)" :key="extra.id">
-                            <img x-show="selectedExtrasIds.includes(extra.id)" :src="extra.image"
-                                class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                :style="`z-index: ${extra.zIndex};`">
-                        </template>
+                            <!-- Остальные допы -->
+                            <template x-for="extra in otherExtras.filter(e => e.image)" :key="extra.id">
+                                <img x-show="selectedExtrasIds.includes(extra.id)" :src="extra.image"
+                                    class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                                    :style="`z-index: ${extra.zIndex};`">
+                            </template>
+                        </div>
                     </div>
 
                     <!-- Вид внутри -->
                     <div x-show="activeTab === 'inside'" class="w-full h-full relative">
 
-                        <!-- Базовый чан внутри (Основа) -->
-                        <img :src="selectedSize.imageInside" alt="Основа внутри"
-                            class="absolute inset-0 w-full h-full object-contain pointer-events-none z-10">
+                        <!-- Placeholder внутри -->
+                        <div x-show="!selectedSizeId"
+                            class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 z-20">
+                            <p class="text-gray-400 text-sm">Выберите размер чана</p>
+                        </div>
 
-                        <!-- Наложение материала внутри -->
-                        <img :src="getMaterialOverlay()" x-show="getMaterialOverlay()" alt="Материал внутри"
-                            class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                            style="z-index: 11;">
+                        <div x-show="selectedSizeId" class="contents">
+                            <!-- Базовый чан внутри (Основа) -->
+                            <img :src="selectedSize.imageInside" alt="Основа внутри"
+                                class="absolute inset-0 w-full h-full object-contain pointer-events-none z-10">
 
-                        <!-- Отделка внутри -->
-                        <template x-for="finish in appData.finishes" :key="finish.id">
-                            <img x-show="selectedFinishId === finish.id && finish.imageInside" :src="finish.imageInside"
+                            <!-- Наложение материала внутри -->
+                            <img :src="getMaterialOverlay()" x-show="getMaterialOverlay()" alt="Материал внутри"
                                 class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                :style="`z-index: ${finish.zIndex};`">
-                        </template>
+                                style="z-index: 11;">
 
-                        <!-- Допы внутри (если есть imageInside) -->
-                        <template x-for="id in selectedExtrasIds" :key="id">
-                            <div x-data="{ extra: appData.extras.find(e => e.id === id) }" class="contents">
-                                <img x-show="extra && extra.imageInside" :src="extra.imageInside"
+                            <!-- Отделка внутри -->
+                            <template x-for="finish in appData.finishes" :key="finish.id">
+                                <img x-show="selectedFinishId === finish.id && finish.imageInside"
+                                    :src="finish.imageInside"
                                     class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                    :style="`z-index: ${extra.zIndex};`">
-                            </div>
-                        </template>
+                                    :style="`z-index: ${finish.zIndex};`">
+                            </template>
+
+                            <!-- Допы внутри (если есть imageInside) -->
+                            <template x-for="id in selectedExtrasIds" :key="id">
+                                <div x-data="{ extra: appData.extras.find(e => e.id === id) }" class="contents">
+                                    <img x-show="extra && extra.imageInside" :src="extra.imageInside"
+                                        class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                                        :style="`z-index: ${extra.zIndex};`">
+                                </div>
+                            </template>
+                        </div>
                     </div>
 
                     <!-- Описание -->
                     <div x-show="activeTab === 'desc'" class="absolute inset-0 p-8 overflow-y-auto text-left"
                         x-transition.opacity>
-                        <h3 class="font-oswald text-2xl font-bold mb-4" x-text="selectedSize.name"></h3>
-                        <p class="text-gray-600 mb-4">
-                            Банный чан — это уникальная купель на дровах для купания на свежем воздухе круглый год.
-                            Вода нагревается до комфортных 38-40 градусов.
-                        </p>
-                        <ul class="list-disc list-inside text-gray-600 space-y-2 mb-6">
-                            <li>Вместимость: <span x-text="selectedSize.people"></span></li>
-                            <li>Материал: <span x-text="selectedMaterial.name"></span></li>
-                            <li>Гарантия качества и долговечности</li>
-                        </ul>
 
-                        <!-- Описание материала -->
-                        <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                            <h4 class="font-bold text-[#333] mb-2" x-text="selectedMaterial.name"></h4>
-                            <p class="text-sm text-gray-600 mb-3" x-text="selectedMaterial.description"></p>
-                            <p class="text-xs font-bold text-[#5fb856] uppercase tracking-wider"
-                                x-text="selectedMaterial.life"></p>
-                        </div>
+                        <template x-if="!selectedSizeId">
+                            <div class="h-full flex items-center justify-center text-gray-400 text-center">
+                                <p>Выберите комплектацию, чтобы увидеть описание</p>
+                            </div>
+                        </template>
+
+                        <template x-if="selectedSizeId">
+                            <div class="contents">
+                                <h3 class="font-oswald text-2xl font-bold mb-4" x-text="selectedSize.name"></h3>
+                                <p class="text-gray-600 mb-4">
+                                    Банный чан — это уникальная купель на дровах для купания на свежем воздухе круглый
+                                    год.
+                                    Вода нагревается до комфортных 38-40 градусов.
+                                </p>
+                                <ul class="list-disc list-inside text-gray-600 space-y-2 mb-6">
+                                    <li>Вместимость: <span x-text="selectedSize.people"></span></li>
+                                    <li>Материал: <span
+                                            x-text="selectedMaterial ? selectedMaterial.name : 'Не выбрано'"></span>
+                                    </li>
+                                    <li>Гарантия качества и долговечности</li>
+                                </ul>
+
+                                <!-- Описание материала -->
+                                <div x-show="selectedMaterial" class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                                    <h4 class="font-bold text-[#333] mb-2" x-text="selectedMaterial?.name"></h4>
+                                    <p class="text-sm text-gray-600 mb-3" x-text="selectedMaterial?.description"></p>
+                                    <p class="text-xs font-bold text-[#5fb856] uppercase tracking-wider"
+                                        x-text="selectedMaterial?.life"></p>
+                                </div>
+                            </div>
+                        </template>
                     </div>
                 </div>
             </div>
@@ -202,6 +244,7 @@
                     <div class="relative">
                         <select x-model="selectedSizeId"
                             class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
+                            <option value="" disabled>Выберите размер</option>
                             <template x-for="size in appData.sizes" :key="size.id">
                                 <option :value="size.id" x-text="`${size.name.split('(')[0]} (${size.people})`">
                                 </option>
@@ -218,13 +261,14 @@
                 </div>
 
                 <!-- Материал -->
-                <div
-                    class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors"
+                    :class="{'opacity-50 pointer-events-none': !selectedSizeId}">
                     <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите материал
                         *</label>
                     <div class="relative">
-                        <select x-model="selectedMaterialId"
+                        <select x-model="selectedMaterialId" :disabled="!selectedSizeId"
                             class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
+                            <option value="" disabled>Выберите материал</option>
                             <template x-for="material in currentMaterials" :key="material.id">
                                 <option :value="material.id" x-text="material.name"></option>
                             </template>
