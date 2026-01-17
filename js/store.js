@@ -280,7 +280,6 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        // --- URL SYNC HELPERS ---
         updateUrl() {
             const params = new URLSearchParams();
             if (this.selectedSizeId) params.set('s', this.selectedSizeId);
@@ -293,6 +292,7 @@ document.addEventListener('alpine:init', () => {
 
             const newUrl = `${window.location.pathname}?${params.toString()}`;
             window.history.replaceState({}, '', newUrl);
+            return window.location.href; // Return for sharing
         },
 
         loadFromUrl() {
@@ -304,6 +304,21 @@ document.addEventListener('alpine:init', () => {
             if (params.has('l')) this.selectedLadderId = params.get('l');
             if (params.has('c')) this.selectedChimneyId = params.get('c');
             if (params.has('e')) this.selectedExtrasIds = params.get('e').split(',');
+        },
+
+        shareConfig() {
+            const url = this.updateUrl(); // Ensure URL is latest
+            const title = 'Мой банный чан';
+            const text = `Посмотри, какой чан я собрал: ${this.selectedSize.name}, ${this.selectedStove.name}`;
+
+            if (navigator.share) {
+                navigator.share({ title, text, url })
+                    .catch((error) => console.log('Error sharing', error));
+            } else {
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Ссылка скопирована! Отправьте её другу.');
+                });
+            }
         }
     }));
 });
