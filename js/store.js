@@ -13,34 +13,9 @@ document.addEventListener('alpine:init', () => {
         // Вкладки визуализации
         activeTab: 'outside', // 'outside', 'inside', 'desc'
 
-        // UI State
-        mobileSticky: true,
-        lastScrollTop: 0,
-
         // Инициализация
         init() {
             console.log('Калькулятор запущен.');
-
-            // Smart Sticky Logic
-            this.mobileSticky = true;
-            this.lastScrollTop = 0;
-            window.addEventListener('scroll', () => {
-                const st = window.pageYOffset || document.documentElement.scrollTop;
-                if (window.innerWidth < 1024) { // Only on mobile
-                    if (st > this.lastScrollTop) {
-                        // Scrolling Down -> Sticky
-                        this.mobileSticky = true;
-                    } else if (st < this.lastScrollTop && st > 100) {
-                        // Scrolling Up (and not at very top) -> Unsticky (Static)
-                        // But wait, if we make it relative, it disappears?
-                        // User wants it to "unpin".
-                        this.mobileSticky = false;
-                    }
-                } else {
-                    this.mobileSticky = true; // Always sticky on desktop
-                }
-                this.lastScrollTop = st <= 0 ? 0 : st;
-            });
 
             if (typeof appData !== 'undefined') {
                 if (appData.sizes?.length) this.selectedSizeId = appData.sizes[0].id;
