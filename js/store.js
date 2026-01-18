@@ -356,7 +356,7 @@ document.addEventListener('alpine:init', () => {
                     .catch((error) => console.log('Error sharing', error));
             } else {
                 navigator.clipboard.writeText(url).then(() => {
-                    alert('Ссылка скопирована! Отправьте её другу.');
+                    alert('Ссылка скопирована!\n' + url);
                 });
             }
         }
