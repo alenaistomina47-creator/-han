@@ -253,10 +253,10 @@ document.addEventListener('alpine:init', () => {
                 return e ? e.name : '';
             }).filter(Boolean).join(', ');
 
-            const sizeName = this.selectedSize.name;
-            const materialName = this.selectedMaterial.name;
-            const stoveName = this.selectedStove.name;
-            const finishName = this.selectedFinish.name;
+            const sizeName = this.selectedSize ? this.selectedSize.name : 'Не выбрано';
+            const materialName = this.selectedMaterial ? this.selectedMaterial.name : 'Не выбрано';
+            const stoveName = this.selectedStove ? this.selectedStove.name : 'Не выбрано';
+            const finishName = this.selectedFinish ? this.selectedFinish.name : 'Не выбрано';
             const ladderName = this.selectedLadder ? this.selectedLadder.name : 'Не выбрано';
             const chimneyName = this.selectedChimney ? this.selectedChimney.name : 'Не выбрано';
 
@@ -296,48 +296,28 @@ document.addEventListener('alpine:init', () => {
             if (this.selectedChimneyId) params.set('c', this.selectedChimneyId);
             if (this.selectedExtrasIds.length) params.set('e', this.selectedExtrasIds.join(','));
 
-            const newUrl = `${window.location.pathname}?${params.toString()}`;
+            const newQuery = params.toString();
+            const newUrl = `${window.location.pathname}?${newQuery}`;
             window.history.replaceState({}, '', newUrl);
-            return window.location.href; // Return for sharing
+
+            // Возвращаем полный абсолютный URL для копирования
+            return `${window.location.origin}${newUrl}`;
         },
 
         loadFromUrl() {
-            // 1. Попытка загрузить из Deep Link (start_param)
-            let startParam = new URLSearchParams(window.location.search).get('tgWebAppStartParam');
-
-            // Если есть в Telegram initData (надежнее внутри Telegram)
-            if (window.Telegram?.WebApp?.initDataUnsafe?.start_param) {
-                startParam = window.Telegram.WebApp.initDataUnsafe.start_param;
-            }
-
-            if (startParam) {
-                try {
-                    // Разбираем Base64 -> JSON
-                    const jsonStr = atob(startParam);
-                    const state = JSON.parse(jsonStr);
-
-                    if (state.s) this.selectedSizeId = state.s;
-                    if (state.m) this.selectedMaterialId = state.m;
-                    if (state.st) this.selectedStoveId = state.st;
-                    if (state.f) this.selectedFinishId = state.f;
-                    if (state.l) this.selectedLadderId = state.l;
-                    if (state.c) this.selectedChimneyId = state.c;
-                    if (state.e) this.selectedExtrasIds = state.e;
-                    return; // Успешно загрузили из Deep Link
-                } catch (e) {
-                    console.error('Ошибка разбора start_param:', e);
-                }
-            }
-
-            // 2. Fallback: Обычные GET-параметры (для браузера)
             const params = new URLSearchParams(window.location.search);
+            // Считываем параметры
             if (params.has('s')) this.selectedSizeId = params.get('s');
-            if (params.has('m')) this.selectedMaterialId = params.get('m');
-            if (params.has('st')) this.selectedStoveId = params.get('st');
-            if (params.has('f')) this.selectedFinishId = params.get('f');
-            if (params.has('l')) this.selectedLadderId = params.get('l');
-            if (params.has('c')) this.selectedChimneyId = params.get('c');
-            if (params.has('e')) this.selectedExtrasIds = params.get('e').split(',');
+
+            // Если есть размер, считываем остальное
+            if (this.selectedSizeId) {
+                if (params.has('m')) this.selectedMaterialId = params.get('m');
+                if (params.has('st')) this.selectedStoveId = params.get('st');
+                if (params.has('f')) this.selectedFinishId = params.get('f');
+                if (params.has('l')) this.selectedLadderId = params.get('l');
+                if (params.has('c')) this.selectedChimneyId = params.get('c');
+                if (params.has('e')) this.selectedExtrasIds = params.get('e').split(',');
+            }
         },
 
         shareConfig() {
