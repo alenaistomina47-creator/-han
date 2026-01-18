@@ -305,6 +305,30 @@ document.addEventListener('alpine:init', () => {
         },
 
         loadFromUrl() {
+            // 1. Попытка загрузить из Deep Link (start_param) - для поддержки старых ссылок
+            let startParam = new URLSearchParams(window.location.search).get('tgWebAppStartParam');
+            if (window.Telegram?.WebApp?.initDataUnsafe?.start_param) {
+                startParam = window.Telegram.WebApp.initDataUnsafe.start_param;
+            }
+
+            if (startParam) {
+                try {
+                    const jsonStr = atob(startParam);
+                    const state = JSON.parse(jsonStr);
+                    if (state.s) this.selectedSizeId = state.s;
+                    if (state.m) this.selectedMaterialId = state.m;
+                    if (state.st) this.selectedStoveId = state.st;
+                    if (state.f) this.selectedFinishId = state.f;
+                    if (state.l) this.selectedLadderId = state.l;
+                    if (state.c) this.selectedChimneyId = state.c;
+                    if (state.e) this.selectedExtrasIds = state.e;
+                    return; // Успех
+                } catch (e) {
+                    console.error('Deep link error:', e);
+                }
+            }
+
+            // 2. Fallback: Обычные GET-параметры (s, m, st...)
             const params = new URLSearchParams(window.location.search);
             // Считываем параметры
             if (params.has('s')) this.selectedSizeId = params.get('s');
