@@ -424,18 +424,17 @@
                 </div>
 
                 <!-- Итого и кнопка (на десктопе внизу, чтобы не перекрывать) -->
-                <div class="bg-white rounded-2xl shadow-lg p-6 mt-6 border border-gray-100">
-                    <p class="text-xs text-gray-400 uppercase tracking-wide font-bold mb-1">Сумма заказа</p>
-
-                </div>
-
-                <!-- Sticky Footer for Mobile (CTA + Price) -->
-                <!-- LG: Static position inside column. Mobile: Fixed bottom. -->
+                <!-- Sticky Footer for Mobile / Card for Desktop -->
                 <div
-                    class="fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 p-4 z-40 lg:static lg:bg-transparent lg:border-0 lg:p-0 lg:z-auto safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] lg:shadow-none">
+                    class="fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 p-4 z-40 lg:static lg:bg-white lg:border lg:border-gray-100 lg:p-6 lg:rounded-2xl lg:shadow-lg lg:mt-6 lg:z-auto safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] lg:shadow-none">
+
+                    <!-- Desktop Title -->
+                    <p class="hidden lg:block text-xs text-gray-400 uppercase tracking-wide font-bold mb-1">Сумма заказа
+                    </p>
+
                     <div class="max-w-7xl mx-auto flex flex-col gap-3">
 
-                        <!-- Mobile Price Row (Hidden on LG since it is in shared flow, but we need to structure it) -->
+                        <!-- Price Row -->
                         <div class="flex items-end justify-between lg:block">
                             <div class="lg:mb-4">
                                 <!-- Оригинальная цена -->
@@ -452,7 +451,7 @@
                                 </div>
                             </div>
 
-                            <!-- Промо (Только десктоп, на мобилке места нет) -->
+                            <!-- Промо -->
                             <div
                                 class="hidden lg:block bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 mb-4">
                                 <p class="text-xs font-bold text-yellow-800">🔥 Цена 2025 года</p>
@@ -547,7 +546,7 @@
         <!-- Кнопка "Помощь" (Floating) -->
         <a href="https://t.me/ivan_ural_chan?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5!%20%D0%9D%D1%83%D0%B6%D0%BD%D0%B0%20%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%20%D1%81%20%D0%B2%D1%8B%D0%B1%D0%BE%D1%80%D0%BE%D0%BC."
             target="_blank"
-            class="fixed bottom-6 right-6 z-[90] bg-[#5fb856] text-white p-4 rounded-full shadow-xl hover:scale-110 hover:bg-[#4da045] transition-all duration-300 flex items-center justify-center group"
+            class="fixed bottom-[140px] right-4 z-[90] lg:bottom-10 lg:right-10 bg-[#5fb856] text-white p-4 rounded-full shadow-xl hover:scale-110 hover:bg-[#4da045] transition-all duration-300 flex items-center justify-center group"
             title="Написать менеджеру">
             <!-- Icon: Chat Bubble -->
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
