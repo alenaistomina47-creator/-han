@@ -14,6 +14,7 @@ document.addEventListener('alpine:init', () => {
         activeTab: 'outside',
         showPriceModal: false,
         isVisualizerMinimized: false,
+        isRestoringUrl: false,
 
         // Инициализация
         init() {
@@ -34,7 +35,6 @@ document.addEventListener('alpine:init', () => {
 
                 // Watchers for URL update
                 this.$watch('selectedSizeId', () => this.updateUrl());
-                // ... (rest of init remains similar, just skip auto-select)
                 this.$watch('selectedMaterialId', () => this.updateUrl());
                 this.$watch('selectedStoveId', () => this.updateUrl());
                 this.$watch('selectedFinishId', () => this.updateUrl());
@@ -287,6 +287,8 @@ document.addEventListener('alpine:init', () => {
         },
 
         updateUrl() {
+            if (this.isRestoringUrl) return; // Не обновляем URL пока восстанавливаемся
+
             const params = new URLSearchParams();
             if (this.selectedSizeId) params.set('s', this.selectedSizeId);
             if (this.selectedMaterialId) params.set('m', this.selectedMaterialId);
@@ -305,6 +307,9 @@ document.addEventListener('alpine:init', () => {
         },
 
         loadFromUrl() {
+            this.isRestoringUrl = true; // Блокируем обновление URL
+            alert('Debug: Start Loading URL. Search: ' + window.location.search); // DEBUG
+
             // 1. Попытка загрузить из Deep Link (start_param) - для поддержки старых ссылок
             let startParam = new URLSearchParams(window.location.search).get('tgWebAppStartParam');
             if (window.Telegram?.WebApp?.initDataUnsafe?.start_param) {
@@ -322,6 +327,7 @@ document.addEventListener('alpine:init', () => {
                     if (state.l) this.selectedLadderId = state.l;
                     if (state.c) this.selectedChimneyId = state.c;
                     if (state.e) this.selectedExtrasIds = state.e;
+                    this.isRestoringUrl = false;
                     return; // Успех
                 } catch (e) {
                     console.error('Deep link error:', e);
@@ -331,7 +337,10 @@ document.addEventListener('alpine:init', () => {
             // 2. Fallback: Обычные GET-параметры (s, m, st...)
             const params = new URLSearchParams(window.location.search);
             // Считываем параметры
-            if (params.has('s')) this.selectedSizeId = params.get('s');
+            if (params.has('s')) {
+                alert('Debug: Found Size ' + params.get('s')); // DEBUG
+                this.selectedSizeId = params.get('s');
+            }
 
             // Если есть размер, считываем остальное
             if (this.selectedSizeId) {
@@ -342,6 +351,7 @@ document.addEventListener('alpine:init', () => {
                 if (params.has('c')) this.selectedChimneyId = params.get('c');
                 if (params.has('e')) this.selectedExtrasIds = params.get('e').split(',');
             }
+            this.isRestoringUrl = false; // Разблокируем обновление
         },
 
         shareConfig() {
