@@ -247,42 +247,94 @@ document.addEventListener('alpine:init', () => {
         },
 
         // Отправка в Telegram
-        sendToTelegram() {
-            const extrasNames = this.selectedExtrasIds.map(id => {
-                const e = appData.extras.find(ext => ext.id === id);
-                return e ? e.name : '';
-            }).filter(Boolean).join(', ');
+        async sendToTelegram() {
+            // 1. Сбор данных пользователя Telegram
+            const tg = window.Telegram?.WebApp;
+            const user = tg?.initDataUnsafe?.user || {};
 
-            const sizeName = this.selectedSize ? this.selectedSize.name : 'Не выбрано';
-            const materialName = this.selectedMaterial ? this.selectedMaterial.name : 'Не выбрано';
-            const stoveName = this.selectedStove ? this.selectedStove.name : 'Не выбрано';
-            const finishName = this.selectedFinish ? this.selectedFinish.name : 'Не выбрано';
-            const ladderName = this.selectedLadder ? this.selectedLadder.name : 'Не выбрано';
-            const chimneyName = this.selectedChimney ? this.selectedChimney.name : 'Не выбрано';
+            // 2. Сбор данных калькулятора
+            const orderData = {
+                order_id: `order_${Date.now()}`,
+                timestamp: new Date().toISOString(),
+                user: {
+                    id: user.id || null,
+                    username: user.username || null,
+                    first_name: user.first_name || null,
+                    last_name: user.last_name || null,
+                    language_code: user.language_code || null,
+                    platform: tg?.platform || 'unknown'
+                },
+                calculator: {
+                    size: this.selectedSize ? this.selectedSize.name : null,
+                    material: this.selectedMaterial ? this.selectedMaterial.name : null,
+                    stove: this.selectedStove ? this.selectedStove.name : null,
+                    finish: this.selectedFinish ? this.selectedFinish.name : null,
+                    ladder: this.selectedLadder ? this.selectedLadder.name : null,
+                    chimney: this.selectedChimney ? this.selectedChimney.name : null,
+                    extras: this.selectedExtrasIds.map(id => {
+                        const e = appData.extras.find(ext => ext.id === id);
+                        return e ? e.name : id;
+                    }),
+                    raw_ids: {
+                        size: this.selectedSizeId,
+                        material: this.selectedMaterialId,
+                        stove: this.selectedStoveId,
+                        finish: this.selectedFinishId,
+                        ladder: this.selectedLadderId,
+                        chimney: this.selectedChimneyId,
+                        extras: this.selectedExtrasIds
+                    }
+                },
+                price: {
+                    total: this.totalPrice,
+                    original: this.originalPrice,
+                    currency: 'RUB',
+                    formatted: this.formatPrice(this.totalPrice)
+                }
+            };
 
-            const text = `🔥 Новый заказ! (из 3D калькулятора)\n\n` +
-                `📏 Размер: ${sizeName}\n` +
-                `🛡 Материал: ${materialName}\n` +
-                `🔥 Печь: ${stoveName}\n` +
-                `✨ Отделка: ${finishName}\n` +
-                `🪜 Лестница: ${ladderName}\n` +
-                `💨 Дымоход: ${chimneyName}\n` +
-                `➕ Дополнительно: ${extrasNames || 'Нет'}\n\n` +
-                `💰 Сумма заказа: ${this.formatPrice(this.totalPrice)}`;
+            // 3. Отправка на Webhook
+            const webhookUrl = 'https://kuklin2022.app.n8n.cloud/webhook-test/test';
 
-            // Если открыто в Telegram Mini App
-            if (this.isTelegram) {
-                // Открываем личку с менеджером с предзаполненным текстом
-                const url = `https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`;
-                window.Telegram.WebApp.openTelegramLink(url);
-            } else {
-                // Fallback для браузера - копируем и открываем
-                navigator.clipboard.writeText(text).then(() => {
-                    alert('Заказ скопирован! Открываю чат с менеджером...');
-                    window.open(`https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`, '_blank');
-                }).catch(() => {
-                    window.open(`https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`, '_blank');
+            try {
+                // Показываем лоадер или меняем текст кнопки (опционально)
+                if (tg?.MainButton) tg.MainButton.showProgress();
+
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
                 });
+
+                if (tg?.MainButton) tg.MainButton.hideProgress();
+
+                if (response.ok) {
+                    // Успех
+                    if (tg && tg.showPopup) {
+                        tg.showPopup({
+                            title: 'Заявка принята!',
+                            message: 'Мы получили ваш расчет. Менеджер скоро свяжется с вами.',
+                            buttons: [{ type: 'ok' }]
+                        });
+                    } else {
+                        alert('Заявка успешно отправлена!');
+                    }
+                    // Можно закрыть окно
+                    // tg.close(); 
+                } else {
+                    throw new Error('Server returned ' + response.status);
+                }
+
+            } catch (error) {
+                console.error('Webhook Error:', error);
+                if (tg?.MainButton) tg.MainButton.hideProgress();
+
+                // Fallback: Если вебхук упал, открываем чат (как раньше)
+                // Или просто говорим об ошибке
+                alert('Произошла ошибка при отправке. Попробуйте еще раз или напишите нам в чат.');
+
+                // Опционально: Fallback to chat logic?
+                // this.openTelegramChat(text); 
             }
         },
 
