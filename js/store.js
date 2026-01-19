@@ -309,7 +309,10 @@ document.addEventListener('alpine:init', () => {
                 if (tg?.MainButton) tg.MainButton.hideProgress();
 
                 if (response.ok) {
-                    // Успех
+                    // Успех! Читаем ответ как текст (n8n возвращает "Workflow got started")
+                    const responseText = await response.text();
+                    console.log('Webhook Response:', responseText);
+
                     if (tg && tg.showPopup) {
                         tg.showPopup({
                             title: 'Заявка принята!',
@@ -319,22 +322,21 @@ document.addEventListener('alpine:init', () => {
                     } else {
                         alert('Заявка успешно отправлена!');
                     }
-                    // Можно закрыть окно
-                    // tg.close(); 
                 } else {
-                    throw new Error('Server returned ' + response.status);
+                    // Пытаемся прочитать текст ошибки от сервера
+                    const errorText = await response.text();
+                    // Выкидываем ошибку с техническими деталями
+                    const serverError = new Error(`Server Error: ${response.status} ${response.statusText}\nResponse: ${errorText.substring(0, 100)}`);
+                    serverError.name = 'ServerError';
+                    throw serverError;
                 }
 
             } catch (error) {
                 console.error('Webhook Error:', error);
                 if (tg?.MainButton) tg.MainButton.hideProgress();
 
-                // Fallback: Если вебхук упал, открываем чат (как раньше)
-                // Или просто говорим об ошибке
-                alert('Произошла ошибка при отправке. Попробуйте еще раз или напишите нам в чат.');
-
-                // Опционально: Fallback to chat logic?
-                // this.openTelegramChat(text); 
+                // Показываем полные технические детали (как просил пользователь)
+                alert(`⚠️ Ошибка отправки!\n\nName: ${error.name}\nMessage: ${error.message}\n\nПожалуйста, сделайте скриншот и отправьте разработчику.`);
             }
         },
 
