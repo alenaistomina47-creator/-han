@@ -297,38 +297,32 @@ document.addEventListener('alpine:init', () => {
             const webhookUrl = 'https://kuklin2022.app.n8n.cloud/webhook-test/test';
 
             try {
-                // Показываем лоадер или меняем текст кнопки (опционально)
+                // Показываем лоадер
                 if (tg?.MainButton) tg.MainButton.showProgress();
 
-                const response = await fetch(webhookUrl, {
+                // ИСПОЛЬЗУЕМ mode: 'no-cors' для обхода ошибки "Load failed" (CORS)
+                // Минус: Мы не узнаем статус ответа (200 или 500), ответ будет "слепым".
+                // Но данные уйдут на сервер.
+                await fetch(webhookUrl, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain' }, // Меняем на text/plain чтобы не вызывать Preflight
                     body: JSON.stringify(orderData)
                 });
 
                 if (tg?.MainButton) tg.MainButton.hideProgress();
 
-                if (response.ok) {
-                    // Успех! Читаем ответ как текст (n8n возвращает "Workflow got started")
-                    const responseText = await response.text();
-                    console.log('Webhook Response:', responseText);
+                // В режиме no-cors мы всегда считаем что отправка успешна, если не упала сеть
+                console.log('Webhook sent (no-cors mode)');
 
-                    if (tg && tg.showPopup) {
-                        tg.showPopup({
-                            title: 'Заявка принята!',
-                            message: 'Мы получили ваш расчет. Менеджер скоро свяжется с вами.',
-                            buttons: [{ type: 'ok' }]
-                        });
-                    } else {
-                        alert('Заявка успешно отправлена!');
-                    }
+                if (tg && tg.showPopup) {
+                    tg.showPopup({
+                        title: 'Заявка принята!',
+                        message: 'Мы получили ваш расчет. Менеджер скоро свяжется с вами.',
+                        buttons: [{ type: 'ok' }]
+                    });
                 } else {
-                    // Пытаемся прочитать текст ошибки от сервера
-                    const errorText = await response.text();
-                    // Выкидываем ошибку с техническими деталями
-                    const serverError = new Error(`Server Error: ${response.status} ${response.statusText}\nResponse: ${errorText.substring(0, 100)}`);
-                    serverError.name = 'ServerError';
-                    throw serverError;
+                    alert('Заявка успешно отправлена!');
                 }
 
             } catch (error) {
