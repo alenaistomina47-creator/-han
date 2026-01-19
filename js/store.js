@@ -315,14 +315,50 @@ document.addEventListener('alpine:init', () => {
                 // В режиме no-cors мы всегда считаем что отправка успешна, если не упала сеть
                 console.log('Webhook sent (no-cors mode)');
 
+                // --- ЛОГИКА ОТКРЫТИЯ ЧАТА (ДУБЛИРОВАНИЕ) ---
+                const extrasNames = this.selectedExtrasIds.map(id => {
+                    const e = appData.extras.find(ext => ext.id === id);
+                    return e ? e.name : '';
+                }).filter(Boolean).join(', ');
+
+                const sizeName = this.selectedSize ? this.selectedSize.name : 'Не выбрано';
+                const materialName = this.selectedMaterial ? this.selectedMaterial.name : 'Не выбрано';
+                const stoveName = this.selectedStove ? this.selectedStove.name : 'Не выбрано';
+                const finishName = this.selectedFinish ? this.selectedFinish.name : 'Не выбрано';
+                const ladderName = this.selectedLadder ? this.selectedLadder.name : 'Не выбрано';
+                const chimneyName = this.selectedChimney ? this.selectedChimney.name : 'Не выбрано';
+
+                const text = `🔥 Новый заказ! (из 3D калькулятора)\n\n` +
+                    `📏 Размер: ${sizeName}\n` +
+                    `🛡 Материал: ${materialName}\n` +
+                    `🔥 Печь: ${stoveName}\n` +
+                    `✨ Отделка: ${finishName}\n` +
+                    `🪜 Лестница: ${ladderName}\n` +
+                    `💨 Дымоход: ${chimneyName}\n` +
+                    `➕ Дополнительно: ${extrasNames || 'Нет'}\n\n` +
+                    `💰 Сумма заказа: ${this.formatPrice(this.totalPrice)}`;
+
+                // Показываем уведомление (ненадолго или сразу открываем чат?)
+                // Пользователь просил: "дублировалась мне в личку"
+
                 if (tg && tg.showPopup) {
                     tg.showPopup({
                         title: 'Заявка принята!',
-                        message: 'Мы получили ваш расчет. Менеджер скоро свяжется с вами.',
-                        buttons: [{ type: 'ok' }]
+                        message: 'Данные отправлены. Сейчас откроется чат с менеджером.',
+                        buttons: [{ type: 'ok', id: 'ok' }]
+                    }, (buttonId) => {
+                        // После нажатия ОК открываем чат
+                        if (this.isTelegram) {
+                            const url = `https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`;
+                            window.Telegram.WebApp.openTelegramLink(url);
+                            // window.Telegram.WebApp.close(); // Можно закрыть приложение, если нужно
+                        } else {
+                            window.open(`https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`, '_blank');
+                        }
                     });
                 } else {
-                    alert('Заявка успешно отправлена!');
+                    alert('Заявка отправлена! Открываю чат с менеджером...');
+                    window.open(`https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`, '_blank');
                 }
 
             } catch (error) {
