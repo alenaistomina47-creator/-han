@@ -395,9 +395,8 @@ document.addEventListener('alpine:init', () => {
 
         loadFromUrl() {
             this.isRestoringUrl = true; // Блокируем обновление URL
-            alert('Debug: Start Loading URL. Search: ' + window.location.search); // DEBUG
 
-            // 1. Попытка загрузить из Deep Link (start_param) - для поддержки старых ссылок
+            // 1. Попытка загрузить из Deep Link
             let startParam = new URLSearchParams(window.location.search).get('tgWebAppStartParam');
             if (window.Telegram?.WebApp?.initDataUnsafe?.start_param) {
                 startParam = window.Telegram.WebApp.initDataUnsafe.start_param;
@@ -421,11 +420,9 @@ document.addEventListener('alpine:init', () => {
                 }
             }
 
-            // 2. Fallback: Обычные GET-параметры (s, m, st...)
+            // 2. Fallback: Обычные GET-параметры
             const params = new URLSearchParams(window.location.search);
-            // Считываем параметры
             if (params.has('s')) {
-                alert('Debug: Found Size ' + params.get('s')); // DEBUG
                 this.selectedSizeId = params.get('s');
             }
 
