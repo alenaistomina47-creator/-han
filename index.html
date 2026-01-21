@@ -443,8 +443,16 @@
         <!-- ======================= -->
         <!-- VIEW 2: CART (ESTIMATE) -->
         <!-- ======================= -->
-        <div x-show="currentTab === 'cart'" style="display: none;" x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
+        <div x-show="currentTab === 'cart'"
+            style="display: block !important; background: black; color: white; padding-top: 100px; z-index: 9999; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; overflow-y: auto;"
+            x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-4"
+            x-transition:enter-end="opacity-100 translate-x-0">
+
+            <!-- DEBUG: Current Tab Indicator -->
+            <div
+                style="background: red; color: white; padding: 10px; font-weight: bold; text-align: center; border-bottom: 2px solid white;">
+                CURRENT TAB STATE: <span x-text="currentTab"></span>
+            </div>
 
             <h2 class="font-oswald font-bold text-3xl mb-6">Ваша комплектация</h2>
 
