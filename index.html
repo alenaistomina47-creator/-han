@@ -30,11 +30,7 @@
 </body>
 
 <!-- Заголовок -->
-<div class="text-center mb-8 flex flex-col items-center">
-    <img src="https://i.1.creatium.io/disk2/06/1c/38/527e3e8070543a6b740baa2d13ab5211ec/logotip_chernii.png" alt="Logo"
-        class="h-16 mb-4">
-    <h1 class="font-oswald font-bold uppercase text-4xl lg:text-5xl mb-2">СОБЕРИТЕ СВОЙ ЧАН</h1>
-</div>
+
 
 <!-- SPA State Wrapper -->
 <div class="relative">
@@ -45,6 +41,13 @@
     <div x-show="currentTab === 'calculator'" x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="opacity-0 -translate-x-4" x-transition:enter-end="opacity-100 translate-x-0"
         class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+        <!-- Заголовок (внутри таба Калькулятор) -->
+        <div class="col-span-1 lg:col-span-12 text-center mb-8 flex flex-col items-center">
+            <img src="https://i.1.creatium.io/disk2/06/1c/38/527e3e8070543a6b740baa2d13ab5211ec/logotip_chernii.png"
+                alt="Logo" class="h-16 mb-4">
+            <h1 class="font-oswald font-bold uppercase text-4xl lg:text-5xl mb-2">СОБЕРИТЕ СВОЙ ЧАН</h1>
+        </div>
 
         <!-- Левая колонка: Визуализация + Табы (7 колонок) -->
         <div
@@ -484,85 +487,32 @@
         <div x-show="currentTab === 'cart'" style="display: none;" x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
 
-            <h2 class="font-oswald font-bold text-3xl mb-6">Ваша смета</h2>
+            <h2 class="font-oswald font-bold text-3xl mb-6">Ваша комплектация</h2>
 
-            <!-- Estimate List (Simple v-for over selected items) -->
+            <!-- Estimate List (Iterate over priceDetails) -->
             <div class="space-y-4 mb-32">
 
-                <!-- 1. Bowl (Size + Material) -->
-                <template x-if="selectedSize">
-                    <div class="bg-white border rounded-xl p-4 relative">
-                        <h3 class="font-bold text-lg mb-1" x-text="selectedSize.name"></h3>
-                        <p class="text-xs text-gray-500"
-                            x-text="selectedMaterial ? selectedMaterial.name : 'Материал не выбран'"></p>
-                        <div class="flex justify-between items-end border-t pt-3 mt-3">
-                            <span class="text-xs text-gray-400">Основа</span>
-                            <span class="font-bold text-lg text-[#5fb856]"
-                                x-text="formatPrice((appData.materials[selectedSizeId]?.[selectedMaterialId] || 0))"></span>
+                <template x-for="(item, index) in priceDetails" :key="index">
+                    <div class="bg-white border rounded-xl p-4 relative flex justify-between items-end">
+                        <div class="w-2/3">
+                            <h3 class="font-bold text-lg mb-1" x-text="item.name"></h3>
+                            <!-- Dots visualization (CSS needed or simpler approach) -->
+                        </div>
+                        <div class="w-1/3 text-right">
+                            <span class="font-bold text-lg text-[#5fb856]" x-text="formatPrice(item.price)"></span>
                         </div>
                     </div>
                 </template>
 
-                <!-- 2. Stove -->
-                <template x-if="selectedStove">
-                    <div class="bg-white border rounded-xl p-4 relative">
-                        <h3 class="font-bold text-lg mb-1" x-text="selectedStove.name"></h3>
-                        <div class="flex justify-between items-end border-t pt-3 mt-3">
-                            <span class="text-xs text-gray-400">Печь</span>
-                            <span class="font-bold text-lg text-[#5fb856]"
-                                x-text="formatPrice(selectedStove.price)"></span>
-                        </div>
+                <!-- Total Sum Footer in Cart -->
+                <div class="bg-gray-50 rounded-xl p-6 mt-8 border border-gray-200">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-gray-500 font-bold uppercase text-xs">Стоимость заказа</span>
+                        <span class="font-oswald font-bold text-3xl text-[#5fb856]"
+                            x-text="formatPrice(totalPrice)"></span>
                     </div>
-                </template>
-
-                <!-- 3. Finish -->
-                <template x-if="selectedFinish">
-                    <div class="bg-white border rounded-xl p-4 relative">
-                        <h3 class="font-bold text-lg mb-1" x-text="selectedFinish.name"></h3>
-                        <div class="flex justify-between items-end border-t pt-3 mt-3">
-                            <span class="text-xs text-gray-400">Отделка</span>
-                            <span class="font-bold text-lg text-[#5fb856]"
-                                x-text="formatPrice(typeof selectedFinish.price === 'object' ? selectedFinish.price[selectedSizeId] : selectedFinish.price)"></span>
-                        </div>
-                    </div>
-                </template>
-
-                <!-- 4. Ladder -->
-                <template x-if="selectedLadder">
-                    <div class="bg-white border rounded-xl p-4 relative">
-                        <h3 class="font-bold text-lg mb-1" x-text="selectedLadder.name"></h3>
-                        <div class="flex justify-between items-end border-t pt-3 mt-3">
-                            <span class="text-xs text-gray-400">Лестница</span>
-                            <span class="font-bold text-lg text-[#5fb856]"
-                                x-text="formatPrice(selectedLadder.price)"></span>
-                        </div>
-                    </div>
-                </template>
-
-                <!-- 5. Chimney -->
-                <template x-if="selectedChimney">
-                    <div class="bg-white border rounded-xl p-4 relative">
-                        <h3 class="font-bold text-lg mb-1" x-text="selectedChimney.name"></h3>
-                        <div class="flex justify-between items-end border-t pt-3 mt-3">
-                            <span class="text-xs text-gray-400">Дымоход</span>
-                            <span class="font-bold text-lg text-[#5fb856]"
-                                x-text="formatPrice(selectedChimney.price)"></span>
-                        </div>
-                    </div>
-                </template>
-
-                <!-- 6. Other Extras -->
-                <template x-for="id in selectedExtrasIds" :key="id">
-                    <div x-show="appData.extras.find(e => e.id === id && !e.type)"
-                        class="bg-white border rounded-xl p-4 relative">
-                        <h3 class="font-bold text-lg mb-1" x-text="appData.extras.find(e => e.id === id)?.name"></h3>
-                        <div class="flex justify-between items-end border-t pt-3 mt-3">
-                            <span class="text-xs text-gray-400">Дополнения</span>
-                            <span class="font-bold text-lg text-[#5fb856]"
-                                x-text="formatPrice(appData.extras.find(e => e.id === id)?.price || 0)"></span>
-                        </div>
-                    </div>
-                </template>
+                    <p class="text-[10px] text-gray-400 text-center mt-2">Цена зафиксирована до конца недели</p>
+                </div>
 
             </div>
         </div>
