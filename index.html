@@ -543,6 +543,19 @@
                     <!-- Cart List -->
                     <div class="space-y-4 mb-32">
 
+                        <!-- DEBUG: RAW DATA DUMP -->
+                        <div class="bg-gray-800 text-green-400 p-4 rounded text-xs overflow-auto max-h-96 font-mono">
+                            <p class="font-bold text-white border-b border-gray-600 mb-2">CART ITEMS DATA:</p>
+                            <pre x-text="JSON.stringify($store.cart ? $store.cart.items : 'NO STORE', null, 2)"></pre>
+
+                            <p class="font-bold text-white border-b border-gray-600 mt-4 mb-2">CURRENT DRAFT DATA:</p>
+                            <pre x-text="JSON.stringify({ 
+                                selectedSizeId: selectedSizeId,
+                                currentItemTitle: currentItemTitle,
+                                currentItemData: currentItemData 
+                            }, null, 2)"></pre>
+                        </div>
+
                         <!-- 1. Saved Items (from Cart Store) -->
                         <template x-for="(item, index) in ($store.cart ? $store.cart.items : [])" :key="item.id">
                             <!-- Safe Wrapper: Render simple block if data missing -->
