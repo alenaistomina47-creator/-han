@@ -521,11 +521,11 @@
                         DEBUG INFO:<br>
                         SizeId: <span x-text="selectedSizeId || 'NULL'"></span><br>
                         Title: <span x-text="currentItemTitle"></span><br>
-                        Cart Items: <span x-text="$store.cart.items.length"></span>
+                        Cart Items: <span x-text="$store.cart ? $store.cart.items.length : 'STORE NOT LOADED'"></span>
                     </div>
 
                     <!-- Empty State (Only if both cart is empty AND no active item) -->
-                    <div x-show="$store.cart.items.length === 0 && !selectedSizeId"
+                    <div x-show="($store && $store.cart ? $store.cart.items.length === 0 : true) && !selectedSizeId"
                         class="text-center py-20 text-gray-400">
                         <svg class="w-16 h-16 mx-auto mb-4 opacity-20" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
@@ -539,10 +539,11 @@
                     </div>
 
                     <!-- Cart List -->
-                    <div class="space-y-4 mb-32" x-show="$store.cart.items.length > 0 || selectedSizeId">
+                    <div class="space-y-4 mb-32"
+                        x-show="($store && $store.cart ? $store.cart.items.length > 0 : false) || selectedSizeId">
 
                         <!-- 1. Saved Items (from Cart Store) -->
-                        <template x-for="(item, index) in $store.cart.items" :key="item.id">
+                        <template x-for="(item, index) in ($store.cart ? $store.cart.items : [])" :key="item.id">
                             <div class="bg-white border rounded-xl p-4 relative group">
                                 <div class="flex justify-between items-start mb-2">
                                     <h3 class="font-bold text-lg pr-8" x-text="item.ui_title"></h3>
@@ -591,13 +592,14 @@
                     </div>
 
                     <!-- Footer Actions -->
-                    <div x-show="$store.cart.items.length > 0 || selectedSizeId"
+                    <div x-show="($store.cart ? $store.cart.items.length > 0 : false) || selectedSizeId"
                         class="fixed bottom-20 inset-x-0 px-4 z-30 lg:static lg:mt-8">
                         <div class="bg-white p-4 rounded-2xl shadow-xl border border-gray-100 max-w-sm mx-auto">
                             <div class="flex justify-between items-center mb-4">
                                 <span class="text-gray-500 font-medium">Итого к оплате:</span>
+                                <!-- Safe Check: only if $store.cart exists -->
                                 <span class="text-2xl font-bold text-[#5fb856]"
-                                    x-text="formatPrice($store.cart.total + (selectedSizeId ? totalPrice : 0))"></span>
+                                    x-text="formatPrice(($store.cart ? $store.cart.total : 0) + (selectedSizeId ? totalPrice : 0))"></span>
                             </div>
 
                             <div class="space-y-3">
@@ -648,9 +650,12 @@
                                         d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
                                     </path>
                                 </svg>
-                                <span x-show="$store.cart.items.length > 0 || selectedSizeId" x-transition.scale
+                                <!-- Safe Check: ($store.cart ? ... : 0) -->
+                                <span
+                                    x-show="($store && $store.cart ? $store.cart.items.length > 0 : false) || selectedSizeId"
+                                    x-transition.scale
                                     class="absolute -top-1 -right-2 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white"
-                                    x-text="$store.cart.count + (selectedSizeId ? 1 : 0)"></span>
+                                    x-text="($store.cart ? $store.cart.count : 0) + (selectedSizeId ? 1 : 0)"></span>
                             </div>
                             <span class="text-[10px] font-bold uppercase tracking-wider">Корзина</span>
                         </button>
