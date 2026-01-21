@@ -513,9 +513,17 @@
                 <!-- ======================= -->
                 <!-- VIEW 2: CART PAGE       -->
                 <!-- ======================= -->
-                <div x-show="currentView === 'cart'" class="min-h-[80vh]">
+                <div :class="currentView === 'cart' ? 'block' : 'hidden'" class="min-h-[80vh] pb-32">
 
-                    <h2 class="font-oswald font-bold text-3xl mb-6">Ваша корзина</h2>
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="font-oswald font-bold text-3xl">Ваша корзина</h2>
+                        <button @click="currentView = 'calculator'" class="text-gray-400 hover:text-gray-600 p-2">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
 
                     <!-- DEBUG BLOCK (Temporary) -->
                     <div class="bg-red-100 text-red-800 p-2 text-xs mb-4 rounded border border-red-300 font-mono">
