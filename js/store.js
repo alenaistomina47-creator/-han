@@ -13,12 +13,24 @@ document.addEventListener('alpine:init', () => {
         // Вкладки визуализации
         activeTab: 'outside',
         showPriceModal: false,
+        showCartModal: false, // Модалка корзины
+        cart: [], // Корзина товаров
         isVisualizerMinimized: false,
         isRestoringUrl: false,
 
         // Инициализация
         init() {
             console.log('Калькулятор запущен.');
+
+            // Загрузка корзины
+            const savedCart = localStorage.getItem('chan_cart');
+            if (savedCart) {
+                try {
+                    this.cart = JSON.parse(savedCart);
+                } catch (e) {
+                    console.error('Error loading cart', e);
+                }
+            }
 
             window.addEventListener('scroll', () => {
                 this.isVisualizerMinimized = window.scrollY > 50;
@@ -246,76 +258,167 @@ document.addEventListener('alpine:init', () => {
             return Math.round(this.totalPrice * 1.3);
         },
 
+        get cartTotal() {
+            return this.cart.reduce((sum, item) => sum + (item.price?.total || 0), 0);
+        },
+
+        addToCart() {
+            if (!this.selectedSizeId || !this.selectedMaterialId) {
+                alert('Сначала выберите Размер и Материал!');
+                return;
+            }
+
+            // Формируем описание для списка
+            const parts = [];
+            if (this.selectedSize) parts.push(this.selectedSize.name);
+            if (this.selectedMaterial) parts.push(this.selectedMaterial.name);
+            if (this.selectedStove) parts.push(`+ ${this.selectedStove.name}`);
+
+            const item = {
+                id: Date.now(),
+                ui_title: parts.join(', '),
+                price: {
+                    total: this.totalPrice,
+                    original: this.originalPrice
+                },
+                // Сохраняем "сырые" ID чтобы потом можно было (в теории) восстановить или отправить ID
+                // Но для отправки текста проще сохранить готовые названия тут, или генерировать их снова.
+                // Сохраним снапшот данных для генерации текста заказа
+                data: {
+                    size: this.selectedSize ? this.selectedSize.name : 'Не выбрано',
+                    material: this.selectedMaterial ? this.selectedMaterial.name : 'Не выбрано',
+                    stove: this.selectedStove ? this.selectedStove.name : 'Не выбрано',
+                    finish: this.selectedFinish ? this.selectedFinish.name : 'Не выбрано',
+                    ladder: this.selectedLadder ? this.selectedLadder.name : 'Не выбрано',
+                    chimney: this.selectedChimney ? this.selectedChimney.name : 'Не выбрано',
+                    extras: this.selectedExtrasIds.map(id => {
+                        const e = appData.extras.find(ext => ext.id === id);
+                        return e ? e.name : '';
+                    }).filter(Boolean).join(', ')
+                }
+            };
+
+            this.cart.push(item);
+            this.saveCart();
+
+            // UIfif
+            if (window.Telegram?.WebApp?.showPopup) {
+                window.Telegram.WebApp.showPopup({
+                    title: 'Готово',
+                    message: 'Товар добавлен в смету',
+                    buttons: [{ type: 'ok' }]
+                });
+            } else {
+                alert('Добавлено в смету!');
+            }
+        },
+
+        removeFromCart(index) {
+            this.cart.splice(index, 1);
+            this.saveCart();
+            if (this.cart.length === 0) {
+                this.showCartModal = false;
+            }
+        },
+
+        saveCart() {
+            localStorage.setItem('chan_cart', JSON.stringify(this.cart));
+        },
+
         // Отправка в Telegram
-        async sendToTelegram() {
+        async sendToTelegram(fromCart = false) {
             // 1. Сбор данных пользователя Telegram
             const tg = window.Telegram?.WebApp;
             const user = tg?.initDataUnsafe?.user || {};
 
-            // 2. Сбор данных калькулятора
-            const orderData = {
-                order_id: `order_${Date.now()}`,
-                timestamp: new Date().toISOString(),
-                user: {
-                    id: user.id || null,
-                    username: user.username || null,
-                    first_name: user.first_name || null,
-                    last_name: user.last_name || null,
-                    language_code: user.language_code || null,
-                    platform: tg?.platform || 'unknown'
-                },
-                calculator: {
-                    size: this.selectedSize ? this.selectedSize.name : null,
-                    material: this.selectedMaterial ? this.selectedMaterial.name : null,
-                    stove: this.selectedStove ? this.selectedStove.name : null,
-                    finish: this.selectedFinish ? this.selectedFinish.name : null,
-                    ladder: this.selectedLadder ? this.selectedLadder.name : null,
-                    chimney: this.selectedChimney ? this.selectedChimney.name : null,
-                    extras: this.selectedExtrasIds.map(id => {
-                        const e = appData.extras.find(ext => ext.id === id);
-                        return e ? e.name : id;
-                    }),
-                    raw_ids: {
-                        size: this.selectedSizeId,
-                        material: this.selectedMaterialId,
-                        stove: this.selectedStoveId,
-                        finish: this.selectedFinishId,
-                        ladder: this.selectedLadderId,
-                        chimney: this.selectedChimneyId,
-                        extras: this.selectedExtrasIds
+            // 2. Сбор данных для отправки
+            let orderPayload = {};
+            let textMessage = '';
+
+            if (fromCart) {
+                // --- ОТПРАВКА КОРЗИНЫ ---
+                if (this.cart.length === 0) return;
+
+                const items = this.cart.map((item, index) => ({
+                    index: index + 1,
+                    summary: item.ui_title,
+                    details: item.data,
+                    price: item.price.total
+                }));
+
+                orderPayload = {
+                    type: 'cart_order',
+                    order_id: `cart_${Date.now()}`,
+                    timestamp: new Date().toISOString(),
+                    user: user,
+                    items: items,
+                    total_price: {
+                        value: this.cartTotal,
+                        formatted: this.formatPrice(this.cartTotal)
                     }
-                },
-                price: {
-                    total: this.totalPrice,
-                    original: this.originalPrice,
-                    currency: 'RUB',
-                    formatted: this.formatPrice(this.totalPrice)
-                }
-            };
+                };
 
-            // 3. Отправка на Webhook
-            const webhookUrl = 'https://kuklin2022.app.n8n.cloud/webhook-test/test';
+                // Генерация текста для чата
+                textMessage = `🛒 *НОВЫЙ ЗАКАЗ (СМЕТА)*\n`;
+                textMessage += `👤 Клиент: ${user.first_name || 'Неизвестно'} ${user.username ? '@' + user.username : ''}\n\n`;
 
-            try {
-                // Показываем лоадер
-                if (tg?.MainButton) tg.MainButton.showProgress();
-
-                // ИСПОЛЬЗУЕМ mode: 'no-cors' для обхода ошибки "Load failed" (CORS)
-                // Минус: Мы не узнаем статус ответа (200 или 500), ответ будет "слепым".
-                // Но данные уйдут на сервер.
-                await fetch(webhookUrl, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain' }, // Меняем на text/plain чтобы не вызывать Preflight
-                    body: JSON.stringify(orderData)
+                this.cart.forEach((item, i) => {
+                    textMessage += `*Позиция #${i + 1}* — ${this.formatPrice(item.price.total)}\n`;
+                    textMessage += `🔹 ${item.ui_title}\n`;
+                    textMessage += `   Размер: ${item.data.size}\n`;
+                    textMessage += `   Материал: ${item.data.material}\n`;
+                    textMessage += `   Печь: ${item.data.stove}\n`;
+                    textMessage += `   Отделка: ${item.data.finish}\n`;
+                    textMessage += `   Допы: ${item.data.extras || 'Нет'}\n`;
+                    textMessage += `------------------\n`;
                 });
 
-                if (tg?.MainButton) tg.MainButton.hideProgress();
+                textMessage += `\n💰 *ИТОГО К ОПЛАТЕ: ${this.formatPrice(this.cartTotal)}*`;
 
-                // В режиме no-cors мы всегда считаем что отправка успешна, если не упала сеть
-                console.log('Webhook sent (no-cors mode)');
+            } else {
+                // --- ОТПРАВКА ТЕКУЩЕГО КОНСТРУКТОРА (ОДИНОЧНЫЙ) ---
+                orderPayload = {
+                    type: 'single_order',
+                    order_id: `order_${Date.now()}`,
+                    timestamp: new Date().toISOString(),
+                    user: {
+                        id: user.id || null,
+                        username: user.username || null,
+                        first_name: user.first_name || null,
+                        last_name: user.last_name || null,
+                        language_code: user.language_code || null,
+                        platform: tg?.platform || 'unknown'
+                    },
+                    calculator: {
+                        size: this.selectedSize ? this.selectedSize.name : null,
+                        material: this.selectedMaterial ? this.selectedMaterial.name : null,
+                        stove: this.selectedStove ? this.selectedStove.name : null,
+                        finish: this.selectedFinish ? this.selectedFinish.name : null,
+                        ladder: this.selectedLadder ? this.selectedLadder.name : null,
+                        chimney: this.selectedChimney ? this.selectedChimney.name : null,
+                        extras: this.selectedExtrasIds.map(id => {
+                            const e = appData.extras.find(ext => ext.id === id);
+                            return e ? e.name : id;
+                        }),
+                        raw_ids: {
+                            size: this.selectedSizeId,
+                            material: this.selectedMaterialId,
+                            stove: this.selectedStoveId,
+                            finish: this.selectedFinishId,
+                            ladder: this.selectedLadderId,
+                            chimney: this.selectedChimneyId,
+                            extras: this.selectedExtrasIds
+                        }
+                    },
+                    price: {
+                        total: this.totalPrice,
+                        original: this.originalPrice,
+                        currency: 'RUB',
+                        formatted: this.formatPrice(this.totalPrice)
+                    }
+                };
 
-                // --- ЛОГИКА ОТКРЫТИЯ ЧАТА (ДУБЛИРОВАНИЕ) ---
+                // Генерация текста (старая логика)
                 const extrasNames = this.selectedExtrasIds.map(id => {
                     const e = appData.extras.find(ext => ext.id === id);
                     return e ? e.name : '';
@@ -328,7 +431,7 @@ document.addEventListener('alpine:init', () => {
                 const ladderName = this.selectedLadder ? this.selectedLadder.name : 'Не выбрано';
                 const chimneyName = this.selectedChimney ? this.selectedChimney.name : 'Не выбрано';
 
-                const text = `🔥 Новый заказ! (из 3D калькулятора)\n\n` +
+                textMessage = `🔥 Новый заказ! (из 3D калькулятора)\n\n` +
                     `📏 Размер: ${sizeName}\n` +
                     `🛡 Материал: ${materialName}\n` +
                     `🔥 Печь: ${stoveName}\n` +
@@ -337,9 +440,29 @@ document.addEventListener('alpine:init', () => {
                     `💨 Дымоход: ${chimneyName}\n` +
                     `➕ Дополнительно: ${extrasNames || 'Нет'}\n\n` +
                     `💰 Сумма заказа: ${this.formatPrice(this.totalPrice)}`;
-                // Показываем уведомление (ненадолго или сразу открываем чат?)
-                // Пользователь просил: "дублировалась мне в личку"
+            }
 
+
+            // 3. Отправка на Webhook
+            const webhookUrl = 'https://kuklin2022.app.n8n.cloud/webhook-test/test';
+
+            try {
+                // Показываем лоадер
+                if (tg?.MainButton) tg.MainButton.showProgress();
+
+                // ИСПОЛЬЗУЕМ mode: 'no-cors' для обхода ошибки "Load failed" (CORS)
+                await fetch(webhookUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(orderPayload)
+                });
+
+                if (tg?.MainButton) tg.MainButton.hideProgress();
+
+                console.log('Webhook sent (no-cors mode)');
+
+                // --- ЛОГИКА ОТКРЫТИЯ ЧАТА (ДУБЛИРОВАНИЕ) ---
                 if (tg && tg.showPopup) {
                     tg.showPopup({
                         title: 'Расчет готов! 🔥',
@@ -348,16 +471,27 @@ document.addEventListener('alpine:init', () => {
                     }, (buttonId) => {
                         // После нажатия ОК открываем чат
                         if (this.isTelegram) {
-                            const url = `https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`;
+                            const url = `https://t.me/ivan_ural_chan?text=${encodeURIComponent(textMessage)}`;
                             window.Telegram.WebApp.openTelegramLink(url);
-                            // window.Telegram.WebApp.close(); // Можно закрыть приложение, если нужно
                         } else {
-                            window.open(`https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`, '_blank');
+                            window.open(`https://t.me/ivan_ural_chan?text=${encodeURIComponent(textMessage)}`, '_blank');
+                        }
+
+                        // Если это была корзина - очищаем её после заказа
+                        if (fromCart) {
+                            this.cart = [];
+                            this.saveCart();
+                            this.showCartModal = false;
                         }
                     });
                 } else {
                     alert('Расчет сохранен! Переходим в чат для оформления...');
-                    window.open(`https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`, '_blank');
+                    window.open(`https://t.me/ivan_ural_chan?text=${encodeURIComponent(textMessage)}`, '_blank');
+                    if (fromCart) {
+                        this.cart = [];
+                        this.saveCart();
+                        this.showCartModal = false;
+                    }
                 }
 
             } catch (error) {

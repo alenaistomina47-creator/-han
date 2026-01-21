@@ -433,17 +433,31 @@
                     </div>
                 </div>
 
-                <!-- CTA Button -->
-                <button @click="sendToTelegram()" x-show="!isTelegram" :disabled="!selectedSizeId"
-                    :class="{'opacity-50 grayscale cursor-not-allowed': !selectedSizeId}"
-                    class="w-full border-2 border-[#5fb856] text-[#5fb856] hover:bg-[#5fb856] hover:text-white rounded-xl py-3 font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 group">
-                    <span>Зафиксировать условия</span>
-                    <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
-                        </path>
-                    </svg>
-                </button>
+                <!-- CTA Buttons -->
+                <div class="flex flex-col gap-3 lg:flex-row lg:gap-4">
+                    <!-- 1. Add to Cart (Secondary) -->
+                    <button @click="addToCart()" :disabled="!selectedSizeId || !selectedMaterialId"
+                        :class="{'opacity-50 grayscale cursor-not-allowed': !selectedSizeId}"
+                        class="w-full lg:w-1/2 border-2 border-gray-300 text-gray-700 hover:border-gray-800 hover:text-gray-900 bg-white rounded-xl py-3 font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
+                            </path>
+                        </svg>
+                        <span>В смету</span>
+                    </button>
+
+                    <!-- 2. Direct Order (Primary) -->
+                    <button @click="sendToTelegram()" x-show="!isTelegram" :disabled="!selectedSizeId"
+                        :class="{'opacity-50 grayscale cursor-not-allowed': !selectedSizeId}"
+                        class="w-full lg:w-1/2 border-2 border-[#5fb856] text-[#5fb856] hover:bg-[#5fb856] hover:text-white rounded-xl py-3 font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 group">
+                        <span>Зафиксировать</span>
+                        <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
 
                 <div class="hidden lg:block mt-3 text-center">
                     <p class="text-[10px] text-gray-500 font-medium">🎁 Получите подарки на <span
@@ -452,6 +466,19 @@
                 </div>
             </div>
         </div>
+
+        <!-- Floating Cart Button -->
+        <button x-show="cart.length > 0" @click="showCartModal = true" x-transition.scale
+            class="fixed bottom-28 right-4 z-50 w-14 h-14 bg-[#5fb856] text-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all lg:bottom-10 lg:right-10">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                </path>
+            </svg>
+            <span
+                class="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center border-2 border-white"
+                x-text="cart.length"></span>
+        </button>
 
         <!-- Spacer for mobile to prevent content hide behind sticky footer -->
         <div class="h-32 lg:hidden"></div>
@@ -469,7 +496,56 @@
         конфиденциальности</a>
 </div>
 
-<!-- Модалка детализации цены -->
+<!-- Модалка корзины -->
+<div x-show="showCartModal" style="display: none;"
+    class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+    x-transition.opacity>
+    <div @click.outside="showCartModal = false"
+        class="bg-white rounded-2xl w-full max-w-sm p-6 relative shadow-2xl flex flex-col max-h-[80vh]"
+        x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4"
+        x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-4">
+
+        <h3 class="text-xl font-oswald font-bold mb-4 pr-6">Ваша смета <span class="text-[#5fb856]"
+                x-text="'(' + cart.length + ')'"></span></h3>
+        <button @click="showCartModal = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+
+        <div class="flex-1 overflow-y-auto space-y-3 mb-4 pr-1">
+            <template x-for="(item, index) in cart" :key="item.id">
+                <div class="p-3 border border-gray-100 rounded-xl bg-gray-50 flex items-start justify-between group">
+                    <div>
+                        <p class="text-xs font-bold text-gray-800" x-text="item.ui_title"></p>
+                        <p class="text-[10px] text-gray-500 mt-1" x-text="formatPrice(item.price.total)"></p>
+                    </div>
+                    <button @click="removeFromCart(index)" class="text-gray-400 hover:text-red-500 p-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+            </template>
+        </div>
+
+        <div class="border-t pt-4">
+            <div class="flex justify-between items-end mb-4">
+                <span class="text-xs text-gray-500 uppercase font-bold">Итого:</span>
+                <span class="text-2xl font-oswald font-bold text-[#5fb856]" x-text="formatPrice(cartTotal)"></span>
+            </div>
+            <button @click="sendToTelegram(true)"
+                class="w-full bg-[#5fb856] text-white py-3 rounded-xl font-bold uppercase tracking-wider hover:bg-green-600 transition-colors">
+                Оформить смету
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Модалка детализации цены (старая) -->
 <div x-show="showPriceModal" style="display: none;"
     class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
     x-transition.opacity>
