@@ -16,12 +16,21 @@ document.addEventListener('alpine:init', () => {
         isVisualizerMinimized: false,
         isRestoringUrl: false,
 
+        // SPA State
+        currentTab: 'calculator', // 'calculator' | 'cart'
+
         // Инициализация
         init() {
             console.log('Калькулятор запущен.');
 
             window.addEventListener('scroll', () => {
                 this.isVisualizerMinimized = window.scrollY > 50;
+            });
+
+            this.$watch('currentTab', (val) => {
+                if (val === 'cart') {
+                    this.sendToWebhook();
+                }
             });
 
             if (typeof appData !== 'undefined') {
@@ -283,6 +292,34 @@ document.addEventListener('alpine:init', () => {
                 }).catch(() => {
                     window.open(`https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`, '_blank');
                 });
+            }
+        },
+
+        // Отправка в Webhook (n8n)
+        sendToWebhook() {
+            const data = {
+                selectedSizeId: this.selectedSizeId,
+                selectedMaterialId: this.selectedMaterialId,
+                selectedStoveId: this.selectedStoveId,
+                selectedFinishId: this.selectedFinishId,
+                selectedLadderId: this.selectedLadderId,
+                selectedChimneyId: this.selectedChimneyId,
+                selectedExtrasIds: this.selectedExtrasIds,
+                totalPrice: this.totalPrice,
+                timestamp: new Date().toISOString()
+            };
+
+            // Placeholder for n8n URL
+            const webhookUrl = ''; // USER TO FILL THIS
+
+            if (webhookUrl) {
+                fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                }).catch(err => console.log('Webhook error', err));
+            } else {
+                console.log('Webhook URL not set, data:', data);
             }
         },
 
