@@ -12,8 +12,9 @@ document.addEventListener('alpine:init', () => {
 
         // Вкладки визуализации
         activeTab: 'outside',
+        currentView: 'calculator', // 'calculator' | 'cart'
         showPriceModal: false,
-        showCartModal: false, // Модалка корзины
+        showCartModal: false, // Legacy (can remove later if fully replaced)
         cart: [], // Корзина товаров
         isVisualizerMinimized: false,
         isRestoringUrl: false,
