@@ -516,13 +516,6 @@
 
                     <div class="flex justify-between items-center mb-6 pt-4">
                         <h2 class="font-oswald font-bold text-3xl">Корзина</h2>
-                        <button @click="currentView = 'calculator'"
-                            class="text-gray-400 hover:text-gray-600 p-2 border border-gray-200 rounded-full bg-white shadow-sm">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
                     </div>
 
                     <!-- DEBUG BLOCK (Temporary) -->
@@ -548,13 +541,12 @@
                     </div>
 
                     <!-- Cart List -->
-                    <div class="space-y-4 mb-32"
-                        x-show="($store && $store.cart ? $store.cart.items.length > 0 : false) || selectedSizeId">
+                    <div class="space-y-4 mb-32">
 
                         <!-- 1. Saved Items (from Cart Store) -->
                         <template x-for="(item, index) in ($store.cart ? $store.cart.items : [])" :key="item.id">
-                            <!-- Safe Wrapper: Only render if item exists and has data -->
-                            <div class="bg-white border rounded-xl p-4 relative group" x-show="item && item.data">
+                            <!-- Safe Wrapper: Render simple block if data missing -->
+                            <div class="bg-white border rounded-xl p-4 relative group" x-show="item">
                                 <div class="flex justify-between items-start mb-2">
                                     <h3 class="font-bold text-lg pr-8" x-text="item.ui_title || 'Без названия'"></h3>
                                     <button @click="$store.cart.removeItem(index)"

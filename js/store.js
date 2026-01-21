@@ -67,6 +67,14 @@ try {
                                 tg.MainButton.show();
                                 tg.MainButton.onClick(() => { this.sendToTelegram(); });
 
+                                // --- Back Button ---
+                                tg.BackButton.onClick(() => {
+                                    this.currentView = 'calculator';
+                                });
+                                this.$watch('currentView', (val) => {
+                                    val === 'cart' ? tg.BackButton.show() : tg.BackButton.hide();
+                                });
+
                                 this.$watch('totalPrice', (val) => {
                                     tg.MainButton.setText(`ЗАФИКСИРОВАТЬ: ${this.formatPrice(val)}`);
                                 });
