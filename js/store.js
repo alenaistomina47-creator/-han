@@ -184,82 +184,85 @@ document.addEventListener('alpine:init', () => {
             return total;
         },
 
-        // --- NEW ROBUST GETTER FOR CART ITEMS ---
+        // --- NEW ROBUST GETTER FOR CART ITEMS (Wrapped in Try/Catch) ---
         get cartItems() {
-            const items = [];
+            try {
+                const items = [];
 
-            // 1. Чан (Размер + Материал)
-            // Используем прямые проверки ID, как в totalPrice, чтобы избежать проблем с геттерами
-            if (this.selectedSizeId && this.selectedMaterialId) {
-                const size = appData.sizes.find(s => s.id === this.selectedSizeId);
-                const matInfo = appData.materialMetadata ? appData.materialMetadata[this.selectedMaterialId] : null;
+                // 1. Чан (Размер + Материал)
+                if (this.selectedSizeId && this.selectedMaterialId) {
+                    // Используем безопасный доступ
+                    const size = appData.sizes ? appData.sizes.find(s => s.id === this.selectedSizeId) : null;
+                    const matInfo = (appData.materialMetadata && appData.materialMetadata[this.selectedMaterialId])
+                        ? appData.materialMetadata[this.selectedMaterialId]
+                        : null;
 
-                // Цену берем напрямую из матрицы цен
-                let basePrice = 0;
-                if (appData.materials[this.selectedSizeId]) {
-                    basePrice = appData.materials[this.selectedSizeId][this.selectedMaterialId] || 0;
-                }
-
-                if (size && matInfo) {
-                    items.push({
-                        name: `Чан: ${size.name}, ${matInfo.name}`,
-                        price: basePrice
-                    });
-                } else if (size) {
-                    // Fallback если метаданных материала нет
-                    items.push({
-                        name: `Чан: ${size.name}`,
-                        price: basePrice
-                    });
-                }
-            }
-
-            // 2. Печь
-            if (this.selectedStoveId) {
-                const stove = appData.stoves.find(s => s.id === this.selectedStoveId);
-                if (stove) {
-                    items.push({ name: stove.name, price: stove.price || 0 });
-                }
-            }
-
-            // 3. Отделка
-            if (this.selectedFinishId) {
-                const finish = appData.finishes.find(f => f.id === this.selectedFinishId);
-                if (finish) {
-                    let finishPrice = 0;
-                    if (typeof finish.price === 'object') {
-                        finishPrice = finish.price[this.selectedSizeId] || 0;
-                    } else {
-                        finishPrice = finish.price || 0;
+                    // Цена
+                    let basePrice = 0;
+                    if (appData.materials && appData.materials[this.selectedSizeId]) {
+                        basePrice = appData.materials[this.selectedSizeId][this.selectedMaterialId] || 0;
                     }
-                    // Показываем даже если цена 0 (вдруг включена в базу), но обычно > 0
-                    if (finishPrice > 0) {
-                        items.push({ name: `Отделка: ${finish.name}`, price: finishPrice });
+
+                    if (size) {
+                        items.push({
+                            name: `Чан: ${size.name}${matInfo ? ', ' + matInfo.name : ''}`,
+                            price: basePrice
+                        });
                     }
                 }
-            }
 
-            // 4. Лестница
-            if (this.selectedLadderId) {
-                const ladder = appData.extras.find(e => e.id === this.selectedLadderId);
-                if (ladder) items.push({ name: ladder.name, price: ladder.price || 0 });
-            }
-
-            // 5. Дымоход
-            if (this.selectedChimneyId) {
-                const chimney = appData.extras.find(e => e.id === this.selectedChimneyId);
-                if (chimney) items.push({ name: chimney.name, price: chimney.price || 0 });
-            }
-
-            // 6. Дополнительные опции
-            this.selectedExtrasIds.forEach(id => {
-                const extra = appData.extras.find(e => e.id === id);
-                if (extra) {
-                    items.push({ name: extra.name, price: extra.price || 0 });
+                // 2. Печь
+                if (this.selectedStoveId && appData.stoves) {
+                    const stove = appData.stoves.find(s => s.id === this.selectedStoveId);
+                    if (stove) {
+                        items.push({ name: stove.name, price: stove.price || 0 });
+                    }
                 }
-            });
 
-            return items;
+                // 3. Отделка
+                if (this.selectedFinishId && appData.finishes) {
+                    const finish = appData.finishes.find(f => f.id === this.selectedFinishId);
+                    if (finish) {
+                        let finishPrice = 0;
+                        if (finish.price && typeof finish.price === 'object') {
+                            finishPrice = finish.price[this.selectedSizeId] || 0;
+                        } else {
+                            finishPrice = finish.price || 0;
+                        }
+                        if (finishPrice > 0) {
+                            items.push({ name: `Отделка: ${finish.name}`, price: finishPrice });
+                        }
+                    }
+                }
+
+                // 4. Лестница
+                if (this.selectedLadderId && appData.extras) {
+                    const ladder = appData.extras.find(e => e.id === this.selectedLadderId);
+                    if (ladder) items.push({ name: ladder.name, price: ladder.price || 0 });
+                }
+
+                // 5. Дымоход
+                if (this.selectedChimneyId && appData.extras) {
+                    const chimney = appData.extras.find(e => e.id === this.selectedChimneyId);
+                    if (chimney) items.push({ name: chimney.name, price: chimney.price || 0 });
+                }
+
+                // 6. Дополнительные опции
+                if (this.selectedExtrasIds && this.selectedExtrasIds.length && appData.extras) {
+                    this.selectedExtrasIds.forEach(id => {
+                        const extra = appData.extras.find(e => e.id === id);
+                        if (extra) {
+                            items.push({ name: extra.name, price: extra.price || 0 });
+                        }
+                    });
+                }
+
+                return items;
+
+            } catch (e) {
+                console.error("Cart Items Error:", e);
+                return [{ name: "ОШИБКА ДАННЫХ (см. консоль)", price: 0 }];
+            }
         },
 
         get discountedPrice() {
