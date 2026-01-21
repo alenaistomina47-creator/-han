@@ -302,27 +302,38 @@ document.addEventListener('alpine:init', () => {
 
         // Получить заголовок текущей комплектации
         get currentItemTitle() {
-            if (!this.selectedSize) return 'Чан не выбран';
-            const parts = [this.selectedSize.name];
-            if (this.selectedMaterial) parts.push(this.selectedMaterial.name);
-            if (this.selectedStove) parts.push(`+ ${this.selectedStove.name}`);
-            return parts.join(', ');
+            try {
+                if (!this.selectedSize || !this.selectedSize.name) return 'Чан не выбран';
+                const parts = [this.selectedSize.name];
+                if (this.selectedMaterial && this.selectedMaterial.name) parts.push(this.selectedMaterial.name);
+                if (this.selectedStove && this.selectedStove.name) parts.push(`+ ${this.selectedStove.name}`);
+                return parts.join(', ');
+            } catch (e) {
+                console.error('Error in currentItemTitle', e);
+                return 'Ошибка названия';
+            }
         },
 
         // Данные текущей комплектации (объект)
         get currentItemData() {
-            return {
-                size: this.selectedSize ? this.selectedSize.name : 'Не выбрано',
-                material: this.selectedMaterial ? this.selectedMaterial.name : 'Не выбрано',
-                stove: this.selectedStove ? this.selectedStove.name : 'Не выбрано',
-                finish: this.selectedFinish ? this.selectedFinish.name : 'Не выбрано',
-                ladder: this.selectedLadder ? this.selectedLadder.name : 'Не выбрано',
-                chimney: this.selectedChimney ? this.selectedChimney.name : 'Не выбрано',
-                extras: this.selectedExtrasIds.map(id => {
-                    const e = appData.extras.find(ext => ext.id === id);
-                    return e ? e.name : '';
-                }).filter(Boolean).join(', ')
-            };
+            try {
+                return {
+                    size: this.selectedSize ? this.selectedSize.name : 'Не выбрано',
+                    material: this.selectedMaterial ? this.selectedMaterial.name : 'Не выбрано',
+                    stove: this.selectedStove ? this.selectedStove.name : 'Не выбрано',
+                    finish: this.selectedFinish ? this.selectedFinish.name : 'Не выбрано',
+                    ladder: this.selectedLadder ? this.selectedLadder.name : 'Не выбрано',
+                    chimney: this.selectedChimney ? this.selectedChimney.name : 'Не выбрано',
+                    extras: (this.selectedExtrasIds || []).map(id => {
+                        if (!appData?.extras) return '';
+                        const e = appData.extras.find(ext => ext.id === id);
+                        return e ? e.name : '';
+                    }).filter(Boolean).join(', ')
+                };
+            } catch (e) {
+                console.error('Error in currentItemData', e);
+                return { size: 'Ошибка данных' };
+            }
         },
 
         // Полная цена (Корзина + Текущий)
