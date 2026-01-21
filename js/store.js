@@ -19,14 +19,15 @@ document.addEventListener('alpine:init', () => {
         selectedChimneyId: '',
         selectedExtrasIds: [],
 
-        // ГЛАВНОЕ ИЗМЕНЕНИЕ: cartItems теперь реальный массив, а не геттер
+        // ВАЖНО: Это теперь обычный массив, а не геттер.
+        // Он физически хранит список товаров, поэтому он не может быть пустым, если цена есть.
         cartItems: [], 
 
         // ==========================================
         // 2. ИНИЦИАЛИЗАЦИЯ
         // ==========================================
         init() {
-            console.log('Калькулятор запущен. Режим массива.');
+            console.log('Калькулятор запущен. Режим массива (v2.0).');
 
             // Следим за скроллом
             window.addEventListener('scroll', () => {
@@ -38,11 +39,12 @@ document.addEventListener('alpine:init', () => {
                 if (val === 2) this.sendToWebhook();
             });
 
+            // Проверяем, загрузились ли данные из data.js
             if (typeof appData !== 'undefined') {
                 this.preloadImages();
                 this.loadFromUrl();
 
-                // URL Синхронизация
+                // При любом изменении параметров — обновляем URL
                 this.$watch('selectedSizeId', () => this.updateUrl());
                 this.$watch('selectedMaterialId', () => this.updateUrl());
                 this.$watch('selectedStoveId', () => this.updateUrl());
@@ -51,7 +53,7 @@ document.addEventListener('alpine:init', () => {
                 this.$watch('selectedChimneyId', () => this.updateUrl());
                 this.$watch('selectedExtrasIds', () => this.updateUrl());
 
-                // Telegram
+                // Telegram инициализация
                 if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
                     this.isTelegram = true;
                     const tg = window.Telegram.WebApp;
@@ -68,7 +70,7 @@ document.addEventListener('alpine:init', () => {
                     });
                 }
 
-                // Логика зависимостей (исключение несовместимых опций)
+                // Логика исключения несовместимых опций
                 this.$watch('selectedChimneyId', (val) => {
                     if (val === 'pipe_sandwich') this.selectedExtrasIds = this.selectedExtrasIds.filter(id => id !== 'protection');
                 });
@@ -89,8 +91,9 @@ document.addEventListener('alpine:init', () => {
                     }
                 });
 
-                // MAGIC FIX: Принудительное обновление корзины при любом изменении
-                // $effect в Alpine запускается автоматически, когда меняются используемые внутри переменные
+                // MAGIC FIX: Принудительное обновление корзины
+                // Эта команда следит за всеми переменными внутри updateCartList
+                // и запускает пересчет списка автоматически.
                 this.$effect(() => {
                     this.updateCartList();
                 });
@@ -98,7 +101,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         // ==========================================
-        // 3. ВСПОМОГАТЕЛЬНЫЕ ГЕТТЕРЫ
+        // 3. ВСПОМОГАТЕЛЬНЫЕ ГЕТТЕРЫ (HELPERS)
         // ==========================================
         get selectedSize() { return this.selectedSizeId ? appData.sizes.find(s => s.id === this.selectedSizeId) : null; },
         get selectedStove() { return this.selectedStoveId ? appData.stoves.find(s => s.id === this.selectedStoveId) : null; },
@@ -126,7 +129,7 @@ document.addEventListener('alpine:init', () => {
         // ==========================================
         updateCartList() {
             try {
-                // Если данные еще не загрузились - выходим
+                // Если данные еще не загрузились - выходим, чтобы не было ошибок
                 if (typeof appData === 'undefined') return;
 
                 const items = [];
@@ -167,7 +170,7 @@ document.addEventListener('alpine:init', () => {
                     items.push({ name: this.selectedChimney.name, price: this.selectedChimney.price || 0 });
                 }
 
-                // 6. Допы
+                // 6. Допы (Чекбоксы)
                 this.selectedExtrasIds.forEach(id => {
                     const extra = appData.extras.find(e => e.id === id);
                     if (extra) {
@@ -175,7 +178,8 @@ document.addEventListener('alpine:init', () => {
                     }
                 });
 
-                // Принудительно обновляем массив
+                // ВОТ ОНО: Принудительно кладем товары в массив.
+                // Теперь HTML просто читает этот массив, ему не нужно ничего считать.
                 this.cartItems = items;
 
             } catch (e) {
@@ -184,7 +188,8 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        // Итоговая цена считается на основе корзины (гарантия совпадения)
+        // Итоговая цена теперь просто сумма товаров в списке.
+        // Это гарантирует, что ЦЕНА и СПИСОК всегда совпадают.
         get totalPrice() {
             return this.cartItems.reduce((sum, item) => sum + item.price, 0);
         },
@@ -203,7 +208,7 @@ document.addEventListener('alpine:init', () => {
         getMaterialOverlay() {
             if (!this.selectedMaterialId || !appData.materialMetadata) return null;
             const meta = appData.materialMetadata[this.selectedMaterialId];
-            return meta ? meta.image : null; // Используем image как оверлей, если так задумано
+            return meta ? meta.image : null;
         },
 
         preloadImages() {
@@ -218,13 +223,22 @@ document.addEventListener('alpine:init', () => {
             if (this.isTelegram) {
                 window.Telegram.WebApp.sendData(JSON.stringify({ items: this.cartItems, total: this.totalPrice }));
             } else {
+                // Если открыто в браузере — копируем и переходим в тг
                 const url = `https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`;
+                
+                // Пробуем скопировать, но не блокируем переход, если не выйдет
+                try {
+                    navigator.clipboard.writeText(text);
+                } catch (e) {}
+                
                 window.open(url, '_blank');
             }
         },
 
         sendToWebhook() {
-            // Webhook logic placeholder
+            // Место для отправки данных в CRM
+            // const data = { ... };
+            // fetch(...)
         },
 
         updateUrl() {
@@ -237,6 +251,7 @@ document.addEventListener('alpine:init', () => {
             if (this.selectedLadderId) params.set('l', this.selectedLadderId);
             if (this.selectedChimneyId) params.set('c', this.selectedChimneyId);
             if (this.selectedExtrasIds.length) params.set('e', this.selectedExtrasIds.join(','));
+            
             const newUrl = `${window.location.pathname}?${params.toString()}`;
             window.history.replaceState({}, '', newUrl);
         },
@@ -245,6 +260,8 @@ document.addEventListener('alpine:init', () => {
             this.isRestoringUrl = true;
             const params = new URLSearchParams(window.location.search);
             if (params.has('s')) this.selectedSizeId = params.get('s');
+            
+            // Загружаем остальное только если выбран размер
             if (this.selectedSizeId) {
                 if (params.has('m')) this.selectedMaterialId = params.get('m');
                 if (params.has('st')) this.selectedStoveId = params.get('st');
