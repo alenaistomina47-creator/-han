@@ -12,26 +12,21 @@ document.addEventListener('alpine:init', () => {
 
         // Вкладки визуализации
         activeTab: 'outside',
-        currentView: 'calculator', // 'calculator' | 'cart'
+        currentView: 'calculator',
         showPriceModal: false,
-        showCartModal: false, // Legacy (can remove later if fully replaced)
-        cart: [], // Корзина товаров
+        showCartModal: false,
         isVisualizerMinimized: false,
         isRestoringUrl: false,
+
+        // === ИНТЕГРАЦИЯ С КОРЗИНОЙ ===
+        get cart() { return Alpine.store('cart').items; },
+        get cartTotal() { return Alpine.store('cart').total; },
 
         // Инициализация
         init() {
             console.log('Калькулятор запущен.');
 
-            // Загрузка корзины
-            const savedCart = localStorage.getItem('chan_cart');
-            if (savedCart) {
-                try {
-                    this.cart = JSON.parse(savedCart);
-                } catch (e) {
-                    console.error('Error loading cart', e);
-                }
-            }
+            // Загрузка корзины выполняется в cart.js (Alpine.store('cart').init())
 
             window.addEventListener('scroll', () => {
                 this.isVisualizerMinimized = window.scrollY > 50;
@@ -259,9 +254,7 @@ document.addEventListener('alpine:init', () => {
             return Math.round(this.totalPrice * 1.3);
         },
 
-        get cartTotal() {
-            return this.cart.reduce((sum, item) => sum + (item.price?.total || 0), 0);
-        },
+        // (Удалено дублирование cartTotal, используется геттер выше)
 
         addToCart() {
             if (!this.selectedSizeId || !this.selectedMaterialId) {
