@@ -17,7 +17,7 @@ document.addEventListener('alpine:init', () => {
         isRestoringUrl: false,
 
         // SPA State
-        currentTab: 'calculator', // 'calculator' | 'cart'
+        currentTab: 1, // 1 = Calculator, 2 = Cart
 
         // Инициализация
         init() {
@@ -28,7 +28,7 @@ document.addEventListener('alpine:init', () => {
             });
 
             this.$watch('currentTab', (val) => {
-                if (val === 'cart') {
+                if (val === 2) {
                     this.sendToWebhook();
                 }
             });
