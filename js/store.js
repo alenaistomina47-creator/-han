@@ -19,8 +19,13 @@ document.addEventListener('alpine:init', () => {
         isRestoringUrl: false,
 
         // === ИНТЕГРАЦИЯ С КОРЗИНОЙ ===
-        get cart() { return Alpine.store('cart').items; },
-        get cartTotal() { return Alpine.store('cart').total; },
+        // Safe Access: check if store exists to avoid crash
+        get cart() {
+            return (Alpine.store('cart')) ? Alpine.store('cart').items : [];
+        },
+        get cartTotal() {
+            return (Alpine.store('cart')) ? Alpine.store('cart').total : 0;
+        },
 
         // Инициализация
         init() {
