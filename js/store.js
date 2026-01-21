@@ -184,52 +184,71 @@ document.addEventListener('alpine:init', () => {
             return total;
         },
 
-        // --- NEW GETTER FOR CART ITEMS (Replaces priceDetails) ---
+        // --- NEW ROBUST GETTER FOR CART ITEMS ---
         get cartItems() {
             const items = [];
 
             // 1. Чан (Размер + Материал)
-            const size = this.selectedSize;
-            const material = this.selectedMaterial;
+            // Используем прямые проверки ID, как в totalPrice, чтобы избежать проблем с геттерами
+            if (this.selectedSizeId && this.selectedMaterialId) {
+                const size = appData.sizes.find(s => s.id === this.selectedSizeId);
+                const matInfo = appData.materialMetadata ? appData.materialMetadata[this.selectedMaterialId] : null;
 
-            if (size && material) {
-                const basePrice = (appData.materials[this.selectedSizeId] && appData.materials[this.selectedSizeId][this.selectedMaterialId]) || 0;
-                items.push({
-                    name: `Чан: ${size.name}, ${material.name}`,
-                    price: basePrice
-                });
+                // Цену берем напрямую из матрицы цен
+                let basePrice = 0;
+                if (appData.materials[this.selectedSizeId]) {
+                    basePrice = appData.materials[this.selectedSizeId][this.selectedMaterialId] || 0;
+                }
+
+                if (size && matInfo) {
+                    items.push({
+                        name: `Чан: ${size.name}, ${matInfo.name}`,
+                        price: basePrice
+                    });
+                } else if (size) {
+                    // Fallback если метаданных материала нет
+                    items.push({
+                        name: `Чан: ${size.name}`,
+                        price: basePrice
+                    });
+                }
             }
 
             // 2. Печь
-            const stove = this.selectedStove;
-            if (stove) {
-                items.push({ name: stove.name, price: stove.price || 0 });
+            if (this.selectedStoveId) {
+                const stove = appData.stoves.find(s => s.id === this.selectedStoveId);
+                if (stove) {
+                    items.push({ name: stove.name, price: stove.price || 0 });
+                }
             }
 
             // 3. Отделка
-            const finish = this.selectedFinish;
-            if (finish && finish.price) {
-                let finishPrice = 0;
-                if (typeof finish.price === 'object') {
-                    finishPrice = finish.price[this.selectedSizeId] || 0;
-                } else {
-                    finishPrice = finish.price || 0;
-                }
-                if (finishPrice > 0) {
-                    items.push({ name: `Отделка: ${finish.name}`, price: finishPrice });
+            if (this.selectedFinishId) {
+                const finish = appData.finishes.find(f => f.id === this.selectedFinishId);
+                if (finish) {
+                    let finishPrice = 0;
+                    if (typeof finish.price === 'object') {
+                        finishPrice = finish.price[this.selectedSizeId] || 0;
+                    } else {
+                        finishPrice = finish.price || 0;
+                    }
+                    // Показываем даже если цена 0 (вдруг включена в базу), но обычно > 0
+                    if (finishPrice > 0) {
+                        items.push({ name: `Отделка: ${finish.name}`, price: finishPrice });
+                    }
                 }
             }
 
             // 4. Лестница
-            const ladder = this.selectedLadder;
-            if (ladder) {
-                items.push({ name: ladder.name, price: ladder.price || 0 });
+            if (this.selectedLadderId) {
+                const ladder = appData.extras.find(e => e.id === this.selectedLadderId);
+                if (ladder) items.push({ name: ladder.name, price: ladder.price || 0 });
             }
 
             // 5. Дымоход
-            const chimney = this.selectedChimney;
-            if (chimney) {
-                items.push({ name: chimney.name, price: chimney.price || 0 });
+            if (this.selectedChimneyId) {
+                const chimney = appData.extras.find(e => e.id === this.selectedChimneyId);
+                if (chimney) items.push({ name: chimney.name, price: chimney.price || 0 });
             }
 
             // 6. Дополнительные опции
