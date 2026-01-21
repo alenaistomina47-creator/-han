@@ -1,611 +1,2213 @@
 <!DOCTYPE html>
+
 <html lang="ru">
 
+
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>3D Калькулятор Банного Чана</title>
+
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+
     <meta http-equiv="Pragma" content="no-cache">
+
     <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="css/variables.css">
-    <link rel="stylesheet" href="css/layout.css">
-    <link rel="stylesheet" href="css/visualizer.css">
-    <link rel="stylesheet" href="css/controls.css">
+
+    
+
+    <!-- Внешние библиотеки -->
+
     <script src="https://cdn.tailwindcss.com"></script>
+
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+
+
+    <!-- ВСТРОЕННЫЕ СТИЛИ -->
+
+    <style>
+
+        /* variables.css */
+
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Inter:wght@400;500;600&display=swap');
+
+
+
+        :root {
+
+            --primary-color: #5fb856;
+
+            --text-main: #333;
+
+            --font-heading: 'Oswald', sans-serif;
+
+            --font-body: 'Inter', sans-serif;
+
+            --bg-color: #F3F5F6;
+
+        }
+
+
+
+        body {
+
+            font-family: var(--font-body);
+
+            -webkit-font-smoothing: antialiased;
+
+            -moz-osx-font-smoothing: grayscale;
+
+            background-color: var(--bg-color);
+
+            color: var(--text-main);
+
+        }
+
+
+
+        .font-oswald {
+
+            font-family: var(--font-heading);
+
+        }
+
+
+
+        /* layout.css */
+
+        html {
+
+            scroll-behavior: smooth;
+
+        }
+
+
+
+        ::-webkit-scrollbar {
+
+            width: 6px;
+
+        }
+
+
+
+        ::-webkit-scrollbar-track {
+
+            background: transparent;
+
+        }
+
+
+
+        ::-webkit-scrollbar-thumb {
+
+            background: #e5e7eb;
+
+            border-radius: 3px;
+
+        }
+
+
+
+        ::-webkit-scrollbar-thumb:hover {
+
+            background: #d1d5db;
+
+        }
+
+
+
+        /* visualizer.css */
+
+        .visualizer-aspect {
+
+            width: 100%;
+
+            aspect-ratio: 4/3;
+
+            position: relative;
+
+            border-radius: 1rem;
+
+            overflow: hidden;
+
+            background-color: #F9FAFB;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+        }
+
+
+
+        /* controls.css */
+
+        .custom-select {
+
+            width: 100%;
+
+            appearance: none;
+
+            -webkit-appearance: none;
+
+            background-color: #F9FAFB;
+
+            border: 1px solid #E5E7EB;
+
+            color: #111827;
+
+            font-size: 0.875rem;
+
+            border-radius: 0.5rem;
+
+            padding: 0.75rem;
+
+            padding-right: 2rem;
+
+            cursor: pointer;
+
+            font-weight: 500;
+
+        }
+
+
+
+        .custom-select:focus {
+
+            outline: none;
+
+            border-color: var(--primary-color);
+
+            box-shadow: 0 0 0 1px var(--primary-color);
+
+        }
+
+
+
+        /* Scrollbar for Cart */
+
+        .custom-scrollbar::-webkit-scrollbar {
+
+            width: 4px;
+
+        }
+
+
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+
+            background: #f1f1f1;
+
+        }
+
+
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+
+            background: #ccc;
+
+            border-radius: 4px;
+
+        }
+
+
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+
+            background: #aaa;
+
+        }
+
+
+
+        .safe-area-bottom {
+
+            padding-bottom: env(safe-area-inset-bottom);
+
+        }
+
+    </style>
+
+
+
+    <!-- СКРИПТЫ ДАННЫХ И ЛОГИКИ (Вставлены прямо здесь для надежности) -->
+
+    <script>
+
+        // --- 1. ДАННЫЕ (appData) ---
+
+        const appData = {
+
+            sizes: [
+
+                { id: 'small', name: 'Малый (170 см)', people: '2-4 чел', image: 'https://i.1.creatium.io/disk2/b7/67/b3/42079feb0e160e1182d325c2db6f527181/aysi304_result.webp', imageInside: 'https://i.1.creatium.io/disk2/ea/63/72/53ba66df206714cb5682424a35405569a4/vverh_aysi304_result.webp' },
+
+                { id: 'medium', name: 'Средний (200 см)', people: '4-6 чел', image: 'https://i.1.creatium.io/disk2/b7/67/b3/42079feb0e160e1182d325c2db6f527181/aysi304_result.webp', imageInside: 'https://i.1.creatium.io/disk2/ea/63/72/53ba66df206714cb5682424a35405569a4/vverh_aysi304_result.webp' },
+
+                { id: 'large', name: 'Большой (230 см)', people: '6-10 чел', image: 'https://i.1.creatium.io/disk2/b7/67/b3/42079feb0e160e1182d325c2db6f527181/aysi304_result.webp', imageInside: 'https://i.1.creatium.io/disk2/ea/63/72/53ba66df206714cb5682424a35405569a4/vverh_aysi304_result.webp' }
+
+            ],
+
+            materialMetadata: {
+
+                aisi430: {
+
+                    name: 'AISI 430 (Техническая)',
+
+                    image: 'https://i.1.creatium.io/disk2/b7/67/b3/42079feb0e160e1182d325c2db6f527181/aysi304_result.webp',
+
+                    imageInside: 'https://i.1.creatium.io/disk2/ea/63/72/53ba66df206714cb5682424a35405569a4/vverh_aysi304_result.webp',
+
+                    description: 'Чан из этой стали надежен и прослужит до 15 лет. Требует обработки швов минимум 1 раз в два месяца.',
+
+                    life: 'СРОК СЛУЖБЫ 15 ЛЕТ'
+
+                },
+
+                aisi304: {
+
+                    name: 'AISI 304 (Пищевая)',
+
+                    image: 'https://i.1.creatium.io/disk2/b7/67/b3/42079feb0e160e1182d325c2db6f527181/aysi304_result.webp',
+
+                    imageInside: 'https://i.1.creatium.io/disk2/ea/63/72/53ba66df206714cb5682424a35405569a4/vverh_aysi304_result.webp',
+
+                    description: 'Чан из этой нержавеющей стали прослужит более 30 лет. Он не требует специального ухода и не подвержен коррозии.',
+
+                    life: 'СРОК СЛУЖБЫ 30+ ЛЕТ'
+
+                }
+
+            },
+
+            materials: {
+
+                small: { aisi430: 68000, aisi304: 92000 },
+
+                medium: { aisi430: 79500, aisi304: 106950 },
+
+                large: { aisi430: 115000, aisi304: 149500 }
+
+            },
+
+            stoves: [
+
+                { id: 'stand', name: 'Подставка (без печи)', price: 9200, image: 'https://i.1.creatium.io/disk2/77/b3/d8/353e905bc23d7489b1d1399842f5a7c48f/podstavka_result.webp', zIndex: 5 },
+
+                { id: 'wind', name: 'Ветрозащита', price: 25300, image: 'https://i.1.creatium.io/disk2/09/8e/c1/538b956b9f526cf7bf80898a5d815bbfd6/vindgard_result.webp', zIndex: 5 },
+
+                { id: 'simple', name: 'Печь-подставка', price: 37950, image: 'https://i.1.creatium.io/disk2/b4/31/61/bd99e3a713ad36d9d5f537b0e90c447853/pech_podstavka_result.webp', zIndex: 5 },
+
+                { id: 'welded_430', name: 'Печь приварная (AISI 430)', price: 48000, image: 'https://i.1.creatium.io/disk2/89/f1/c6/e8339e162a5e77541df28eab6fae9bafa7/vodyanaya_result.webp', zIndex: 5 },
+
+                { id: 'welded_304', name: 'Печь приварная (AISI 304)', price: 65000, image: 'https://i.1.creatium.io/disk2/89/f1/c6/e8339e162a5e77541df28eab6fae9bafa7/vodyanaya_result.webp', zIndex: 5 },
+
+                { id: 'jacket', name: 'С водяной рубашкой', price: 95450, image: 'https://i.1.creatium.io/disk2/89/f1/c6/e8339e162a5e77541df28eab6fae9bafa7/vodyanaya_result.webp', zIndex: 5 }
+
+            ],
+
+            finishes: [
+
+                { id: 'min', name: 'Минимум', price: { small: 18400, medium: 18400, large: 23000 }, image: 'https://i.1.creatium.io/disk2/89/cd/95/30c96399ab24a35874c4c9e5efd305795e/otdelka_minimum_result.webp', imageInside: 'https://i.1.creatium.io/disk2/02/13/08/5bb366dcaccb9f7066864ab224e360185d/vverh_minimum_result.webp', zIndex: 15 },
+
+                { id: 'std', name: 'Стандарт', price: { small: 26450, medium: 26450, large: 32200 }, image: 'https://i.1.creatium.io/disk2/32/79/90/04cabe0cc0e3be78c1814fe5e723453d6e/otdelka_srednyaya_result.webp', imageInside: 'https://i.1.creatium.io/disk2/36/8e/c4/8d2b3383f58194b2ab6e7cd033b6e6b692/vverh_standart_result.webp', zIndex: 15 },
+
+                { id: 'max', name: 'Максимум', price: { small: 37950, medium: 37950, large: 48300 }, image: 'https://i.1.creatium.io/disk2/42/ae/47/8124e9442d699a01dc439962ec3f1d0607/otdelka_maksimum_result.webp', imageInside: 'https://i.1.creatium.io/disk2/96/9b/f4/4a0fa0db35a35941ca508020dcc87f286e/vverh_maksimum_result.webp', zIndex: 15 }
+
+            ],
+
+            extras: [
+
+                { id: 'stairs_wood', name: 'Лестница дерево', price: 9200, image: 'https://i.1.creatium.io/disk2/e0/0b/3f/6d68b442326ca542ea325b9e367a6622a2/lestnica_derevo_result.webp', type: 'stairs', zIndex: 30 },
+
+                { id: 'stairs_metal', name: 'Лестница металл', price: 17250, image: 'https://i.1.creatium.io/disk2/b4/47/90/bc71b75a0b49f60c88ba8226c1ba45e573/lestnica_s_ploshadkoy_result.webp', type: 'stairs', zIndex: 8 },
+
+                { id: 'lid', name: 'Крышка чана', price: 14950, image: 'https://i.1.creatium.io/disk2/48/ed/a5/4b90aa9d0cfbc75e06d394990323c172ec/krishka_result.webp', imageInside: 'https://i.1.creatium.io/disk2/e3/d5/33/a24bec5770dd3e9554eb1ec0b2565e279f/vverh_krishka_result.webp', zIndex: 50 },
+
+                { id: 'pipe', name: 'Труба простая', price: 9000, image: 'https://i.1.creatium.io/disk2/a5/2d/c0/b5417b7c7ce47d64d8935a9bfc47619313/truba_obichnaya_result.webp', type: 'pipe', zIndex: 1 },
+
+                { id: 'pipe_sandwich', name: 'Труба сэндвич', price: 22000, image: 'https://i.1.creatium.io/disk2/66/8f/94/65ea8886a969e77cd2f9800eea459de49a/truba_sendvich_result.webp', type: 'pipe', zIndex: 1 },
+
+                { id: 'protection', name: 'Защита дымохода', price: 3450, image: 'https://i.1.creatium.io/disk2/4e/3f/1c/7d733b24ca08f23acd488a3e9de1f168c3/zashita_trubi_result.webp', zIndex: 25 },
+
+                { id: 'table_central', name: 'Центральный столик', price: 8050, image: 'https://i.1.creatium.io/disk2/6b/d4/03/5e1b82338f81a1b2c22242bb7fc37cd769/centralniy_stolik_result.webp', imageInside: 'https://i.1.creatium.io/disk2/f2/b6/68/10684600f9e1b967af7c35a737abac03a2/vverh_stol_centr_result.webp', zIndex: 35 },
+
+                { id: 'table_side', name: 'Боковой столик', price: 6900, image: 'https://i.1.creatium.io/disk2/39/00/f8/8bae7451b67202e023ea2b18db5ecde1c2/stol_bokovoy_result.webp', zIndex: 35 },
+
+                { id: 'light', name: 'Подсветка (LED)', price: 34500, image: 'https://i.1.creatium.io/disk2/f3/31/b1/f5f7dc8367bd44671c007465af094546ff/effekt_osveshennosti_result.webp', zIndex: 40 },
+
+                { id: 'jacuzzi', name: 'Джакузи', price: 100000, image: 'https://i.1.creatium.io/disk2/3d/b8/d5/030e509716dfdac4c454b4f0befb81c984/djakuzi_result.webp', imageInside: 'https://i.1.creatium.io/disk2/63/2f/10/59b5e3e0e7208302646571f84dbbddc4c5/vverh_djakuzi_result.webp', zIndex: 26 },
+
+                { id: 'rim_finish', name: 'Внешняя отделка', price: 40000, image: 'https://i.1.creatium.io/disk2/c7/df/2c/caf07544b68c2c06b933718764f7a2d434/vneshnyaya_otdelka_vverh_result.webp', zIndex: 45 },
+
+                { id: 'thermometer', name: 'Водяной термометр', price: 5750, image: 'https://i.1.creatium.io/disk2/00/e2/46/7f9ee3b743b6d97127417b489d7f1af079/termometr.png', zIndex: 70 }
+
+            ]
+
+        };
+
+
+
+        // --- 2. ЛОГИКА (Alpine Store) ---
+
+        document.addEventListener('alpine:init', () => {
+
+            Alpine.data('calculator', () => ({
+
+                // Состояние конфигуратора
+
+                selectedSizeId: '',
+
+                selectedMaterialId: '',
+
+                selectedStoveId: '',
+
+                selectedFinishId: '',
+
+                selectedLadderId: '',
+
+                selectedChimneyId: '',
+
+                selectedExtrasIds: [],
+
+
+
+                // Состояние приложения
+
+                isTelegram: false,
+
+                activeTab: 'outside',
+
+                showPriceModal: false,
+
+                isVisualizerMinimized: false,
+
+                isRestoringUrl: false,
+
+
+
+                // Корзина
+
+                cart: [],
+
+                isCartOpen: false,
+
+
+
+                // Инициализация
+
+                init() {
+
+                    console.log('Калькулятор запущен.');
+
+
+
+                    window.addEventListener('scroll', () => {
+
+                        this.isVisualizerMinimized = window.scrollY > 50;
+
+                    });
+
+
+
+                    // Восстановление корзины
+
+                    const savedCart = localStorage.getItem('chan_cart');
+
+                    if (savedCart) {
+
+                        try {
+
+                            this.cart = JSON.parse(savedCart);
+
+                        } catch(e) {
+
+                            console.error('Error loading cart', e);
+
+                        }
+
+                    }
+
+
+
+                    if (typeof appData !== 'undefined') {
+
+                        this.preloadImages();
+
+                        this.loadFromUrl();
+
+
+
+                        // Watchers for URL update
+
+                        this.$watch('selectedSizeId', () => this.updateUrl());
+
+                        this.$watch('selectedMaterialId', () => this.updateUrl());
+
+                        this.$watch('selectedStoveId', () => this.updateUrl());
+
+                        this.$watch('selectedFinishId', () => this.updateUrl());
+
+                        this.$watch('selectedLadderId', () => this.updateUrl());
+
+                        this.$watch('selectedChimneyId', () => this.updateUrl());
+
+                        this.$watch('selectedExtrasIds', () => this.updateUrl());
+
+
+
+                        // Watcher for Cart
+
+                        this.$watch('cart', (val) => {
+
+                            localStorage.setItem('chan_cart', JSON.stringify(val));
+
+                            // Update Telegram Button if needed
+
+                            if (this.isTelegram && window.Telegram && window.Telegram.WebApp) {
+
+                                const tg = window.Telegram.WebApp;
+
+                                if (val.length > 0) {
+
+                                    tg.MainButton.setText(`ОФОРМИТЬ (${this.formatPrice(this.cartTotal)})`);
+
+                                    tg.MainButton.show();
+
+                                } else {
+
+                                    tg.MainButton.hide();
+
+                                }
+
+                            }
+
+                        });
+
+
+
+                        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
+
+                            this.isTelegram = true;
+
+                            const tg = window.Telegram.WebApp;
+
+                            tg.ready();
+
+                            tg.expand();
+
+                            tg.MainButton.setParams({ color: '#5fb856', text_color: '#ffffff' });
+
+                            tg.MainButton.onClick(() => { this.sendCartToTelegram(); });
+
+                        }
+
+
+
+                        // Business Logic watchers
+
+                        this.$watch('selectedChimneyId', (val) => {
+
+                            if (val === 'pipe_sandwich') {
+
+                                this.selectedExtrasIds = this.selectedExtrasIds.filter(id => id !== 'protection');
+
+                            }
+
+                        });
+
+
+
+                        this.$watch('selectedExtrasIds', (val) => {
+
+                            if (val.includes('rim_finish')) {
+
+                                if (val.includes('thermometer')) this.selectedExtrasIds = val.filter(id => id !== 'thermometer');
+
+                                if (this.selectedLadderId === 'stairs_wood') this.selectedLadderId = '';
+
+                            }
+
+                        });
+
+
+
+                        this.$watch('selectedLadderId', (val) => {
+
+                            if (val === 'stairs_wood' && this.selectedExtrasIds.includes('rim_finish')) {
+
+                                this.selectedExtrasIds = this.selectedExtrasIds.filter(id => id !== 'rim_finish');
+
+                            }
+
+                        });
+
+
+
+                        this.$watch('selectedStoveId', (val) => {
+
+                            if (val && val !== 'jacket') {
+
+                                this.selectedExtrasIds = this.selectedExtrasIds.filter(id => id !== 'jacuzzi' && id !== 'rim_finish');
+
+                            }
+
+                        });
+
+                    }
+
+                },
+
+
+
+                // Геттеры сущностей (для текущего выбора)
+
+                get selectedSize() { return this.selectedSizeId ? appData.sizes.find(s => s.id === this.selectedSizeId) : null; },
+
+                get selectedStove() { return this.selectedStoveId ? appData.stoves.find(s => s.id === this.selectedStoveId) : null; },
+
+                get selectedFinish() { return this.selectedFinishId ? appData.finishes.find(f => f.id === this.selectedFinishId) : null; },
+
+                get selectedLadder() { return this.selectedLadderId ? appData.extras.find(e => e.id === this.selectedLadderId) : null; },
+
+                get selectedChimney() { return this.selectedChimneyId ? appData.extras.find(e => e.id === this.selectedChimneyId) : null; },
+
+
+
+                get ladders() { return appData.extras.filter(e => e.type === 'stairs'); },
+
+                get chimneys() { return appData.extras.filter(e => e.type === 'pipe'); },
+
+                get otherExtras() { return appData.extras.filter(e => !e.type); },
+
+
+
+                get currentMaterials() {
+
+                    if (!this.selectedSizeId) return [];
+
+                    const prices = appData.materials[this.selectedSizeId];
+
+                    if (!prices) return [];
+
+                    return [
+
+                        { id: 'aisi430', price: prices.aisi430, ...appData.materialMetadata.aisi430 },
+
+                        { id: 'aisi304', price: prices.aisi304, ...appData.materialMetadata.aisi304 }
+
+                    ];
+
+                },
+
+                get selectedMaterial() {
+
+                    return this.selectedMaterialId ? this.currentMaterials.find(m => m.id === this.selectedMaterialId) : null;
+
+                },
+
+
+
+                formatPrice(price) { return price.toLocaleString('ru-RU') + ' ₽'; },
+
+                formatOriginalPrice(price) { return Math.round(price * 1.3).toLocaleString('ru-RU') + ' ₽'; },
+
+
+
+                getMaterialOverlay() {
+
+                    if (!this.selectedMaterialId) return null;
+
+                    if (appData.materialMetadata && appData.materialMetadata[this.selectedMaterialId]) {
+
+                        return appData.materialMetadata[this.selectedMaterialId].overlayImage || null;
+
+                    }
+
+                    return null;
+
+                },
+
+
+
+                get totalPrice() {
+
+                    let total = 0;
+
+                    if (this.selectedSizeId && this.selectedMaterialId && appData.materials[this.selectedSizeId]) {
+
+                        total += appData.materials[this.selectedSizeId][this.selectedMaterialId] || 0;
+
+                    }
+
+                    if (this.selectedStove) total += this.selectedStove.price || 0;
+
+                    if (this.selectedFinish) {
+
+                        if (typeof this.selectedFinish.price === 'object') {
+
+                            total += this.selectedFinish.price[this.selectedSizeId] || 0;
+
+                        } else {
+
+                            total += this.selectedFinish.price || 0;
+
+                        }
+
+                    }
+
+                    if (this.selectedLadder) total += this.selectedLadder.price || 0;
+
+                    if (this.selectedChimney) total += this.selectedChimney.price || 0;
+
+                    this.selectedExtrasIds.forEach(id => {
+
+                        const extra = appData.extras.find(e => e.id === id);
+
+                        if (extra) total += extra.price || 0;
+
+                    });
+
+                    return total;
+
+                },
+
+
+
+                get originalPrice() {
+
+                    return Math.round(this.totalPrice * 1.3);
+
+                },
+
+
+
+                get priceDetails() {
+
+                    const details = [];
+
+                    const size = appData.sizes.find(s => s.id === this.selectedSizeId);
+
+                    const material = this.currentMaterials ? this.currentMaterials.find(m => m.id === this.selectedMaterialId) : null;
+
+
+
+                    if (size && material) {
+
+                        const basePrice = (appData.materials[this.selectedSizeId] && appData.materials[this.selectedSizeId][this.selectedMaterialId]) || 0;
+
+                        details.push({
+
+                            name: `Чан: ${size.name}, ${material.name}`,
+
+                            price: basePrice
+
+                        });
+
+                    }
+
+                    if (this.selectedStove) details.push({ name: this.selectedStove.name, price: this.selectedStove.price || 0 });
+
+                    
+
+                    const finish = appData.finishes.find(f => f.id === this.selectedFinishId);
+
+                    if (finish && finish.price) {
+
+                        let finishPrice = (typeof finish.price === 'object') ? (finish.price[this.selectedSizeId] || 0) : finish.price;
+
+                        if (finishPrice > 0) details.push({ name: `Отделка: ${finish.name}`, price: finishPrice });
+
+                    }
+
+
+
+                    if (this.selectedLadder) details.push({ name: this.selectedLadder.name, price: this.selectedLadder.price || 0 });
+
+                    if (this.selectedChimney) details.push({ name: this.selectedChimney.name, price: this.selectedChimney.price || 0 });
+
+                    this.selectedExtrasIds.forEach(id => {
+
+                        const extra = appData.extras.find(e => e.id === id);
+
+                        if (extra) details.push({ name: extra.name, price: extra.price || 0 });
+
+                    });
+
+                    return details;
+
+                },
+
+
+
+                // --- ЛОГИКА КОРЗИНЫ ---
+
+
+
+                addToCart() {
+
+                    if (!this.selectedSizeId || !this.selectedMaterialId) {
+
+                        alert('Пожалуйста, выберите размер и материал чана.');
+
+                        return;
+
+                    }
+
+
+
+                    const sizeName = this.selectedSize ? this.selectedSize.name : 'Чан';
+
+                    const materialName = this.selectedMaterial ? this.selectedMaterial.name : '';
+
+                    const tags = [];
+
+                    if (this.selectedStove) tags.push(this.selectedStove.name);
+
+                    if (this.selectedFinish) tags.push(this.selectedFinish.name);
+
+                    if (this.selectedLadder) tags.push(this.selectedLadder.name);
+
+                    this.selectedExtrasIds.forEach(id => {
+
+                         const e = appData.extras.find(ext => ext.id === id);
+
+                         if(e) tags.push(e.name);
+
+                    });
+
+
+
+                    const newItem = {
+
+                        id: Date.now(),
+
+                        title: `${sizeName} (${materialName})`,
+
+                        summary: tags.join(', '),
+
+                        tags: tags,
+
+                        price: this.totalPrice,
+
+                        details: JSON.parse(JSON.stringify(this.priceDetails))
+
+                    };
+
+
+
+                    this.cart.push(newItem);
+
+                    this.isCartOpen = true; 
+
+                },
+
+
+
+                removeFromCart(index) {
+
+                    this.cart.splice(index, 1);
+
+                },
+
+
+
+                get cartTotal() {
+
+                    return this.cart.reduce((sum, item) => sum + item.price, 0);
+
+                },
+
+
+
+                sendCartToTelegram() {
+
+                    if (this.cart.length === 0) return;
+
+
+
+                    let text = `🛒 *НОВЫЙ ЗАКАЗ* (${this.cart.length} поз.)\n\n`;
+
+
+
+                    this.cart.forEach((item, index) => {
+
+                        text += `*Позиция #${index + 1}*\n`;
+
+                        text += `📦 ${item.title}\n`;
+
+                        text += `🔧 ${item.summary}\n`;
+
+                        text += `💰 ${this.formatPrice(item.price)}\n\n`;
+
+                    });
+
+
+
+                    text += `----------------\n`;
+
+                    text += `💳 *ИТОГО: ${this.formatPrice(this.cartTotal)}*`;
+
+
+
+                    if (this.isTelegram) {
+
+                        const url = `https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`;
+
+                        window.Telegram.WebApp.openTelegramLink(url);
+
+                    } else {
+
+                        navigator.clipboard.writeText(text).then(() => {
+
+                            alert('Заказ скопирован! Открываю чат...');
+
+                            window.open(`https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`, '_blank');
+
+                        }).catch(() => {
+
+                            window.open(`https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`, '_blank');
+
+                        });
+
+                    }
+
+                },
+
+
+
+                updateUrl() {
+
+                    if (this.isRestoringUrl) return;
+
+                    const params = new URLSearchParams();
+
+                    if (this.selectedSizeId) params.set('s', this.selectedSizeId);
+
+                    if (this.selectedMaterialId) params.set('m', this.selectedMaterialId);
+
+                    if (this.selectedStoveId) params.set('st', this.selectedStoveId);
+
+                    if (this.selectedFinishId) params.set('f', this.selectedFinishId);
+
+                    if (this.selectedLadderId) params.set('l', this.selectedLadderId);
+
+                    if (this.selectedChimneyId) params.set('c', this.selectedChimneyId);
+
+                    if (this.selectedExtrasIds.length) params.set('e', this.selectedExtrasIds.join(','));
+
+                    
+
+                    const newUrl = `${window.location.pathname}?${params.toString()}`;
+
+                    
+
+                    try {
+
+                        window.history.replaceState({}, '', newUrl);
+
+                    } catch (e) {
+
+                        console.log('History API not available in this environment');
+
+                    }
+
+                    return `${window.location.origin}${newUrl}`;
+
+                },
+
+
+
+                loadFromUrl() {
+
+                    this.isRestoringUrl = true;
+
+                    let startParam = new URLSearchParams(window.location.search).get('tgWebAppStartParam');
+
+                    if (window.Telegram?.WebApp?.initDataUnsafe?.start_param) {
+
+                        startParam = window.Telegram.WebApp.initDataUnsafe.start_param;
+
+                    }
+
+
+
+                    if (startParam) {
+
+                        try {
+
+                            const jsonStr = atob(startParam);
+
+                            const state = JSON.parse(jsonStr);
+
+                            if (state.s) this.selectedSizeId = state.s;
+
+                            if (state.m) this.selectedMaterialId = state.m;
+
+                            if (state.st) this.selectedStoveId = state.st;
+
+                            if (state.f) this.selectedFinishId = state.f;
+
+                            if (state.l) this.selectedLadderId = state.l;
+
+                            if (state.c) this.selectedChimneyId = state.c;
+
+                            if (state.e) this.selectedExtrasIds = state.e;
+
+                            this.isRestoringUrl = false;
+
+                            return;
+
+                        } catch (e) { console.error(e); }
+
+                    }
+
+
+
+                    const params = new URLSearchParams(window.location.search);
+
+                    if (params.has('s')) this.selectedSizeId = params.get('s');
+
+                    if (this.selectedSizeId) {
+
+                        if (params.has('m')) this.selectedMaterialId = params.get('m');
+
+                        if (params.has('st')) this.selectedStoveId = params.get('st');
+
+                        if (params.has('f')) this.selectedFinishId = params.get('f');
+
+                        if (params.has('l')) this.selectedLadderId = params.get('l');
+
+                        if (params.has('c')) this.selectedChimneyId = params.get('c');
+
+                        if (params.has('e')) this.selectedExtrasIds = params.get('e').split(',');
+
+                    }
+
+                    this.isRestoringUrl = false;
+
+                },
+
+                
+
+                preloadImages() {
+
+                    // Logic to preload images if needed
+
+                }
+
+            }));
+
+        });
+
+    </script>
+
+    
+
+    <!-- Alpine JS (Должен быть ПОСЛЕ скрипта с данными) -->
+
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
 </head>
 
+
+
 <body class="bg-[#F3F5F6] text-[#333] font-body min-h-screen pb-48 lg:pb-0">
-    <div x-data="calculator()" class="max-w-[1200px] mx-auto px-4 py-8 lg:px-8">
 
-        <!-- ... content ... -->
-
+    <div x-data="calculator()" class="max-w-[1200px] mx-auto px-4 py-8 lg:px-8 relative">
 
 
-        <!-- Scripts -->
-        <script src="js/data.js?v=4"></script>
-        <script src="js/store.js?v=4"></script>
-</body>
 
-<!-- Заголовок -->
+        <!-- Кнопка Корзины (Плавающая или в углу) -->
 
+        <div class="fixed top-4 right-4 z-[60] lg:absolute lg:top-8 lg:right-8">
 
-<!-- SPA State Wrapper -->
-<div class="relative">
+            <button @click="isCartOpen = true" 
 
-    <!-- ======================= -->
-    <!-- VIEW 1: CALCULATOR      -->
-    <!-- ======================= -->
-    <div x-show="currentTab === 1" x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 -translate-x-4" x-transition:enter-end="opacity-100 translate-x-0"
-        class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                class="relative bg-white p-3 rounded-full shadow-lg border border-gray-100 hover:scale-105 transition-transform group">
 
-        <!-- Заголовок (внутри таба Калькулятор) -->
-        <div class="col-span-1 lg:col-span-12 text-center mb-8 flex flex-col items-center">
-            <img src="https://i.1.creatium.io/disk2/06/1c/38/527e3e8070543a6b740baa2d13ab5211ec/logotip_chernii.png"
-                alt="Logo" class="h-16 mb-4">
-            <h1 class="font-oswald font-bold uppercase text-4xl lg:text-5xl mb-2">СОБЕРИТЕ СВОЙ ЧАН</h1>
-        </div>
+                <svg class="w-6 h-6 text-gray-700 group-hover:text-[#5fb856] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 
-        <!-- Левая колонка: Визуализация + Табы (7 колонок) -->
-        <div
-            class="lg:col-span-8 sticky top-2 z-50 lg:top-4 bg-white rounded-2xl lg:rounded-[30px] p-3 lg:p-6 shadow-sm relative">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
 
-            <!-- Табы (скрываем при свертывании) -->
-            <div class="flex justify-center mb-2 lg:mb-6 transition-all duration-300" x-show="!isVisualizerMinimized"
-                x-transition:enter="transition ease-out duration-200"
-                x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
-                x-transition:leave="transition ease-in duration-150"
-                x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2">
-                <div class="bg-gray-100 p-1 rounded-full flex gap-1 scale-90 lg:scale-100 origin-top">
-                    <button @click="activeTab = 'outside'"
-                        :class="activeTab === 'outside' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-gray-700'"
-                        class="px-6 py-2 rounded-full text-sm font-medium transition-all">
-                        Вид снаружи
-                    </button>
-                    <button @click="activeTab = 'inside'"
-                        :class="activeTab === 'inside' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-gray-700'"
-                        class="px-6 py-2 rounded-full text-sm font-medium transition-all">
-                        Вид внутри
-                    </button>
-                    <button @click="activeTab = 'desc'"
-                        :class="activeTab === 'desc' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-gray-700'"
-                        class="px-6 py-2 rounded-full text-sm font-medium transition-all">
-                        Описание
-                    </button>
-                </div>
-            </div>
-
-            <!-- Контент визуализации -->
-            <div :class="isVisualizerMinimized ? 'w-[85%] mx-auto shadow-md' : 'w-full shadow-sm'"
-                class="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gray-50 flex items-center justify-center transition-all duration-300 ease-in-out">
-
-                <!-- Кнопка Свернуть/Развернуть -->
-                <button @click="isVisualizerMinimized = !isVisualizerMinimized"
-                    class="absolute top-3 left-3 bg-white/80 hover:bg-white text-gray-700 backdrop-blur-sm p-2 rounded-lg transition-colors z-40 shadow-sm border border-gray-100 group"
-                    :title="isVisualizerMinimized ? 'Развернуть' : 'Свернуть'">
-                    <!-- Иконка меняется или вращается -->
-                    <svg class="w-4 h-4 transition-transform duration-300"
-                        :class="isVisualizerMinimized ? '' : 'rotate-180'" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
-                        </path>
-                    </svg>
-                </button>
-
-                <!-- Вид снаружи (Слои) -->
-                <div x-show="activeTab === 'outside'" class="w-full h-full relative">
-
-                    <!-- Placeholder: Если ничего не выбрано -->
-                    <div x-show="!selectedSizeId"
-                        class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 z-20"
-                        x-transition.opacity>
-                        <div
-                            class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-gray-100 max-w-xs transform transition-all hover:scale-105">
-                            <div
-                                class="w-12 h-12 bg-[#5fb856]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                                <svg class="w-6 h-6 text-[#5fb856]" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                </svg>
-                            </div>
-                            <p class="text-lg font-bold text-gray-800 mb-1">Соберите свой чан</p>
-                            <p class="text-xs text-gray-500">Выберите размер, чтобы начать</p>
-                        </div>
-                    </div>
-
-                    <!-- Контент визуализатора (только если выбран размер) -->
-                    <div x-show="selectedSizeId" class="contents" x-transition.opacity>
-                        <!-- Базовый чан (Main) -->
-                        <img :src="selectedSize.image" alt="Основа"
-                            class="absolute inset-0 w-full h-full object-contain pointer-events-none z-10">
-
-                        <!-- Наложение материала (Нержавейка) -->
-                        <img :src="getMaterialOverlay()" x-show="getMaterialOverlay()" alt="Материал"
-                            class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                            style="z-index: 11;">
-
-                        <!-- Отделка -->
-                        <template x-for="finish in appData.finishes" :key="finish.id">
-                            <img x-show="selectedFinishId === finish.id && finish.image" :src="finish.image"
-                                class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                :style="`z-index: ${finish.zIndex};`">
-                        </template>
-
-                        <!-- Печи (Main) -->
-                        <template x-for="stove in appData.stoves" :key="stove.id">
-                            <img x-show="selectedStoveId === stove.id && stove.image" :src="stove.image"
-                                class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                :style="`z-index: ${stove.zIndex};`">
-                        </template>
-
-                        <!-- Лестница -->
-                        <template x-if="selectedLadder && selectedLadder.image">
-                            <img :src="selectedLadder.image"
-                                class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                :style="`z-index: ${selectedLadder.zIndex};`">
-                        </template>
-
-                        <!-- Дымоход -->
-                        <template x-if="selectedChimney && selectedChimney.image">
-                            <img :src="selectedChimney.image"
-                                class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                :style="`z-index: ${selectedChimney.zIndex};`">
-                        </template>
-
-                        <!-- Остальные допы -->
-                        <template x-for="extra in otherExtras.filter(e => e.image)" :key="extra.id">
-                            <img x-show="selectedExtrasIds.includes(extra.id)" :src="extra.image"
-                                class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                :style="`z-index: ${extra.zIndex};`">
-                        </template>
-                    </div>
-                </div>
-
-                <!-- Вид внутри -->
-                <div x-show="activeTab === 'inside'" class="w-full h-full relative">
-
-                    <!-- Placeholder внутри -->
-                    <div x-show="!selectedSizeId"
-                        class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 z-20">
-                        <p class="text-gray-400 text-sm">Выберите размер чана</p>
-                    </div>
-
-                    <div x-show="selectedSizeId" class="contents">
-                        <!-- Базовый чан внутри (Основа) -->
-                        <img :src="selectedSize.imageInside" alt="Основа внутри"
-                            class="absolute inset-0 w-full h-full object-contain pointer-events-none z-10">
-
-                        <!-- Наложение материала внутри -->
-                        <img :src="getMaterialOverlay()" x-show="getMaterialOverlay()" alt="Материал внутри"
-                            class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                            style="z-index: 11;">
-
-                        <!-- Отделка внутри -->
-                        <template x-for="finish in appData.finishes" :key="finish.id">
-                            <img x-show="selectedFinishId === finish.id && finish.imageInside" :src="finish.imageInside"
-                                class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                :style="`z-index: ${finish.zIndex};`">
-                        </template>
-
-                        <!-- Допы внутри (если есть imageInside) -->
-                        <template x-for="id in selectedExtrasIds" :key="id">
-                            <div x-data="{ extra: appData.extras.find(e => e.id === id) }" class="contents">
-                                <img x-show="extra && extra.imageInside" :src="extra.imageInside"
-                                    class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                    :style="`z-index: ${extra.zIndex};`">
-                            </div>
-                        </template>
-                    </div>
-                </div>
-
-                <!-- Описание -->
-                <div x-show="activeTab === 'desc'" class="absolute inset-0 p-8 overflow-y-auto text-left"
-                    x-transition.opacity>
-
-                    <template x-if="!selectedSizeId">
-                        <div class="h-full flex items-center justify-center text-gray-400 text-center">
-                            <p>Выберите комплектацию, чтобы увидеть описание</p>
-                        </div>
-                    </template>
-
-                    <template x-if="selectedSizeId">
-                        <div class="contents">
-                            <h3 class="font-oswald text-2xl font-bold mb-4" x-text="selectedSize.name"></h3>
-                            <p class="text-gray-600 mb-4">
-                                Банный чан — это уникальная купель на дровах для купания на свежем воздухе круглый
-                                год.
-                                Вода нагревается до комфортных 38-40 градусов.
-                            </p>
-                            <ul class="list-disc list-inside text-gray-600 space-y-2 mb-6">
-                                <li>Вместимость: <span x-text="selectedSize.people"></span></li>
-                                <li>Материал: <span
-                                        x-text="selectedMaterial ? selectedMaterial.name : 'Не выбрано'"></span>
-                                </li>
-                                <li>Гарантия качества и долговечности</li>
-                            </ul>
-
-                            <!-- Описание материала -->
-                            <div x-show="selectedMaterial" class="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                                <h4 class="font-bold text-[#333] mb-2" x-text="selectedMaterial?.name"></h4>
-                                <p class="text-sm text-gray-600 mb-3" x-text="selectedMaterial?.description"></p>
-                                <p class="text-xs font-bold text-[#5fb856] uppercase tracking-wider"
-                                    x-text="selectedMaterial?.life"></p>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </div>
-        </div>
-
-        <!-- Правая колонка: Форма (4 колонки) -->
-        <div class="lg:col-span-4 space-y-4">
-
-            <!-- Размер -->
-            <div
-                class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors">
-                <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите размер
-                    *</label>
-                <div class="relative">
-                    <select x-model="selectedSizeId"
-                        class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
-                        <option value="" disabled>Выберите размер</option>
-                        <template x-for="size in appData.sizes" :key="size.id">
-                            <option :value="size.id" x-text="`${size.name.split('(')[0]} (${size.people})`">
-                            </option>
-                        </template>
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
-                            </path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Материал -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors"
-                :class="{'opacity-50 pointer-events-none': !selectedSizeId}">
-                <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите материал
-                    *</label>
-                <div class="relative">
-                    <select x-model="selectedMaterialId" :disabled="!selectedSizeId"
-                        class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
-                        <option value="" disabled>Выберите материал</option>
-                        <template x-for="material in currentMaterials" :key="material.id">
-                            <option :value="material.id" x-text="material.name"></option>
-                        </template>
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
-                            </path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Тип подогрева (Печь) -->
-            <div
-                class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors">
-                <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите тип
-                    подогрева *</label>
-                <div class="relative">
-                    <select x-model="selectedStoveId"
-                        class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
-                        <option value="">Не выбрано</option>
-                        <template x-for="stove in appData.stoves" :key="stove.id">
-                            <option :value="stove.id" x-text="`${stove.name} (+${formatOriginalPrice(stove.price)})`">
-                            </option>
-                        </template>
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
-                            </path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Отделка -->
-            <div
-                class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors">
-                <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите отделку
-                    чана *</label>
-                <div class="relative">
-                    <select x-model="selectedFinishId"
-                        class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
-                        <option value="">Не выбрано</option>
-                        <template x-for="finish in appData.finishes" :key="finish.id">
-                            <option :value="finish.id"
-                                x-text="`${finish.name} (+${formatOriginalPrice(typeof finish.price === 'object' ? (finish.price[selectedSizeId] || 0) : finish.price)})`">
-                            </option>
-                        </template>
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
-                            </path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Лестница -->
-            <div
-                class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors">
-                <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите
-                    лестницу</label>
-                <div class="relative">
-                    <select x-model="selectedLadderId"
-                        class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
-                        <option value="">Не выбрано</option>
-                        <template x-for="ladder in ladders" :key="ladder.id">
-                            <option :value="ladder.id" x-text="`${ladder.name} (+${formatOriginalPrice(ladder.price)})`"
-                                :disabled="ladder.id === 'stairs_wood' && selectedExtrasIds.includes('rim_finish')">
-                            </option>
-                        </template>
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
-                            </path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Дымоход -->
-            <div
-                class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors">
-                <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите
-                    дымоход</label>
-                <div class="relative">
-                    <select x-model="selectedChimneyId"
-                        class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
-                        <option value="">Не выбрано</option>
-                        <template x-for="chimney in chimneys" :key="chimney.id">
-                            <option :value="chimney.id"
-                                x-text="`${chimney.name} (+${formatOriginalPrice(chimney.price)})`">
-                            </option>
-                        </template>
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
-                            </path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Комплектация (Чекбоксы) -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm mt-4">
-                <label class="block text-xs uppercase font-bold text-gray-500 mb-3 tracking-wider">Выберите
-                    комплектацию</label>
-                <div class="grid grid-cols-1 gap-2">
-                    <template x-for="extra in otherExtras" :key="extra.id">
-                        <label
-                            class="flex items-center p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors group"
-                            :class="{ 'opacity-50 cursor-not-allowed': (extra.id === 'protection' && selectedChimneyId === 'pipe_sandwich') || (extra.id === 'thermometer' && selectedExtrasIds.includes('rim_finish')) || ((extra.id === 'jacuzzi' || extra.id === 'rim_finish') && selectedStoveId && selectedStoveId !== 'jacket') }">
-                            <input type="checkbox" :value="extra.id" x-model="selectedExtrasIds"
-                                :disabled="(extra.id === 'protection' && selectedChimneyId === 'pipe_sandwich') || (extra.id === 'thermometer' && selectedExtrasIds.includes('rim_finish')) || ((extra.id === 'jacuzzi' || extra.id === 'rim_finish') && selectedStoveId && selectedStoveId !== 'jacket')"
-                                class="w-4 h-4 text-[#5fb856] focus:ring-[#5fb856] rounded border-gray-300 cursor-pointer disabled:cursor-not-allowed">
-                            <div class="ml-3 flex flex-col flex-1">
-                                <span class="text-sm text-gray-700 font-medium group-hover:text-gray-900">
-                                    <span x-text="extra.name"></span>
-                                </span>
-                                <!-- Warning Message: Protection -->
-                                <template x-if="extra.id === 'protection' && selectedChimneyId === 'pipe_sandwich'">
-                                    <span class="text-xs text-red-500 mt-0.5">Недоступно для сэндвич-трубы</span>
-                                </template>
-                                <!-- Warning Message: Thermometer -->
-                                <template x-if="extra.id === 'thermometer' && selectedExtrasIds.includes('rim_finish')">
-                                    <span class="text-xs text-red-500 mt-0.5">Несовместимо с внешней отделкой</span>
-                                </template>
-                                <!-- Warning Message: Jacuzzi/Rim requires Water Jacket -->
-                                <template
-                                    x-if="(extra.id === 'jacuzzi' || extra.id === 'rim_finish') && selectedStoveId && selectedStoveId !== 'jacket'">
-                                    <span class="text-xs text-red-500 mt-0.5">Доступно только для печи с водяной
-                                        рубашкой</span>
-                                </template>
-                            </div>
-                            <span class="text-xs text-gray-500 font-bold"
-                                x-text="formatOriginalPrice(extra.price)"></span>
-                        </label>
-                    </template>
-                </div>
-            </div>
-
-            <!-- Итого и кнопка (на десктопе внизу, чтобы не перекрывать) -->
-            <!-- Sticky Footer for Mobile / Card for Desktop -->
-            <!-- Sticky Footer HIDDEN in Calculator (Blind Choice Mode) -->
-            <div class="hidden"></div>
-
-            <!-- Requisites (Visible only in Calculator) -->
-            <div class="mt-8 text-center text-gray-400 pb-8 border-t border-gray-200 pt-8">
-                <p class="text-[10px] uppercase tracking-wider font-bold mb-1">Реквизиты</p>
-                <p class="text-[10px]">ИП Куклин Иван Андреевич</p>
-                <p class="text-[10px]">ИНН: 381404122559</p>
-                <a href="#" class="text-[10px] underline hover:text-gray-600 mt-2 block w-max mx-auto">Политика
-                    конфиденциальности</a>
-            </div>
-
-            <!-- Spacer for mobile -->
-            <div class="h-32 lg:hidden"></div>
-        </div> <!-- End Calculator View -->
-
-        <!-- ======================= -->
-        <!-- VIEW 2: CART (ESTIMATE) -->
-        <!-- ======================= -->
-        <!-- ======================= -->
-        <!-- VIEW 2: CART (ESTIMATE) -->
-        <!-- ======================= -->
-        <div x-show="currentTab === 2" x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
-
-            <h2 class="font-oswald font-bold text-3xl mb-6">Ваша комплектация</h2>
-
-            <!-- Estimate List (Iterate over cartItems) -->
-            <div class="space-y-4 mb-32">
-                <template x-for="(item, index) in cartItems" :key="index">
-                    <div class="bg-white border rounded-xl p-4 relative flex justify-between items-end">
-                        <div class="w-2/3">
-                            <h3 class="font-bold text-lg mb-1" x-text="item.name"></h3>
-                        </div>
-                        <div class="w-1/3 text-right">
-                            <span class="font-bold text-lg text-[#5fb856]" x-text="formatPrice(item.price)"></span>
-                        </div>
-                    </div>
-                </template>
-
-                <!-- Total Sum Footer in Cart -->
-                <div class="bg-gray-50 rounded-xl p-6 mt-8 border border-gray-200 shadow-sm">
-                    <div class="flex justify-between items-center mb-6">
-                        <span class="text-gray-500 font-bold uppercase text-xs tracking-wider">Итоговая стоимость</span>
-                        <span class="font-oswald font-bold text-3xl text-[#5fb856]"
-                            x-text="formatPrice(totalPrice)"></span>
-                    </div>
-
-                    <!-- Telegram Action Button -->
-                    <button @click="sendToTelegram()"
-                        class="w-full bg-[#5fb856] text-white py-4 rounded-xl font-bold uppercase text-sm hover:bg-[#4da048] active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2">
-                        <span>Зафиксировать условия</span>
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
-                            </path>
-                        </svg>
-                    </button>
-
-                    <p class="text-[10px] text-gray-400 text-center mt-4">
-                        Цена и условия фиксируются на 7 дней
-                    </p>
-                </div>
-
-            </div>
-        </div>
-
-    </div> <!-- End SPA Wrapper -->
-
-    <!-- ======================= -->
-    <!-- BOTTOM NAVIGATION       -->
-    <!-- ======================= -->
-    <div
-        class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 z-[60] flex justify-around pb-safe safe-area-bottom shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
-
-        <button @click="currentTab = 1"
-            class="flex flex-col items-center justify-center w-full py-3 active:bg-gray-50 transition-colors group">
-            <div :class="currentTab === 1 ? 'text-[#5fb856]' : 'text-gray-400 group-hover:text-gray-600'"
-                class="transition-colors mb-1">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
-                    </path>
                 </svg>
-            </div>
-            <span class="text-[10px] font-bold uppercase tracking-wider transition-colors"
-                :class="currentTab === 1 ? 'text-[#5fb856]' : 'text-gray-400 group-hover:text-gray-600'">
-                Конструктор
-            </span>
-        </button>
 
-        <button @click="currentTab = 2"
-            class="flex flex-col items-center justify-center w-full py-3 active:bg-gray-50 transition-colors group relative">
-            <div :class="currentTab === 2 ? 'text-[#5fb856]' : 'text-gray-400 group-hover:text-gray-600'"
-                class="transition-colors mb-1">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
-                    </path>
-                </svg>
-            </div>
-            <span class="text-[10px] font-bold uppercase tracking-wider transition-colors"
-                :class="currentTab === 2 ? 'text-[#5fb856]' : 'text-gray-400 group-hover:text-gray-600'">
-                Смета
-            </span>
-            <!-- Price Badge -->
-            <span
-                class="absolute top-2 right-[20%] bg-[#5fb856] text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold"
-                x-show="totalPrice > 0" x-text="formatPrice(totalPrice)"></span>
-        </button>
+                <!-- Badge счетчик -->
 
-    </div>
+                <div x-show="cart.length > 0" 
 
+                     x-transition.scale
 
+                     class="absolute -top-1 -right-1 bg-[#5fb856] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white"
 
+                     x-text="cart.length">
 
+                </div>
 
-    <!-- Модалка детализации цены -->
-    <div x-show="showPriceModal" style="display: none;"
-        class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-        x-transition.opacity>
-        <div @click.outside="showPriceModal = false"
-            class="bg-white rounded-2xl w-full max-w-sm p-6 relative shadow-2xl"
-            x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4"
-            x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-4">
-
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-oswald font-bold text-xl uppercase">Ваша смета</h3>
-                <button @click="showPriceModal = false" class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
-                        </path>
-                    </svg>
-                </button>
-            </div>
-
-            <div class="space-y-3 mb-6">
-                <template x-for="(item, index) in priceDetails" :key="index">
-                    <div class="flex justify-between text-sm border-b border-gray-100 pb-2 last:border-0 last:pb-0">
-                        <span class="text-gray-600 font-medium" x-text="item.name"></span>
-                        <span class="font-bold text-gray-900 whitespace-nowrap" x-text="formatPrice(item.price)"></span>
-                    </div>
-                </template>
-            </div>
-
-            <div class="flex justify-between items-center pt-4 border-t border-gray-200">
-                <span class="font-bold text-gray-500 uppercase text-xs">Итого</span>
-                <span class="font-oswald font-bold text-2xl text-[#5fb856]" x-text="formatPrice(totalPrice)"></span>
-            </div>
-
-            <!-- Подарки -->
-            <div class="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center">
-                <p class="text-[10px] font-bold text-yellow-800 uppercase">🎁 + Подарки на 25 000 ₽</p>
-                <p class="text-[9px] text-yellow-700">при фиксации условий сегодня</p>
-            </div>
-
-            <button @click="showPriceModal = false"
-                class="w-full mt-6 bg-gray-100 text-gray-700 py-3 rounded-xl font-bold uppercase text-sm hover:bg-gray-200 active:scale-95 active:bg-gray-300 transition-all duration-200">
-                Понятно
             </button>
+
         </div>
-    </div>
-    <!-- Кнопка "Помощь" (Floating) -->
-    <a href="https://t.me/ivan_ural_chan?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5!%20%D0%9D%D1%83%D0%B6%D0%BD%D0%B0%20%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%20%D1%81%20%D0%B2%D1%8B%D0%B1%D0%BE%D1%80%D0%BE%D0%BC."
-        target="_blank"
-        class="fixed bottom-[140px] right-4 z-[90] lg:bottom-10 lg:right-10 bg-[#2AABEE] text-white p-4 rounded-full shadow-xl hover:scale-110 hover:bg-[#229ED9] transition-all duration-300 flex items-center justify-center group"
-        title="Написать в Telegram">
-        <!-- Icon: Telegram Plane -->
-        <svg class="w-6 h-6 transform -translate-x-0.5 translate-y-0.5" fill="currentColor" viewBox="0 0 24 24">
-            <path
-                d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42l10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701l-.164.168l.184.465l1.58 4.029c.17.434.34.606.77.606c.465 0 .806-.213.92-.328l2.21-2.142l4.595 3.397c.848.468 1.46.227 1.67-.785l3.035-14.288c.31-1.248-.445-1.815-1.423-1.423z" />
-        </svg>
-        <span
-            class="absolute right-full mr-3 bg-white text-gray-700 text-xs font-bold px-3 py-1.5 rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none hidden lg:block">
-            Написать в Telegram
-        </span>
-    </a>
 
-</div> <!-- Close x-data div -->
 
-<script src="js/data.js?v=4"></script>
-<script src="js/store.js?v=4"></script>
+
+        <!-- Заголовок -->
+
+        <div class="text-center mb-8 flex flex-col items-center">
+
+            <img src="https://i.1.creatium.io/disk2/06/1c/38/527e3e8070543a6b740baa2d13ab5211ec/logotip_chernii.png" alt="Logo"
+
+                class="h-16 mb-4">
+
+            <h1 class="font-oswald font-bold uppercase text-4xl lg:text-5xl mb-2">СОБЕРИТЕ СВОЙ ЧАН</h1>
+
+        </div>
+
+
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+
+
+            <!-- Левая колонка: Визуализация + Табы (7 колонок) -->
+
+            <div
+
+                class="lg:col-span-8 sticky top-2 z-50 lg:top-4 bg-white rounded-2xl lg:rounded-[30px] p-3 lg:p-6 shadow-sm relative">
+
+
+
+                <!-- Табы (скрываем при свертывании) -->
+
+                <div class="flex justify-center mb-2 lg:mb-6 transition-all duration-300" x-show="!isVisualizerMinimized"
+
+                    x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2"
+
+                    x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150"
+
+                    x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2">
+
+                    <div class="bg-gray-100 p-1 rounded-full flex gap-1 scale-90 lg:scale-100 origin-top">
+
+                        <button @click="activeTab = 'outside'"
+
+                            :class="activeTab === 'outside' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-gray-700'"
+
+                            class="px-6 py-2 rounded-full text-sm font-medium transition-all">
+
+                            Вид снаружи
+
+                        </button>
+
+                        <button @click="activeTab = 'inside'"
+
+                            :class="activeTab === 'inside' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-gray-700'"
+
+                            class="px-6 py-2 rounded-full text-sm font-medium transition-all">
+
+                            Вид внутри
+
+                        </button>
+
+                        <button @click="activeTab = 'desc'"
+
+                            :class="activeTab === 'desc' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-gray-700'"
+
+                            class="px-6 py-2 rounded-full text-sm font-medium transition-all">
+
+                            Описание
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Контент визуализации -->
+
+                <div :class="isVisualizerMinimized ? 'w-[85%] mx-auto shadow-md' : 'w-full shadow-sm'"
+
+                    class="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gray-50 flex items-center justify-center transition-all duration-300 ease-in-out">
+
+
+
+                    <!-- Кнопка Свернуть/Развернуть -->
+
+                    <button @click="isVisualizerMinimized = !isVisualizerMinimized"
+
+                        class="absolute top-3 left-3 bg-white/80 hover:bg-white text-gray-700 backdrop-blur-sm p-2 rounded-lg transition-colors z-40 shadow-sm border border-gray-100 group"
+
+                        :title="isVisualizerMinimized ? 'Развернуть' : 'Свернуть'">
+
+                        <svg class="w-4 h-4 transition-transform duration-300"
+
+                            :class="isVisualizerMinimized ? '' : 'rotate-180'" fill="none" stroke="currentColor"
+
+                            viewBox="0 0 24 24">
+
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+
+                            </path>
+
+                        </svg>
+
+                    </button>
+
+
+
+                    <!-- Вид снаружи (Слои) -->
+
+                    <div x-show="activeTab === 'outside'" class="w-full h-full relative">
+
+
+
+                        <!-- Placeholder: Если ничего не выбрано -->
+
+                        <div x-show="!selectedSizeId"
+
+                            class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 z-20"
+
+                            x-transition.opacity>
+
+                            <div
+
+                                class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-gray-100 max-w-xs transform transition-all hover:scale-105">
+
+                                <div
+
+                                    class="w-12 h-12 bg-[#5fb856]/10 rounded-full flex items-center justify-center mx-auto mb-3">
+
+                                    <svg class="w-6 h-6 text-[#5fb856]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+
+                                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+
+                                    </svg>
+
+                                </div>
+
+                                <p class="text-lg font-bold text-gray-800 mb-1">Соберите свой чан</p>
+
+                                <p class="text-xs text-gray-500">Выберите размер, чтобы начать</p>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- Контент визуализатора (только если выбран размер) -->
+
+                        <div x-show="selectedSizeId" class="contents" x-transition.opacity>
+
+                            <!-- Базовый чан (Main) -->
+
+                            <img :src="selectedSize ? selectedSize.image : ''" alt="Основа"
+
+                                class="absolute inset-0 w-full h-full object-contain pointer-events-none z-10">
+
+
+
+                            <!-- Наложение материала (Нержавейка) -->
+
+                            <img :src="getMaterialOverlay()" x-show="getMaterialOverlay()" alt="Материал"
+
+                                class="absolute inset-0 w-full h-full object-contain pointer-events-none" style="z-index: 11;">
+
+
+
+                            <!-- Отделка -->
+
+                            <template x-for="finish in appData.finishes" :key="finish.id">
+
+                                <img x-show="selectedFinishId === finish.id && finish.image" :src="finish.image"
+
+                                    class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+
+                                    :style="`z-index: ${finish.zIndex};`">
+
+                            </template>
+
+
+
+                            <!-- Печи (Main) -->
+
+                            <template x-for="stove in appData.stoves" :key="stove.id">
+
+                                <img x-show="selectedStoveId === stove.id && stove.image" :src="stove.image"
+
+                                    class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+
+                                    :style="`z-index: ${stove.zIndex};`">
+
+                            </template>
+
+
+
+                            <!-- Лестница -->
+
+                            <template x-if="selectedLadder && selectedLadder.image">
+
+                                <img :src="selectedLadder.image"
+
+                                    class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+
+                                    :style="`z-index: ${selectedLadder.zIndex};`">
+
+                            </template>
+
+
+
+                            <!-- Дымоход -->
+
+                            <template x-if="selectedChimney && selectedChimney.image">
+
+                                <img :src="selectedChimney.image"
+
+                                    class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+
+                                    :style="`z-index: ${selectedChimney.zIndex};`">
+
+                            </template>
+
+
+
+                            <!-- Остальные допы -->
+
+                            <template x-for="extra in otherExtras.filter(e => e.image)" :key="extra.id">
+
+                                <img x-show="selectedExtrasIds.includes(extra.id)" :src="extra.image"
+
+                                    class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+
+                                    :style="`z-index: ${extra.zIndex};`">
+
+                            </template>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- Вид внутри -->
+
+                    <div x-show="activeTab === 'inside'" class="w-full h-full relative">
+
+
+
+                        <!-- Placeholder внутри -->
+
+                        <div x-show="!selectedSizeId"
+
+                            class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 z-20">
+
+                            <p class="text-gray-400 text-sm">Выберите размер чана</p>
+
+                        </div>
+
+
+
+                        <div x-show="selectedSizeId" class="contents">
+
+                            <!-- Базовый чан внутри (Основа) -->
+
+                            <img :src="selectedSize ? selectedSize.imageInside : ''" alt="Основа внутри"
+
+                                class="absolute inset-0 w-full h-full object-contain pointer-events-none z-10">
+
+
+
+                            <!-- Наложение материала внутри -->
+
+                            <img :src="getMaterialOverlay()" x-show="getMaterialOverlay()" alt="Материал внутри"
+
+                                class="absolute inset-0 w-full h-full object-contain pointer-events-none" style="z-index: 11;">
+
+
+
+                            <!-- Отделка внутри -->
+
+                            <template x-for="finish in appData.finishes" :key="finish.id">
+
+                                <img x-show="selectedFinishId === finish.id && finish.imageInside" :src="finish.imageInside"
+
+                                    class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+
+                                    :style="`z-index: ${finish.zIndex};`">
+
+                            </template>
+
+
+
+                            <!-- Допы внутри (если есть imageInside) -->
+
+                            <template x-for="id in selectedExtrasIds" :key="id">
+
+                                <div x-data="{ extra: appData.extras.find(e => e.id === id) }" class="contents">
+
+                                    <img x-show="extra && extra.imageInside" :src="extra.imageInside"
+
+                                        class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+
+                                        :style="`z-index: ${extra.zIndex};`">
+
+                                </div>
+
+                            </template>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- Описание -->
+
+                    <div x-show="activeTab === 'desc'" class="absolute inset-0 p-8 overflow-y-auto text-left"
+
+                        x-transition.opacity>
+
+
+
+                        <template x-if="!selectedSizeId">
+
+                            <div class="h-full flex items-center justify-center text-gray-400 text-center">
+
+                                <p>Выберите комплектацию, чтобы увидеть описание</p>
+
+                            </div>
+
+                        </template>
+
+
+
+                        <template x-if="selectedSizeId">
+
+                            <div class="contents">
+
+                                <h3 class="font-oswald text-2xl font-bold mb-4" x-text="selectedSize.name"></h3>
+
+                                <p class="text-gray-600 mb-4">
+
+                                    Банный чан — это уникальная купель на дровах для купания на свежем воздухе круглый
+
+                                    год.
+
+                                    Вода нагревается до комфортных 38-40 градусов.
+
+                                </p>
+
+                                <ul class="list-disc list-inside text-gray-600 space-y-2 mb-6">
+
+                                    <li>Вместимость: <span x-text="selectedSize.people"></span></li>
+
+                                    <li>Материал: <span x-text="selectedMaterial ? selectedMaterial.name : 'Не выбрано'"></span>
+
+                                    </li>
+
+                                    <li>Гарантия качества и долговечности</li>
+
+                                </ul>
+
+
+
+                                <!-- Описание материала -->
+
+                                <div x-show="selectedMaterial" class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+
+                                    <h4 class="font-bold text-[#333] mb-2" x-text="selectedMaterial?.name"></h4>
+
+                                    <p class="text-sm text-gray-600 mb-3" x-text="selectedMaterial?.description"></p>
+
+                                    <p class="text-xs font-bold text-[#5fb856] uppercase tracking-wider"
+
+                                        x-text="selectedMaterial?.life"></p>
+
+                                </div>
+
+                            </div>
+
+                        </template>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Правая колонка: Форма (4 колонки) -->
+
+            <div class="lg:col-span-4 space-y-4">
+
+
+
+                <!-- Размер -->
+
+                <div
+
+                    class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors">
+
+                    <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите размер
+
+                        *</label>
+
+                    <div class="relative">
+
+                        <select x-model="selectedSizeId"
+
+                            class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
+
+                            <option value="" disabled>Выберите размер</option>
+
+                            <template x-for="size in appData.sizes" :key="size.id">
+
+                                <option :value="size.id" x-text="`${size.name.split('(')[0]} (${size.people})`">
+
+                                </option>
+
+                            </template>
+
+                        </select>
+
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+
+                            </svg>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Материал -->
+
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors"
+
+                    :class="{'opacity-50 pointer-events-none': !selectedSizeId}">
+
+                    <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите материал
+
+                        *</label>
+
+                    <div class="relative">
+
+                        <select x-model="selectedMaterialId" :disabled="!selectedSizeId"
+
+                            class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
+
+                            <option value="" disabled>Выберите материал</option>
+
+                            <template x-for="material in currentMaterials" :key="material.id">
+
+                                <option :value="material.id" x-text="material.name"></option>
+
+                            </template>
+
+                        </select>
+
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+
+                            </svg>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Тип подогрева (Печь) -->
+
+                <div
+
+                    class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors">
+
+                    <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите тип
+
+                        подогрева *</label>
+
+                    <div class="relative">
+
+                        <select x-model="selectedStoveId"
+
+                            class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
+
+                            <option value="">Не выбрано</option>
+
+                            <template x-for="stove in appData.stoves" :key="stove.id">
+
+                                <option :value="stove.id" x-text="`${stove.name} (+${formatOriginalPrice(stove.price)})`">
+
+                                </option>
+
+                            </template>
+
+                        </select>
+
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+
+                            </svg>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Отделка -->
+
+                <div
+
+                    class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors">
+
+                    <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите отделку
+
+                        чана *</label>
+
+                    <div class="relative">
+
+                        <select x-model="selectedFinishId"
+
+                            class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
+
+                            <option value="">Не выбрано</option>
+
+                            <template x-for="finish in appData.finishes" :key="finish.id">
+
+                                <option :value="finish.id"
+
+                                    x-text="`${finish.name} (+${formatOriginalPrice(typeof finish.price === 'object' ? (finish.price[selectedSizeId] || 0) : finish.price)})`">
+
+                                </option>
+
+                            </template>
+
+                        </select>
+
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+
+                            </svg>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Лестница -->
+
+                <div
+
+                    class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors">
+
+                    <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите
+
+                        лестницу</label>
+
+                    <div class="relative">
+
+                        <select x-model="selectedLadderId"
+
+                            class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
+
+                            <option value="">Не выбрано</option>
+
+                            <template x-for="ladder in ladders" :key="ladder.id">
+
+                                <option :value="ladder.id" x-text="`${ladder.name} (+${formatOriginalPrice(ladder.price)})`"
+
+                                    :disabled="ladder.id === 'stairs_wood' && selectedExtrasIds.includes('rim_finish')">
+
+                                </option>
+
+                            </template>
+
+                        </select>
+
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+
+                            </svg>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Дымоход -->
+
+                <div
+
+                    class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors">
+
+                    <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите
+
+                        дымоход</label>
+
+                    <div class="relative">
+
+                        <select x-model="selectedChimneyId"
+
+                            class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
+
+                            <option value="">Не выбрано</option>
+
+                            <template x-for="chimney in chimneys" :key="chimney.id">
+
+                                <option :value="chimney.id" x-text="`${chimney.name} (+${formatOriginalPrice(chimney.price)})`">
+
+                                </option>
+
+                            </template>
+
+                        </select>
+
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+
+                            </svg>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Комплектация (Чекбоксы) -->
+
+                <div class="bg-white p-5 rounded-2xl shadow-sm mt-4">
+
+                    <label class="block text-xs uppercase font-bold text-gray-500 mb-3 tracking-wider">Выберите
+
+                        комплектацию</label>
+
+                    <div class="grid grid-cols-1 gap-2">
+
+                        <template x-for="extra in otherExtras" :key="extra.id">
+
+                            <label
+
+                                class="flex items-center p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors group"
+
+                                :class="{ 'opacity-50 cursor-not-allowed': (extra.id === 'protection' && selectedChimneyId === 'pipe_sandwich') || (extra.id === 'thermometer' && selectedExtrasIds.includes('rim_finish')) || ((extra.id === 'jacuzzi' || extra.id === 'rim_finish') && selectedStoveId && selectedStoveId !== 'jacket') }">
+
+                                <input type="checkbox" :value="extra.id" x-model="selectedExtrasIds"
+
+                                    :disabled="(extra.id === 'protection' && selectedChimneyId === 'pipe_sandwich') || (extra.id === 'thermometer' && selectedExtrasIds.includes('rim_finish')) || ((extra.id === 'jacuzzi' || extra.id === 'rim_finish') && selectedStoveId && selectedStoveId !== 'jacket')"
+
+                                    class="w-4 h-4 text-[#5fb856] focus:ring-[#5fb856] rounded border-gray-300 cursor-pointer disabled:cursor-not-allowed">
+
+                                <div class="ml-3 flex flex-col flex-1">
+
+                                    <span class="text-sm text-gray-700 font-medium group-hover:text-gray-900">
+
+                                        <span x-text="extra.name"></span>
+
+                                    </span>
+
+                                    <!-- Warning Message: Protection -->
+
+                                    <template x-if="extra.id === 'protection' && selectedChimneyId === 'pipe_sandwich'">
+
+                                        <span class="text-xs text-red-500 mt-0.5">Недоступно для сэндвич-трубы</span>
+
+                                    </template>
+
+                                    <!-- Warning Message: Thermometer -->
+
+                                    <template x-if="extra.id === 'thermometer' && selectedExtrasIds.includes('rim_finish')">
+
+                                        <span class="text-xs text-red-500 mt-0.5">Несовместимо с внешней отделкой</span>
+
+                                    </template>
+
+                                    <!-- Warning Message: Jacuzzi/Rim requires Water Jacket -->
+
+                                    <template
+
+                                        x-if="(extra.id === 'jacuzzi' || extra.id === 'rim_finish') && selectedStoveId && selectedStoveId !== 'jacket'">
+
+                                        <span class="text-xs text-red-500 mt-0.5">Доступно только для печи с водяной
+
+                                            рубашкой</span>
+
+                                    </template>
+
+                                </div>
+
+                                <span class="text-xs text-gray-500 font-bold" x-text="formatOriginalPrice(extra.price)"></span>
+
+                            </label>
+
+                        </template>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Sticky Footer -->
+
+                <div
+
+                    class="fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 p-4 z-40 lg:static lg:bg-white lg:border lg:border-gray-100 lg:p-6 lg:rounded-2xl lg:shadow-lg lg:mt-6 lg:z-auto safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] lg:shadow-none">
+
+
+
+                    <!-- Desktop Title -->
+
+                    <p class="hidden lg:block text-xs text-gray-400 uppercase tracking-wide font-bold mb-1">Предварительный расчет</p>
+
+
+
+                    <div class="max-w-7xl mx-auto flex flex-col gap-3">
+
+
+
+                        <!-- Price Row -->
+
+                        <div class="flex items-end justify-between lg:block">
+
+                            <div class="lg:mb-4">
+
+                                <!-- Оригинальная цена -->
+
+                                <p class="text-sm lg:text-lg font-oswald text-gray-400 line-through mb-0 lg:mb-1"
+
+                                    x-text="formatPrice(originalPrice)">
+
+                                </p>
+
+                                <!-- Цена текущей конфигурации -->
+
+                                <div class="flex flex-col lg:block">
+
+                                    <p class="text-2xl lg:text-3xl font-oswald font-bold text-[#5fb856]"
+
+                                        x-text="formatPrice(totalPrice)"></p>
+
+                                    <button @click="showPriceModal = true"
+
+                                        class="text-[10px] lg:text-xs text-left text-gray-400 border-b border-dashed border-gray-400 hover:text-gray-600 hover:border-gray-600 transition-colors w-max">Что
+
+                                        входит?</button>
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- Промо -->
+
+                            <div class="hidden lg:block bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 mb-4">
+
+                                <p class="text-xs font-bold text-yellow-800">🔥 Цена 2025 года</p>
+
+                                <p class="text-xs text-yellow-700">Актуальна до конца недели</p>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- CTA Button (В КОРЗИНУ) -->
+
+                        <button @click="addToCart()" :disabled="!selectedSizeId || !selectedMaterialId"
+
+                            :class="{'opacity-50 grayscale cursor-not-allowed': !selectedSizeId || !selectedMaterialId}"
+
+                            class="w-full border-2 border-[#5fb856] text-[#5fb856] hover:bg-[#5fb856] hover:text-white rounded-xl py-3 font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 group">
+
+                            <span>В корзину</span>
+
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+
+                            </svg>
+
+                        </button>
+
+
+
+                        <div class="hidden lg:block mt-3 text-center">
+
+                            <p class="text-[10px] text-gray-500 font-medium">🎁 Получите подарки на <span
+
+                                    class="text-[#5fb856] font-bold">25 000 ₽</span></p>
+
+                            <p class="text-[9px] text-gray-400">при фиксации условий сегодня</p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Spacer for mobile to prevent content hide behind sticky footer -->
+
+                <div class="h-32 lg:hidden"></div>
+
+
+
+            </div>
+
+        </div>
+
+
+
+
+
+        <!-- Подвал -->
+
+        <div class="mt-12 text-center text-gray-400 pb-8 border-t border-gray-200 pt-8">
+
+            <p class="text-[10px] uppercase tracking-wider font-bold mb-1">Реквизиты</p>
+
+            <p class="text-[10px]">ИП Куклин Иван Андреевич</p>
+
+            <p class="text-[10px]">ИНН: 381404122559</p>
+
+            <a href="#" class="text-[10px] underline hover:text-gray-600 mt-2 block w-max mx-auto">Политика
+
+                конфиденциальности</a>
+
+        </div>
+
+
+
+        <!-- Модалка детализации цены (Текущий конфиг) -->
+
+        <div x-show="showPriceModal" style="display: none;"
+
+            class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+
+            x-transition.opacity>
+
+            <div @click.outside="showPriceModal = false" class="bg-white rounded-2xl w-full max-w-sm p-6 relative shadow-2xl"
+
+                x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4"
+
+                x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200"
+
+                x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-4">
+
+
+
+                <div class="flex justify-between items-center mb-4">
+
+                    <h3 class="font-oswald font-bold text-xl uppercase">Текущая комплектация</h3>
+
+                    <button @click="showPriceModal = false" class="text-gray-400 hover:text-gray-600">
+
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+
+                            </path>
+
+                        </svg>
+
+                    </button>
+
+                </div>
+
+
+
+                <div class="space-y-3 mb-6 max-h-[50vh] overflow-y-auto">
+
+                    <template x-for="(item, index) in priceDetails" :key="index">
+
+                        <div class="flex justify-between text-sm border-b border-gray-100 pb-2 last:border-0 last:pb-0">
+
+                            <span class="text-gray-600 font-medium" x-text="item.name"></span>
+
+                            <span class="font-bold text-gray-900 whitespace-nowrap" x-text="formatPrice(item.price)"></span>
+
+                        </div>
+
+                    </template>
+
+                </div>
+
+
+
+                <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+
+                    <span class="font-bold text-gray-500 uppercase text-xs">Итого</span>
+
+                    <span class="font-oswald font-bold text-2xl text-[#5fb856]" x-text="formatPrice(totalPrice)"></span>
+
+                </div>
+
+
+
+                <button @click="showPriceModal = false"
+
+                    class="w-full mt-6 bg-gray-100 text-gray-700 py-3 rounded-xl font-bold uppercase text-sm hover:bg-gray-200 active:scale-95 active:bg-gray-300 transition-all duration-200">
+
+                    Закрыть
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- МОДАЛКА КОРЗИНЫ -->
+
+        <div x-show="isCartOpen" style="display: none;"
+
+            class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+
+            x-transition.opacity>
+
+            <div @click.outside="isCartOpen = false" class="bg-white rounded-2xl w-full max-w-lg p-6 relative shadow-2xl flex flex-col max-h-[90vh]"
+
+                x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4"
+
+                x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200"
+
+                x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-4">
+
+
+
+                <div class="flex justify-between items-center mb-6">
+
+                    <h3 class="font-oswald font-bold text-2xl uppercase">Корзина</h3>
+
+                    <button @click="isCartOpen = false" class="bg-gray-100 p-2 rounded-full text-gray-500 hover:text-gray-800 transition-colors">
+
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+
+                        </svg>
+
+                    </button>
+
+                </div>
+
+
+
+                <!-- Пустая корзина -->
+
+                <div x-show="cart.length === 0" class="flex flex-col items-center justify-center py-12 text-center text-gray-400">
+
+                    <svg class="w-16 h-16 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+
+                    </svg>
+
+                    <p class="font-medium">Ваша корзина пуста</p>
+
+                    <button @click="isCartOpen = false" class="mt-4 text-[#5fb856] font-bold hover:underline">Перейти к выбору</button>
+
+                </div>
+
+
+
+                <!-- Список товаров -->
+
+                <div x-show="cart.length > 0" class="flex-1 overflow-y-auto space-y-4 pr-2 mb-6 custom-scrollbar">
+
+                    <template x-for="(item, index) in cart" :key="item.id">
+
+                        <div class="bg-gray-50 rounded-xl p-4 border border-gray-100 relative group">
+
+                            <!-- Удалить -->
+
+                            <button @click="removeFromCart(index)" class="absolute top-2 right-2 text-gray-400 hover:text-red-500 transition-colors p-2">
+
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+
+                                </svg>
+
+                            </button>
+
+
+
+                            <div class="pr-8">
+
+                                <h4 class="font-bold text-gray-800 text-sm mb-1" x-text="item.title"></h4>
+
+                                <p class="text-xs text-gray-500 mb-2" x-text="item.summary"></p>
+
+                                
+
+                                <div class="flex flex-wrap gap-1 mb-2">
+
+                                    <!-- Теги опций для наглядности -->
+
+                                    <template x-for="opt in item.tags" :key="opt">
+
+                                        <span class="text-[10px] bg-white border border-gray-200 px-1.5 py-0.5 rounded text-gray-500" x-text="opt"></span>
+
+                                    </template>
+
+                                </div>
+
+                            </div>
+
+                            
+
+                            <div class="flex justify-between items-end border-t border-gray-200 pt-2 mt-2">
+
+                                <span class="text-xs font-bold text-gray-400 line-through" x-text="formatPrice(Math.round(item.price * 1.3))"></span>
+
+                                <span class="font-oswald font-bold text-lg text-[#5fb856]" x-text="formatPrice(item.price)"></span>
+
+                            </div>
+
+                        </div>
+
+                    </template>
+
+                </div>
+
+
+
+                <!-- Итого в корзине -->
+
+                <div x-show="cart.length > 0" class="border-t border-gray-200 pt-4 bg-white">
+
+                    <div class="flex justify-between items-center mb-4">
+
+                        <span class="text-sm font-bold text-gray-600 uppercase">Общая сумма</span>
+
+                        <span class="font-oswald font-bold text-3xl text-[#5fb856]" x-text="formatPrice(cartTotal)"></span>
+
+                    </div>
+
+
+
+                    <!-- Оформить заказ -->
+
+                    <button @click="sendCartToTelegram()" x-show="!isTelegram"
+
+                        class="w-full bg-[#5fb856] text-white rounded-xl py-4 font-bold uppercase tracking-wider hover:bg-[#4ea046] active:scale-[0.98] transition-all shadow-lg shadow-green-200 flex items-center justify-center gap-2">
+
+                        <span>Оформить заказ</span>
+
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+
+                        </svg>
+
+                    </button>
+
+                    
+
+                    <div class="mt-3 text-center">
+
+                        <p class="text-[10px] text-gray-400">Менеджер свяжется с вами для уточнения деталей</p>
+
+                    </div>
+
+                </div>
+
+
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Кнопка "Помощь" (Floating) -->
+
+        <a href="https://t.me/ivan_ural_chan?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5!%20%D0%9D%D1%83%D0%B6%D0%BD%D0%B0%20%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%20%D1%81%20%D0%B2%D1%8B%D0%B1%D0%BE%D1%80%D0%BE%D0%BC."
+
+            target="_blank"
+
+            class="fixed bottom-[140px] right-4 z-[90] lg:bottom-10 lg:right-10 bg-[#2AABEE] text-white p-4 rounded-full shadow-xl hover:scale-110 hover:bg-[#229ED9] transition-all duration-300 flex items-center justify-center group"
+
+            title="Написать в Telegram">
+
+            <!-- Icon: Telegram Plane -->
+
+            <svg class="w-6 h-6 transform -translate-x-0.5 translate-y-0.5" fill="currentColor" viewBox="0 0 24 24">
+
+                <path
+
+                    d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42l10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701l-.164.168l.184.465l1.58 4.029c.17.434.34.606.77.606c.465 0 .806-.213.92-.328l2.21-2.142l4.595 3.397c.848.468 1.46.227 1.67-.785l3.035-14.288c.31-1.248-.445-1.815-1.423-1.423z" />
+
+            </svg>
+
+            <span
+
+                class="absolute right-full mr-3 bg-white text-gray-700 text-xs font-bold px-3 py-1.5 rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none hidden lg:block">
+
+                Написать в Telegram
+
+            </span>
+
+        </a>
+
+
+
+    </div> <!-- Close x-data div -->
+
 </body>
+
+
 
 </html>
