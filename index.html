@@ -451,7 +451,7 @@
             <!-- Estimate List (Iterate over priceDetails) -->
             <div class="space-y-4 mb-32">
 
-                <template x-for="(item, index) in priceDetails" :key="index">
+                <template x-for="(item, index) in cartItems" :key="index">
                     <div class="bg-white border rounded-xl p-4 relative flex justify-between items-end">
                         <div class="w-2/3">
                             <h3 class="font-bold text-lg mb-1" x-text="item.name"></h3>
