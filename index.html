@@ -18,6 +18,7 @@
 </head>
 
 <body class="bg-[#F3F5F6] text-[#333] font-body min-h-screen pb-24 lg:pb-0">
+
     <div x-data="calculator()" class="max-w-[1200px] mx-auto px-4 py-8 lg:px-8">
 
         <!-- ======================= -->
@@ -552,9 +553,10 @@
 
                         <!-- 1. Saved Items (from Cart Store) -->
                         <template x-for="(item, index) in ($store.cart ? $store.cart.items : [])" :key="item.id">
-                            <div class="bg-white border rounded-xl p-4 relative group">
+                            <!-- Safe Wrapper: Only render if item exists and has data -->
+                            <div class="bg-white border rounded-xl p-4 relative group" x-show="item && item.data">
                                 <div class="flex justify-between items-start mb-2">
-                                    <h3 class="font-bold text-lg pr-8" x-text="item.ui_title"></h3>
+                                    <h3 class="font-bold text-lg pr-8" x-text="item.ui_title || 'Без названия'"></h3>
                                     <button @click="$store.cart.removeItem(index)"
                                         class="text-gray-400 hover:text-red-500 transition-colors">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -564,15 +566,17 @@
                                         </svg>
                                     </button>
                                 </div>
-                                <div class="text-xs text-gray-500 space-y-1 mb-3">
-                                    <p x-text="`Размер: ${item.data.size}`"></p>
-                                    <p x-text="`Печь: ${item.data.stove}`"></p>
-                                    <p x-text="`Отделка: ${item.data.finish}`"></p>
+
+                                <!-- Defensive Data Rendering -->
+                                <div class="text-xs text-gray-500 space-y-1 mb-3" x-show="item.data">
+                                    <p x-text="`Размер: ${item.data?.size || '-'}`"></p>
+                                    <p x-text="`Печь: ${item.data?.stove || '-'}`"></p>
+                                    <p x-text="`Отделка: ${item.data?.finish || '-'}`"></p>
                                 </div>
                                 <div class="flex justify-between items-end border-t pt-3 mt-3">
                                     <span class="text-xs font-bold text-gray-400">Сохранено</span>
                                     <span class="font-bold text-lg text-[#5fb856]"
-                                        x-text="formatPrice(item.price.total)"></span>
+                                        x-text="formatPrice(item.price?.total || 0)"></span>
                                 </div>
                             </div>
                         </template>
