@@ -1,11 +1,10 @@
-// Все данные калькулятора (Data-Driven подход)
+// --- 1. ДАННЫЕ (appData) ---
 const appData = {
     sizes: [
         { id: 'small', name: 'Малый (170 см)', people: '2-4 чел', image: 'https://i.1.creatium.io/disk2/b7/67/b3/42079feb0e160e1182d325c2db6f527181/aysi304_result.webp', imageInside: 'https://i.1.creatium.io/disk2/ea/63/72/53ba66df206714cb5682424a35405569a4/vverh_aysi304_result.webp' },
         { id: 'medium', name: 'Средний (200 см)', people: '4-6 чел', image: 'https://i.1.creatium.io/disk2/b7/67/b3/42079feb0e160e1182d325c2db6f527181/aysi304_result.webp', imageInside: 'https://i.1.creatium.io/disk2/ea/63/72/53ba66df206714cb5682424a35405569a4/vverh_aysi304_result.webp' },
         { id: 'large', name: 'Большой (230 см)', people: '6-10 чел', image: 'https://i.1.creatium.io/disk2/b7/67/b3/42079feb0e160e1182d325c2db6f527181/aysi304_result.webp', imageInside: 'https://i.1.creatium.io/disk2/ea/63/72/53ba66df206714cb5682424a35405569a4/vverh_aysi304_result.webp' }
     ],
-    // Метаданные материалов (картинки)
     materialMetadata: {
         aisi430: {
             name: 'AISI 430 (Техническая)',
@@ -22,7 +21,6 @@ const appData = {
             life: 'СРОК СЛУЖБЫ 30+ ЛЕТ'
         }
     },
-    // Цены материалов (зависят от размера)
     materials: {
         small: { aisi430: 68000, aisi304: 92000 },
         medium: { aisi430: 79500, aisi304: 106950 },

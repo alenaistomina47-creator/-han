@@ -1,0 +1,101 @@
+/* variables.css */
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+    --primary-color: #5fb856;
+    --text-main: #333;
+    --font-heading: 'Oswald', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --bg-color: #F3F5F6;
+}
+
+body {
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+}
+
+.font-oswald {
+    font-family: var(--font-heading);
+}
+
+/* layout.css */
+html {
+    scroll-behavior: smooth;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #d1d5db;
+}
+
+/* visualizer.css */
+.visualizer-aspect {
+    width: 100%;
+    aspect-ratio: 4/3;
+    position: relative;
+    border-radius: 1rem;
+    overflow: hidden;
+    background-color: #F9FAFB;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* controls.css */
+.custom-select {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    color: #111827;
+    font-size: 0.875rem;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    padding-right: 2rem;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.custom-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 1px var(--primary-color);
+}
+
+/* Scrollbar for Cart */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+}
+
+.safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+}
