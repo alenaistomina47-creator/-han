@@ -433,76 +433,16 @@
 
                     <!-- Итого и кнопка (на десктопе внизу, чтобы не перекрывать) -->
                     <!-- Sticky Footer for Mobile / Card for Desktop -->
-                    <div
-                        class="fixed bottom-16 inset-x-0 bg-white border-t border-gray-200 p-4 z-40 lg:static lg:bg-white lg:border lg:border-gray-100 lg:p-6 lg:rounded-2xl lg:shadow-lg lg:mt-6 lg:z-auto safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] lg:shadow-none">
-
-                        <!-- Desktop Title -->
-                        <p class="hidden lg:block text-xs text-gray-400 uppercase tracking-wide font-bold mb-1">Сумма
-                            заказа
-                        </p>
-
-                        <div class="max-w-7xl mx-auto flex flex-col gap-3">
-
-                            <!-- Price Row -->
-                            <div class="flex items-end justify-between lg:block">
-                                <div class="lg:mb-4">
-                                    <!-- Оригинальная цена -->
-                                    <p class="text-sm lg:text-lg font-oswald text-gray-400 line-through mb-0 lg:mb-1"
-                                        x-text="formatPrice(originalPrice)">
-                                    </p>
-                                    <!-- Цена со скидкой -->
-                                    <div class="flex flex-col lg:block">
-                                        <p class="text-2xl lg:text-3xl font-oswald font-bold text-[#5fb856]"
-                                            x-text="formatPrice(totalPrice)"></p>
-                                        <button @click="showPriceModal = true"
-                                            class="text-[10px] lg:text-xs text-left text-gray-400 border-b border-dashed border-gray-400 hover:text-gray-600 hover:border-gray-600 transition-colors w-max">Что
-                                            входит?</button>
-                                    </div>
-                                </div>
-
-                                <!-- Промо -->
-                                <div
-                                    class="hidden lg:block bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 mb-4">
-                                    <p class="text-xs font-bold text-yellow-800">🔥 Цена 2025 года</p>
-                                    <p class="text-xs text-yellow-700">Актуальна до конца недели</p>
-                                </div>
-                            </div>
-
-                            <!-- CTA Buttons -->
-                            <div class="flex flex-col gap-3 lg:flex-row lg:gap-4">
-                                <!-- 1. Add to Cart (Secondary) -->
-                                <button @click="addToCart()" :disabled="!selectedSizeId || !selectedMaterialId"
-                                    :class="{'opacity-50 grayscale cursor-not-allowed': !selectedSizeId}"
-                                    class="w-full lg:w-1/2 border-2 border-gray-300 text-gray-700 hover:border-gray-800 hover:text-gray-900 bg-white rounded-xl py-3 font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 4v16m8-8H4">
-                                        </path>
-                                    </svg>
-                                    <span>В смету</span>
-                                </button>
-
-                                <!-- 2. Direct Order (Primary) -->
-                                <button @click="sendToTelegram()" x-show="!isTelegram" :disabled="!selectedSizeId"
-                                    :class="{'opacity-50 grayscale cursor-not-allowed': !selectedSizeId}"
-                                    class="w-full lg:w-1/2 border-2 border-[#5fb856] text-[#5fb856] hover:bg-[#5fb856] hover:text-white rounded-xl py-3 font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 group">
-                                    <span>Зафиксировать</span>
-                                    <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
-                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 5l7 7-7 7">
-                                        </path>
-                                    </svg>
-                                </button>
-                            </div>
-
-                            <div class="hidden lg:block mt-3 text-center">
-                                <p class="text-[10px] text-gray-500 font-medium">🎁 Получите подарки на <span
-                                        class="text-[#5fb856] font-bold">25 000 ₽</span></p>
-                                <p class="text-[9px] text-gray-400">при фиксации условий сегодня</p>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- NEW INLINE ACTION: Add to Cart -->
+                    <button @click="addToCart()" :disabled="!selectedSizeId"
+                        :class="{'opacity-50 grayscale cursor-not-allowed': !selectedSizeId}"
+                        class="w-full mt-6 bg-[#5fb856] text-white py-4 rounded-xl font-bold uppercase tracking-wider hover:bg-green-600 transition-all duration-300 flex items-center justify-center gap-2 active:scale-95 shadow-lg shadow-green-500/20">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
+                            </path>
+                        </svg>
+                        <span>Добавить в смету</span>
+                    </button>
 
 
 
@@ -585,10 +525,10 @@
                     x-transition:enter-start="opacity-0 translate-x-4"
                     x-transition:enter-end="opacity-100 translate-x-0" style="display: none;" class="min-h-[80vh]">
 
-                    <h2 class="font-oswald font-bold text-3xl mb-6">Ваша смета</h2>
+                    <h2 class="font-oswald font-bold text-3xl mb-6">Ваша корзина</h2>
 
-                    <!-- Empty State -->
-                    <div x-show="cart.length === 0" class="text-center py-20 text-gray-400">
+                    <!-- Empty State (Only if both cart is empty AND no active item) -->
+                    <div x-show="cart.length === 0 && !selectedSizeId" class="text-center py-20 text-gray-400">
                         <svg class="w-16 h-16 mx-auto mb-4 opacity-20" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -601,14 +541,15 @@
                     </div>
 
                     <!-- Cart List -->
-                    <div class="space-y-4 mb-32" x-show="cart.length > 0">
+                    <div class="space-y-4 mb-32" x-show="cart.length > 0 || selectedSizeId">
+
+                        <!-- 1. Saved Items (from Cart Array) -->
                         <template x-for="(item, index) in cart" :key="item.id">
-                            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 relative">
-                                <!-- Header -->
+                            <div class="bg-white border rounded-xl p-4 relative group">
                                 <div class="flex justify-between items-start mb-2">
-                                    <span class="bg-gray-100 text-gray-500 text-[10px] px-2 py-0.5 rounded-md"
-                                        x-text="'#' + (index + 1)"></span>
-                                    <button @click="removeFromCart(index)" class="text-gray-300 hover:text-red-500">
+                                    <h3 class="font-bold text-lg pr-8" x-text="item.ui_title"></h3>
+                                    <button @click="removeFromCart(index)"
+                                        class="text-gray-400 hover:text-red-500 transition-colors">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
@@ -616,37 +557,66 @@
                                         </svg>
                                     </button>
                                 </div>
-
-                                <!-- Title -->
-                                <h3 class="font-bold text-lg mb-1" x-text="item.ui_title"></h3>
-
-                                <!-- Details -->
                                 <div class="text-xs text-gray-500 space-y-1 mb-3">
-                                    <p x-show="item.data.extras" x-text="'Допы: ' + item.data.extras"></p>
+                                    <p x-text="`Размер: ${item.data.size}`"></p>
+                                    <p x-text="`Печь: ${item.data.stove}`"></p>
+                                    <p x-text="`Отделка: ${item.data.finish}`"></p>
                                 </div>
-
-                                <!-- Price -->
-                                <div class="flex items-end justify-between border-t border-dashed border-gray-100 pt-3">
-                                    <span class="text-xs text-gray-400">Стоимость:</span>
-                                    <span class="font-oswald font-bold text-xl text-[#5fb856]"
+                                <div class="flex justify-between items-end border-t pt-3 mt-3">
+                                    <span class="text-xs font-bold text-gray-400">Сохранено</span>
+                                    <span class="font-bold text-lg text-[#5fb856]"
                                         x-text="formatPrice(item.price.total)"></span>
                                 </div>
                             </div>
                         </template>
 
-                        <!-- Summary Card -->
-                        <div class="bg-white p-6 rounded-2xl shadow-lg border border-[#5fb856]/20 mt-8">
-                            <div class="flex justify-between items-end mb-6">
-                                <span class="text-sm text-gray-500 font-bold uppercase">Итого к оплате:</span>
-                                <span class="font-oswald font-bold text-3xl text-[#5fb856]"
-                                    x-text="formatPrice(cartTotal)"></span>
+                        <!-- 2. Active Item (Current Draft in Calculator) -->
+                        <div x-show="selectedSizeId"
+                            class="bg-blue-50 border border-blue-200 rounded-xl p-4 relative animate-pulse-slow">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-lg text-blue-900 pr-8" x-text="currentItemTitle"></h3>
+                                <span
+                                    class="bg-blue-200 text-blue-800 text-[10px] font-bold px-2 py-1 rounded uppercase">Текущий</span>
                             </div>
-                            <button @click="sendToTelegram(true)"
-                                class="w-full bg-[#5fb856] text-white py-4 rounded-xl font-bold uppercase tracking-wider shadow-lg hover:shadow-xl hover:bg-green-600 transition-all transform active:scale-95">
-                                Оформить смету
-                            </button>
+                            <div class="text-xs text-blue-800 space-y-1 mb-3">
+                                <p x-text="`Размер: ${currentItemData.size}`"></p>
+                                <p x-text="`Печь: ${currentItemData.stove}`"></p>
+                                <p x-text="`Отделка: ${currentItemData.finish}`"></p>
+                            </div>
+                            <div class="flex justify-between items-end border-t border-blue-200 pt-3 mt-3">
+                                <button @click="currentView = 'calculator'"
+                                    class="text-xs font-bold text-blue-600 border-b border-dashed border-blue-400 hover:text-blue-800">Редактировать</button>
+                                <span class="font-bold text-lg text-[#5fb856]" x-text="formatPrice(totalPrice)"></span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Footer Actions -->
+                    <div x-show="cart.length > 0 || selectedSizeId"
+                        class="fixed bottom-20 inset-x-0 px-4 z-30 lg:static lg:mt-8">
+                        <div class="bg-white p-4 rounded-2xl shadow-xl border border-gray-100 max-w-sm mx-auto">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-gray-500 font-medium">Итого к оплате:</span>
+                                <span class="text-2xl font-bold text-[#5fb856]" x-text="formatPrice(grandTotal)"></span>
+                            </div>
+
+                            <div class="space-y-3">
+                                <!-- Order Button -->
+                                <button @click="sendToTelegram()"
+                                    class="w-full bg-[#5fb856] text-white py-3 rounded-xl font-bold uppercase tracking-wider hover:bg-green-600 transition-all shadow-lg active:scale-95">
+                                    Оформить заказ
+                                </button>
+
+                                <!-- Add Another Button -->
+                                <button @click="saveCurrentAndReset()" x-show="selectedSizeId"
+                                    class="w-full bg-gray-100 text-gray-700 py-3 rounded-xl font-bold uppercase tracking-wider hover:bg-gray-200 transition-all active:scale-95 border border-gray-200">
+                                    + Добавить еще один чан
+                                </button>
+                            </div>
                         </div>
                     </div>
+
                 </div>
 
                 <!-- ======================= -->
@@ -662,7 +632,7 @@
 
                             <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4">
                                 </path>
                             </svg>
                             <span class="text-[10px] font-bold uppercase tracking-wider">Конструктор</span>
@@ -679,11 +649,11 @@
                                         d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
                                     </path>
                                 </svg>
-                                <span x-show="cart.length > 0" x-transition.scale
+                                <span x-show="cart.length > 0 || selectedSizeId" x-transition.scale
                                     class="absolute -top-1 -right-2 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white"
-                                    x-text="cart.length"></span>
+                                    x-text="cart.length + (selectedSizeId ? 1 : 0)"></span>
                             </div>
-                            <span class="text-[10px] font-bold uppercase tracking-wider">Смета</span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider">Корзина</span>
                         </button>
                     </div>
                 </nav>
@@ -691,6 +661,7 @@
             </div> <!-- Close x-data div -->
 
             <script src="js/data.js?v=4"></script>
+            <script src="js/cart.js?v=1"></script>
             <script src="js/store.js?v=4"></script>
 </body>
 
