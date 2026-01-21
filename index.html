@@ -458,157 +458,150 @@
             </div>
 
             <!-- Estimate List (Iterate over priceDetails) -->
-            <div class="space-y-4 mb-32">
+            <!-- DEBUG MODE: RAW DATA -->
+            <div
+                style="background: #ffffcc; border: 2px solid red; padding: 20px; color: black; font-family: monospace; min-height: 200px; display: block !important;">
+                <h3 class="font-bold mb-2">DEBUG MODE</h3>
+                <p class="mb-1"><strong>Price:</strong> <span x-text="totalPrice"></span></p>
+                <p class="mb-2"><strong>Count:</strong> <span x-text="cartItems ? cartItems.length : 'null'"></span></p>
+                <hr class="border-red-300 my-2">
+                <pre class="text-xs break-all whitespace-pre-wrap" x-text="JSON.stringify(cartItems, null, 2)"></pre>
+            </div>
 
-                <template x-for="(item, index) in cartItems" :key="index">
-                    <div class="bg-white border rounded-xl p-4 relative flex justify-between items-end">
-                        <div class="w-2/3">
-                            <h3 class="font-bold text-lg mb-1" x-text="item.name"></h3>
-                            <!-- Dots visualization (CSS needed or simpler approach) -->
-                        </div>
-                        <div class="w-1/3 text-right">
-                            <span class="font-bold text-lg text-[#5fb856]" x-text="formatPrice(item.price)"></span>
-                        </div>
-                    </div>
-                </template>
-
-                <!-- Total Sum Footer in Cart -->
-                <div class="bg-gray-50 rounded-xl p-6 mt-8 border border-gray-200 shadow-sm">
-                    <div class="flex justify-between items-center mb-6">
-                        <span class="text-gray-500 font-bold uppercase text-xs tracking-wider">Итоговая стоимость</span>
-                        <span class="font-oswald font-bold text-3xl text-[#5fb856]"
-                            x-text="formatPrice(totalPrice)"></span>
-                    </div>
-
-                    <!-- Telegram Action Button -->
-                    <button @click="sendToTelegram()"
-                        class="w-full bg-[#5fb856] text-white py-4 rounded-xl font-bold uppercase text-sm hover:bg-[#4da048] active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2">
-                        <span>Зафиксировать условия</span>
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
-                            </path>
-                        </svg>
-                    </button>
-
-                    <p class="text-[10px] text-gray-400 text-center mt-4">
-                        Цена и условия фиксируются на 7 дней
-                    </p>
+            <!-- Total Sum Footer in Cart -->
+            <div class="bg-gray-50 rounded-xl p-6 mt-8 border border-gray-200 shadow-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <span class="text-gray-500 font-bold uppercase text-xs tracking-wider">Итоговая стоимость</span>
+                    <span class="font-oswald font-bold text-3xl text-[#5fb856]" x-text="formatPrice(totalPrice)"></span>
                 </div>
 
-            </div>
-        </div>
-
-    </div> <!-- End SPA Wrapper -->
-
-    <!-- ======================= -->
-    <!-- BOTTOM NAVIGATION       -->
-    <!-- ======================= -->
-    <div
-        class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 z-[60] flex justify-around pb-safe safe-area-bottom shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
-
-        <button @click="currentTab = 'calculator'"
-            class="flex flex-col items-center justify-center w-full py-3 active:bg-gray-50 transition-colors group">
-            <div :class="currentTab === 'calculator' ? 'text-[#5fb856]' : 'text-gray-400 group-hover:text-gray-600'"
-                class="transition-colors mb-1">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
-                    </path>
-                </svg>
-            </div>
-            <span class="text-[10px] font-bold uppercase tracking-wider transition-colors"
-                :class="currentTab === 'calculator' ? 'text-[#5fb856]' : 'text-gray-400 group-hover:text-gray-600'">
-                Конструктор
-            </span>
-        </button>
-
-        <button @click="currentTab = 'cart'"
-            class="flex flex-col items-center justify-center w-full py-3 active:bg-gray-50 transition-colors group relative">
-            <div :class="currentTab === 'cart' ? 'text-[#5fb856]' : 'text-gray-400 group-hover:text-gray-600'"
-                class="transition-colors mb-1">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
-                    </path>
-                </svg>
-            </div>
-            <span class="text-[10px] font-bold uppercase tracking-wider transition-colors"
-                :class="currentTab === 'cart' ? 'text-[#5fb856]' : 'text-gray-400 group-hover:text-gray-600'">
-                Смета
-            </span>
-            <!-- Price Badge -->
-            <span
-                class="absolute top-2 right-[20%] bg-[#5fb856] text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold"
-                x-show="totalPrice > 0" x-text="formatPrice(totalPrice)"></span>
-        </button>
-
-    </div>
-
-
-
-
-
-    <!-- Модалка детализации цены -->
-    <div x-show="showPriceModal" style="display: none;"
-        class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-        x-transition.opacity>
-        <div @click.outside="showPriceModal = false"
-            class="bg-white rounded-2xl w-full max-w-sm p-6 relative shadow-2xl"
-            x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4"
-            x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-4">
-
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-oswald font-bold text-xl uppercase">Ваша смета</h3>
-                <button @click="showPriceModal = false" class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                <!-- Telegram Action Button -->
+                <button @click="sendToTelegram()"
+                    class="w-full bg-[#5fb856] text-white py-4 rounded-xl font-bold uppercase text-sm hover:bg-[#4da048] active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2">
+                    <span>Зафиксировать условия</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
                         </path>
                     </svg>
                 </button>
+
+                <p class="text-[10px] text-gray-400 text-center mt-4">
+                    Цена и условия фиксируются на 7 дней
+                </p>
             </div>
 
-            <div class="space-y-3 mb-6">
-                <template x-for="(item, index) in priceDetails" :key="index">
-                    <div class="flex justify-between text-sm border-b border-gray-100 pb-2 last:border-0 last:pb-0">
-                        <span class="text-gray-600 font-medium" x-text="item.name"></span>
-                        <span class="font-bold text-gray-900 whitespace-nowrap" x-text="formatPrice(item.price)"></span>
-                    </div>
-                </template>
-            </div>
-
-            <div class="flex justify-between items-center pt-4 border-t border-gray-200">
-                <span class="font-bold text-gray-500 uppercase text-xs">Итого</span>
-                <span class="font-oswald font-bold text-2xl text-[#5fb856]" x-text="formatPrice(totalPrice)"></span>
-            </div>
-
-            <!-- Подарки -->
-            <div class="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center">
-                <p class="text-[10px] font-bold text-yellow-800 uppercase">🎁 + Подарки на 25 000 ₽</p>
-                <p class="text-[9px] text-yellow-700">при фиксации условий сегодня</p>
-            </div>
-
-            <button @click="showPriceModal = false"
-                class="w-full mt-6 bg-gray-100 text-gray-700 py-3 rounded-xl font-bold uppercase text-sm hover:bg-gray-200 active:scale-95 active:bg-gray-300 transition-all duration-200">
-                Понятно
-            </button>
         </div>
     </div>
-    <!-- Кнопка "Помощь" (Floating) -->
-    <a href="https://t.me/ivan_ural_chan?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5!%20%D0%9D%D1%83%D0%B6%D0%BD%D0%B0%20%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%20%D1%81%20%D0%B2%D1%8B%D0%B1%D0%BE%D1%80%D0%BE%D0%BC."
-        target="_blank"
-        class="fixed bottom-[140px] right-4 z-[90] lg:bottom-10 lg:right-10 bg-[#2AABEE] text-white p-4 rounded-full shadow-xl hover:scale-110 hover:bg-[#229ED9] transition-all duration-300 flex items-center justify-center group"
-        title="Написать в Telegram">
-        <!-- Icon: Telegram Plane -->
-        <svg class="w-6 h-6 transform -translate-x-0.5 translate-y-0.5" fill="currentColor" viewBox="0 0 24 24">
-            <path
-                d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42l10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701l-.164.168l.184.465l1.58 4.029c.17.434.34.606.77.606c.465 0 .806-.213.92-.328l2.21-2.142l4.595 3.397c.848.468 1.46.227 1.67-.785l3.035-14.288c.31-1.248-.445-1.815-1.423-1.423z" />
-        </svg>
-        <span
-            class="absolute right-full mr-3 bg-white text-gray-700 text-xs font-bold px-3 py-1.5 rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none hidden lg:block">
-            Написать в Telegram
+
+</div> <!-- End SPA Wrapper -->
+
+<!-- ======================= -->
+<!-- BOTTOM NAVIGATION       -->
+<!-- ======================= -->
+<div
+    class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 z-[60] flex justify-around pb-safe safe-area-bottom shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+
+    <button @click="currentTab = 'calculator'"
+        class="flex flex-col items-center justify-center w-full py-3 active:bg-gray-50 transition-colors group">
+        <div :class="currentTab === 'calculator' ? 'text-[#5fb856]' : 'text-gray-400 group-hover:text-gray-600'"
+            class="transition-colors mb-1">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                </path>
+            </svg>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider transition-colors"
+            :class="currentTab === 'calculator' ? 'text-[#5fb856]' : 'text-gray-400 group-hover:text-gray-600'">
+            Конструктор
         </span>
-    </a>
+    </button>
+
+    <button @click="currentTab = 'cart'"
+        class="flex flex-col items-center justify-center w-full py-3 active:bg-gray-50 transition-colors group relative">
+        <div :class="currentTab === 'cart' ? 'text-[#5fb856]' : 'text-gray-400 group-hover:text-gray-600'"
+            class="transition-colors mb-1">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                </path>
+            </svg>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider transition-colors"
+            :class="currentTab === 'cart' ? 'text-[#5fb856]' : 'text-gray-400 group-hover:text-gray-600'">
+            Смета
+        </span>
+        <!-- Price Badge -->
+        <span class="absolute top-2 right-[20%] bg-[#5fb856] text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold"
+            x-show="totalPrice > 0" x-text="formatPrice(totalPrice)"></span>
+    </button>
+
+</div>
+
+
+
+
+
+<!-- Модалка детализации цены -->
+<div x-show="showPriceModal" style="display: none;"
+    class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+    x-transition.opacity>
+    <div @click.outside="showPriceModal = false" class="bg-white rounded-2xl w-full max-w-sm p-6 relative shadow-2xl"
+        x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4"
+        x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-4">
+
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="font-oswald font-bold text-xl uppercase">Ваша смета</h3>
+            <button @click="showPriceModal = false" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg>
+            </button>
+        </div>
+
+        <div class="space-y-3 mb-6">
+            <template x-for="(item, index) in priceDetails" :key="index">
+                <div class="flex justify-between text-sm border-b border-gray-100 pb-2 last:border-0 last:pb-0">
+                    <span class="text-gray-600 font-medium" x-text="item.name"></span>
+                    <span class="font-bold text-gray-900 whitespace-nowrap" x-text="formatPrice(item.price)"></span>
+                </div>
+            </template>
+        </div>
+
+        <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+            <span class="font-bold text-gray-500 uppercase text-xs">Итого</span>
+            <span class="font-oswald font-bold text-2xl text-[#5fb856]" x-text="formatPrice(totalPrice)"></span>
+        </div>
+
+        <!-- Подарки -->
+        <div class="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center">
+            <p class="text-[10px] font-bold text-yellow-800 uppercase">🎁 + Подарки на 25 000 ₽</p>
+            <p class="text-[9px] text-yellow-700">при фиксации условий сегодня</p>
+        </div>
+
+        <button @click="showPriceModal = false"
+            class="w-full mt-6 bg-gray-100 text-gray-700 py-3 rounded-xl font-bold uppercase text-sm hover:bg-gray-200 active:scale-95 active:bg-gray-300 transition-all duration-200">
+            Понятно
+        </button>
+    </div>
+</div>
+<!-- Кнопка "Помощь" (Floating) -->
+<a href="https://t.me/ivan_ural_chan?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5!%20%D0%9D%D1%83%D0%B6%D0%BD%D0%B0%20%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%20%D1%81%20%D0%B2%D1%8B%D0%B1%D0%BE%D1%80%D0%BE%D0%BC."
+    target="_blank"
+    class="fixed bottom-[140px] right-4 z-[90] lg:bottom-10 lg:right-10 bg-[#2AABEE] text-white p-4 rounded-full shadow-xl hover:scale-110 hover:bg-[#229ED9] transition-all duration-300 flex items-center justify-center group"
+    title="Написать в Telegram">
+    <!-- Icon: Telegram Plane -->
+    <svg class="w-6 h-6 transform -translate-x-0.5 translate-y-0.5" fill="currentColor" viewBox="0 0 24 24">
+        <path
+            d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42l10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701l-.164.168l.184.465l1.58 4.029c.17.434.34.606.77.606c.465 0 .806-.213.92-.328l2.21-2.142l4.595 3.397c.848.468 1.46.227 1.67-.785l3.035-14.288c.31-1.248-.445-1.815-1.423-1.423z" />
+    </svg>
+    <span
+        class="absolute right-full mr-3 bg-white text-gray-700 text-xs font-bold px-3 py-1.5 rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none hidden lg:block">
+        Написать в Telegram
+    </span>
+</a>
 
 </div> <!-- Close x-data div -->
 
