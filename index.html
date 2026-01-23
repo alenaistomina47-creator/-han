@@ -143,6 +143,131 @@
         .safe-area-bottom {
             padding-bottom: env(safe-area-inset-bottom);
         }
+
+        /* --- CRITICAL HOTFIX STYLES (If Tailwind Fails) --- */
+        /* Make images responsive by default */
+        img,
+        svg,
+        video,
+        canvas,
+        audio,
+        iframe,
+        embed,
+        object {
+            display: block;
+            vertical-align: middle;
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Grid fallbacks */
+        .grid {
+            display: grid;
+        }
+
+        .grid-cols-1 {
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
+
+        /* Fix Giant Logo/Icons */
+        .h-16 {
+            height: 4rem !important;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem !important;
+        }
+
+        .w-6 {
+            width: 1.5rem !important;
+        }
+
+        .h-6 {
+            height: 1.5rem !important;
+        }
+
+        .w-5 {
+            width: 1.25rem !important;
+        }
+
+        .h-5 {
+            height: 1.25rem !important;
+        }
+
+        .w-4 {
+            width: 1rem !important;
+        }
+
+        .h-4 {
+            height: 1rem !important;
+        }
+
+        /* Layout Fixes */
+        .fixed {
+            position: fixed !important;
+        }
+
+        .absolute {
+            position: absolute !important;
+        }
+
+        .relative {
+            position: relative !important;
+        }
+
+        .top-4 {
+            top: 1rem !important;
+        }
+
+        .right-4 {
+            right: 1rem !important;
+        }
+
+        .rounded-full {
+            border-radius: 9999px !important;
+        }
+
+        .rounded-2xl {
+            border-radius: 1rem !important;
+        }
+
+        .bg-white {
+            background-color: rgb(255, 255, 255) !important;
+        }
+
+        .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        .z-\[60\] {
+            z-index: 60 !important;
+        }
+
+        .z-50 {
+            z-index: 50 !important;
+        }
+
+        /* Typography */
+        .text-4xl {
+            font-size: 2.25rem !important;
+            line-height: 2.5rem !important;
+        }
+
+        .text-center {
+            text-align: center !important;
+        }
+
+        .font-bold {
+            font-weight: 700 !important;
+        }
+
+        .uppercase {
+            text-transform: uppercase !important;
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
     </style>
 
 
@@ -545,6 +670,12 @@
 
 
 <body class="bg-[#F3F5F6] text-[#333] font-body min-h-screen pb-48 lg:pb-0">
+    <script>
+        window.onerror = function (msg, url, line) {
+            var d = document.getElementById('debug-error');
+            if (d) { d.style.display = 'block'; d.innerText = "JS Error: " + msg + " (" + line + ")"; }
+        };
+    </script>
 
     <div x-data="calculator()" class="max-w-[1200px] mx-auto px-4 py-8 lg:px-8 relative">
 
@@ -588,7 +719,12 @@
                 alt="Logo" class="h-16 mb-4">
 
             <h1 class="font-oswald font-bold uppercase text-4xl lg:text-5xl mb-2">СОБЕРИТЕ СВОЙ ЧАН</h1>
-            <p class="text-[10px] text-gray-400">Версия 2.2 (Offline Fix)</p>
+            <p class="text-[10px] text-gray-400">Версия 3.0 (CSS Hardcoded)</p>
+            <div id="debug-error"
+                class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-xs mt-2 font-bold"
+                style="display:none;">
+                DEBUG MODE
+            </div>
             <div id="debug-error" class="text-red-500 text-xs mt-2" style="display:none;">Ошибка загрузки скриптов!
             </div>
         </div>
