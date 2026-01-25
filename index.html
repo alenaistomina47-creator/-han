@@ -486,8 +486,8 @@
             <template x-for="(item, index) in priceDetails" :key="index">
                 <div
                     class="flex justify-between items-center py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 px-2 rounded-lg transition-colors">
-                    <span class="text-gray-700 font-medium text-base" x-text="item.name"></span>
-                    <span class="font-bold text-gray-900 whitespace-nowrap text-lg"
+                    <span class="text-gray-700 font-medium text-sm" x-text="item.name"></span>
+                    <span class="font-bold text-gray-900 whitespace-nowrap text-base"
                         x-text="formatPrice(item.price)"></span>
                 </div>
             </template>
