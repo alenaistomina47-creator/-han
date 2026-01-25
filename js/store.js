@@ -62,18 +62,13 @@ document.addEventListener('alpine:init', () => {
                 if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
                     this.isTelegram = true;
                     // ... (Telegram init logic)
-                    const tg = window.Telegram.WebApp;
-                    tg.ready();
-                    tg.expand();
+                    // const tg = window.Telegram.WebApp;
+                    // tg.ready();
+                    // tg.expand();
 
-                    tg.MainButton.setText(`ЗАФИКСИРОВАТЬ: 0 ₽`);
-                    tg.MainButton.setParams({ color: '#5fb856', text_color: '#ffffff' });
-                    tg.MainButton.show();
-                    tg.MainButton.onClick(() => { this.sendToTelegram(); });
-
-                    this.$watch('totalPrice', (val) => {
-                        tg.MainButton.setText(`ЗАФИКСИРОВАТЬ: ${this.formatPrice(val)}`);
-                    });
+                    // Native MainButton disabled in favor of custom UI
+                    // tg.MainButton.setText(`ЗАФИКСИРОВАТЬ: 0 ₽`);
+                    // tg.MainButton.show();
                 }
 
                 // ... (Business Logic watchers remain)
