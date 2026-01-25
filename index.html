@@ -591,9 +591,9 @@
                     </path>
                 </svg>
                 <!-- Badge -->
-                <div x-show="selectedSizeId" x-transition.scale
-                    class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm border border-white">
-                    1
+                <div x-show="priceDetails.length > 0" x-transition.scale
+                    class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm border border-white"
+                    x-text="priceDetails.length">
                 </div>
             </div>
             <span class="text-[10px] font-medium">Корзина</span>
