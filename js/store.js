@@ -12,7 +12,8 @@ document.addEventListener('alpine:init', () => {
 
         // Вкладки визуализации
         activeTab: 'outside',
-        showPriceModal: false,
+        // 'calculator' | 'cart'
+        currentView: 'calculator',
         isVisualizerMinimized: false,
         isRestoringUrl: false,
 

@@ -36,7 +36,8 @@
     <h1 class="font-oswald font-bold uppercase text-4xl lg:text-5xl mb-2">СОБЕРИТЕ СВОЙ ЧАН</h1>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<div x-show="currentView === 'calculator'" x-transition.opacity.duration.300ms
+    class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
     <!-- Левая колонка: Визуализация + Табы (7 колонок) -->
     <div
@@ -420,7 +421,7 @@
                         <div class="flex flex-col lg:block">
                             <p class="text-2xl lg:text-3xl font-oswald font-bold text-[#5fb856]"
                                 x-text="formatPrice(totalPrice)"></p>
-                            <button @click="showPriceModal = true"
+                            <button @click="currentView = 'cart'"
                                 class="text-[10px] lg:text-xs text-left font-bold text-[#5fb856] border-b border-dashed border-[#5fb856] hover:text-[#4ca344] hover:border-[#4ca344] transition-colors w-max uppercase tracking-wider">
                                 🛒 Корзина
                             </button>
@@ -435,10 +436,10 @@
                 </div>
 
                 <!-- CTA Button -->
-                <button @click="sendToTelegram()" x-show="!isTelegram" :disabled="!selectedSizeId"
+                <button @click="currentView = 'cart'" x-show="!isTelegram" :disabled="!selectedSizeId"
                     :class="{'opacity-50 grayscale cursor-not-allowed': !selectedSizeId}"
                     class="w-full border-2 border-[#5fb856] text-[#5fb856] hover:bg-[#5fb856] hover:text-white rounded-xl py-3 font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 group">
-                    <span>Зафиксировать условия</span>
+                    <span>Перейти в корзину</span>
                     <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none"
                         stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
@@ -471,50 +472,7 @@
 </div>
 
 <!-- Модалка детализации цены -->
-<div x-show="showPriceModal" style="display: none;"
-    class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-    x-transition.opacity>
-    <div @click.outside="showPriceModal = false" class="bg-white rounded-2xl w-full max-w-sm p-6 relative shadow-2xl"
-        x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4"
-        x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-4">
-
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="font-oswald font-bold text-xl uppercase">Ваша корзина</h3>
-            <button @click="showPriceModal = false" class="text-gray-400 hover:text-gray-600">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
-                    </path>
-                </svg>
-            </button>
-        </div>
-
-        <div class="space-y-3 mb-6">
-            <template x-for="(item, index) in priceDetails" :key="index">
-                <div class="flex justify-between text-sm border-b border-gray-100 pb-2 last:border-0 last:pb-0">
-                    <span class="text-gray-600 font-medium" x-text="item.name"></span>
-                    <span class="font-bold text-gray-900 whitespace-nowrap" x-text="formatPrice(item.price)"></span>
-                </div>
-            </template>
-        </div>
-
-        <div class="flex justify-between items-center pt-4 border-t border-gray-200">
-            <span class="font-bold text-gray-500 uppercase text-xs">Итого</span>
-            <span class="font-oswald font-bold text-2xl text-[#5fb856]" x-text="formatPrice(totalPrice)"></span>
-        </div>
-
-        <!-- Подарки -->
-        <div class="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center">
-            <p class="text-[10px] font-bold text-yellow-800 uppercase">🎁 + Подарки на 25 000 ₽</p>
-            <p class="text-[9px] text-yellow-700">при фиксации условий сегодня</p>
-        </div>
-
-        <button @click="showPriceModal = false"
-            class="w-full mt-6 bg-gray-100 text-gray-700 py-3 rounded-xl font-bold uppercase text-sm hover:bg-gray-200 active:scale-95 active:bg-gray-300 transition-all duration-200">
-            Понятно
-        </button>
-    </div>
-</div>
+<!-- Модалка убрана в пользу отдельной страницы -->
 <!-- Кнопка "Помощь" (Floating) -->
 <a href="https://t.me/ivan_ural_chan?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5!%20%D0%9D%D1%83%D0%B6%D0%BD%D0%B0%20%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%20%D1%81%20%D0%B2%D1%8B%D0%B1%D0%BE%D1%80%D0%BE%D0%BC."
     target="_blank"
