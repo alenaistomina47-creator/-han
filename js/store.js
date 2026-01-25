@@ -1,16 +1,6 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('calculator', () => ({
-        // ==========================================
-        // 1. СОСТОЯНИЕ (STATE)
-        // ==========================================
-        currentTab: 1, // 1 = Конструктор, 2 = Смета
-        isVisualizerMinimized: false,
-        activeTab: 'outside',
-        showPriceModal: false,
-        isRestoringUrl: false,
-        isTelegram: false,
-
-        // Выбранные ID
+        // Состояние
         selectedSizeId: '',
         selectedMaterialId: '',
         selectedStoveId: '',
@@ -18,33 +8,32 @@ document.addEventListener('alpine:init', () => {
         selectedLadderId: '',
         selectedChimneyId: '',
         selectedExtrasIds: [],
+        isTelegram: false,
 
-        // ВАЖНО: Это теперь обычный массив, а не геттер.
-        // Он физически хранит список товаров, поэтому он не может быть пустым, если цена есть.
-        cartItems: [], 
+        // Вкладки визуализации
+        activeTab: 'outside',
+        showPriceModal: false,
+        isVisualizerMinimized: false,
+        isRestoringUrl: false,
 
-        // ==========================================
-        // 2. ИНИЦИАЛИЗАЦИЯ
-        // ==========================================
+        // Инициализация
         init() {
-            console.log('Калькулятор запущен. Режим массива (v2.0).');
+            console.log('Калькулятор запущен.');
 
-            // Следим за скроллом
             window.addEventListener('scroll', () => {
                 this.isVisualizerMinimized = window.scrollY > 50;
             });
 
-            // Отправка вебхука при переходе в корзину
-            this.$watch('currentTab', (val) => {
-                if (val === 2) this.sendToWebhook();
-            });
-
-            // Проверяем, загрузились ли данные из data.js
             if (typeof appData !== 'undefined') {
+                // НЕ выбираем ничего по умолчанию (чистый лист)
+                // this.selectedSizeId = ... 
+
                 this.preloadImages();
+
+                // --- URL STATE SYNC START ---
                 this.loadFromUrl();
 
-                // При любом изменении параметров — обновляем URL
+                // Watchers for URL update
                 this.$watch('selectedSizeId', () => this.updateUrl());
                 this.$watch('selectedMaterialId', () => this.updateUrl());
                 this.$watch('selectedStoveId', () => this.updateUrl());
@@ -53,13 +42,13 @@ document.addEventListener('alpine:init', () => {
                 this.$watch('selectedChimneyId', () => this.updateUrl());
                 this.$watch('selectedExtrasIds', () => this.updateUrl());
 
-                // Telegram инициализация
                 if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
                     this.isTelegram = true;
+                    // ... (Telegram init logic)
                     const tg = window.Telegram.WebApp;
                     tg.ready();
                     tg.expand();
-                    
+
                     tg.MainButton.setText(`ЗАФИКСИРОВАТЬ: 0 ₽`);
                     tg.MainButton.setParams({ color: '#5fb856', text_color: '#ffffff' });
                     tg.MainButton.show();
@@ -70,50 +59,47 @@ document.addEventListener('alpine:init', () => {
                     });
                 }
 
-                // Логика исключения несовместимых опций
+                // ... (Business Logic watchers remain)
                 this.$watch('selectedChimneyId', (val) => {
-                    if (val === 'pipe_sandwich') this.selectedExtrasIds = this.selectedExtrasIds.filter(id => id !== 'protection');
+                    if (val === 'pipe_sandwich') {
+                        this.selectedExtrasIds = this.selectedExtrasIds.filter(id => id !== 'protection');
+                    }
                 });
+
                 this.$watch('selectedExtrasIds', (val) => {
                     if (val.includes('rim_finish')) {
                         if (val.includes('thermometer')) this.selectedExtrasIds = val.filter(id => id !== 'thermometer');
                         if (this.selectedLadderId === 'stairs_wood') this.selectedLadderId = '';
                     }
                 });
+
                 this.$watch('selectedLadderId', (val) => {
                     if (val === 'stairs_wood' && this.selectedExtrasIds.includes('rim_finish')) {
                         this.selectedExtrasIds = this.selectedExtrasIds.filter(id => id !== 'rim_finish');
                     }
                 });
+
                 this.$watch('selectedStoveId', (val) => {
                     if (val && val !== 'jacket') {
                         this.selectedExtrasIds = this.selectedExtrasIds.filter(id => id !== 'jacuzzi' && id !== 'rim_finish');
                     }
                 });
-
-                // MAGIC FIX: Принудительное обновление корзины
-                // Эта команда следит за всеми переменными внутри updateCartList
-                // и запускает пересчет списка автоматически.
-                this.$effect(() => {
-                    this.updateCartList();
-                });
             }
         },
 
-        // ==========================================
-        // 3. ВСПОМОГАТЕЛЬНЫЕ ГЕТТЕРЫ (HELPERS)
-        // ==========================================
+        // Геттеры сущностей
         get selectedSize() { return this.selectedSizeId ? appData.sizes.find(s => s.id === this.selectedSizeId) : null; },
         get selectedStove() { return this.selectedStoveId ? appData.stoves.find(s => s.id === this.selectedStoveId) : null; },
         get selectedFinish() { return this.selectedFinishId ? appData.finishes.find(f => f.id === this.selectedFinishId) : null; },
         get selectedLadder() { return this.selectedLadderId ? appData.extras.find(e => e.id === this.selectedLadderId) : null; },
         get selectedChimney() { return this.selectedChimneyId ? appData.extras.find(e => e.id === this.selectedChimneyId) : null; },
-        get selectedMaterial() { return this.selectedMaterialId ? this.currentMaterials.find(m => m.id === this.selectedMaterialId) : null; },
 
+        // Списки
         get ladders() { return appData.extras.filter(e => e.type === 'stairs'); },
         get chimneys() { return appData.extras.filter(e => e.type === 'pipe'); },
         get otherExtras() { return appData.extras.filter(e => !e.type); },
 
+        // Материалы
         get currentMaterials() {
             if (!this.selectedSizeId) return [];
             const prices = appData.materials[this.selectedSizeId];
@@ -123,126 +109,186 @@ document.addEventListener('alpine:init', () => {
                 { id: 'aisi304', price: prices.aisi304, ...appData.materialMetadata.aisi304 }
             ];
         },
-
-        // ==========================================
-        // 4. ЛОГИКА КОРЗИНЫ (МАССИВ)
-        // ==========================================
-        updateCartList() {
-            try {
-                // Если данные еще не загрузились - выходим, чтобы не было ошибок
-                if (typeof appData === 'undefined') return;
-
-                const items = [];
-
-                // 1. Чан (Размер + Материал)
-                if (this.selectedSizeId && this.selectedMaterialId && appData.materials[this.selectedSizeId]) {
-                    const price = appData.materials[this.selectedSizeId][this.selectedMaterialId] || 0;
-                    const sizeName = this.selectedSize ? this.selectedSize.name : 'Чан';
-                    const matName = this.selectedMaterial ? this.selectedMaterial.name : 'Материал';
-                    items.push({ name: `Чан: ${sizeName}, ${matName}`, price: price });
-                }
-
-                // 2. Печь
-                if (this.selectedStove) {
-                    items.push({ name: this.selectedStove.name, price: this.selectedStove.price || 0 });
-                }
-
-                // 3. Отделка
-                if (this.selectedFinish) {
-                    let finishPrice = 0;
-                    if (typeof this.selectedFinish.price === 'object') {
-                        finishPrice = this.selectedFinish.price[this.selectedSizeId] || 0;
-                    } else {
-                        finishPrice = this.selectedFinish.price || 0;
-                    }
-                    if (finishPrice > 0) {
-                        items.push({ name: `Отделка: ${this.selectedFinish.name}`, price: finishPrice });
-                    }
-                }
-
-                // 4. Лестница
-                if (this.selectedLadder) {
-                    items.push({ name: this.selectedLadder.name, price: this.selectedLadder.price || 0 });
-                }
-
-                // 5. Дымоход
-                if (this.selectedChimney) {
-                    items.push({ name: this.selectedChimney.name, price: this.selectedChimney.price || 0 });
-                }
-
-                // 6. Допы (Чекбоксы)
-                this.selectedExtrasIds.forEach(id => {
-                    const extra = appData.extras.find(e => e.id === id);
-                    if (extra) {
-                        items.push({ name: extra.name, price: extra.price || 0 });
-                    }
-                });
-
-                // ВОТ ОНО: Принудительно кладем товары в массив.
-                // Теперь HTML просто читает этот массив, ему не нужно ничего считать.
-                this.cartItems = items;
-
-            } catch (e) {
-                console.error("Ошибка обновления корзины:", e);
-                this.cartItems = [{ name: "Ошибка расчета", price: 0 }];
-            }
+        get selectedMaterial() {
+            return this.selectedMaterialId ? this.currentMaterials.find(m => m.id === this.selectedMaterialId) : null;
         },
 
-        // Итоговая цена теперь просто сумма товаров в списке.
-        // Это гарантирует, что ЦЕНА и СПИСОК всегда совпадают.
-        get totalPrice() {
-            return this.cartItems.reduce((sum, item) => sum + item.price, 0);
-        },
-
-        // Для совместимости с модалкой
-        get priceDetails() {
-            return this.cartItems;
-        },
-
-        // ==========================================
-        // 5. УТИЛИТЫ И ЭКШЕНЫ
-        // ==========================================
         formatPrice(price) { return price.toLocaleString('ru-RU') + ' ₽'; },
         formatOriginalPrice(price) { return Math.round(price * 1.3).toLocaleString('ru-RU') + ' ₽'; },
 
         getMaterialOverlay() {
-            if (!this.selectedMaterialId || !appData.materialMetadata) return null;
-            const meta = appData.materialMetadata[this.selectedMaterialId];
-            return meta ? meta.image : null;
+            if (!this.selectedMaterialId) return null;
+            if (appData.materialMetadata && appData.materialMetadata[this.selectedMaterialId]) {
+                return appData.materialMetadata[this.selectedMaterialId].overlayImage || null;
+            }
+            return null;
         },
 
-        preloadImages() {
-            if (appData.sizes) appData.sizes.forEach(s => { new Image().src = s.image; });
+        getBaseImage() {
+            // Если ничего не выбрано, вернем null (в HTML обработаем вывод заглушки)
+            if (!this.selectedSizeId) return null;
+
+            // Если выбран размер, но не материал - покажем просто размер (если есть картинка размера)
+            // Но у нас картинки привязаны к металлу скорее. 
+            // Хотя в data.js: sizes имеет 'image'.
+
+            // Логика:
+            // 1. Если выбрана 430 - берем её картинку.
+            // 2. Если 304 - её.
+            // 3. Если ничего - берем картинку из selectedSize (если она есть).
+
+            // В data.js у sizes есть image: '.../small.png'
+            if (this.selectedSize && this.selectedSize.image) {
+                // Но мы хотим overlay?
+                // В старом коде было: <img :src="selectedSize.image"> как база.
+                // Тогда getBaseImage мб и не нужен, если мы вернемся к слоям.
+                // Оставим пока старую логику слоев в HTML.
+                return null;
+            }
+            return null;
+        },
+
+        // ... preloadImages ...
+
+        get totalPrice() {
+            let total = 0;
+            // 1. Материал
+            if (this.selectedSizeId && this.selectedMaterialId && appData.materials[this.selectedSizeId]) {
+                total += appData.materials[this.selectedSizeId][this.selectedMaterialId] || 0;
+            }
+            // 2. Печь
+            if (this.selectedStove) total += this.selectedStove.price || 0;
+            // 3. Отделка
+            if (this.selectedFinish) {
+                if (typeof this.selectedFinish.price === 'object') {
+                    total += this.selectedFinish.price[this.selectedSizeId] || 0;
+                } else {
+                    total += this.selectedFinish.price || 0;
+                }
+            }
+            // ... ladders, chimneys, extras ...
+            if (this.selectedLadder) total += this.selectedLadder.price || 0;
+            if (this.selectedChimney) total += this.selectedChimney.price || 0;
+            this.selectedExtrasIds.forEach(id => {
+                const extra = appData.extras.find(e => e.id === id);
+                if (extra) total += extra.price || 0;
+            });
+            return total;
+        },
+
+        // Детализация цены (Смета)
+        get priceDetails() {
+            const details = [];
+
+            // 1. Чаша (Размер + Материал)
+            const size = appData.sizes.find(s => s.id === this.selectedSizeId);
+            // Use currentMaterials helper if available, or finding manually
+            const material = this.currentMaterials ? this.currentMaterials.find(m => m.id === this.selectedMaterialId) : null;
+
+            if (size && material) {
+                const basePrice = (appData.materials[this.selectedSizeId] && appData.materials[this.selectedSizeId][this.selectedMaterialId]) || 0;
+                details.push({
+                    name: `Чан: ${size.name}, ${material.name}`,
+                    price: basePrice
+                });
+            }
+
+            // 2. Печь
+            const stove = appData.stoves.find(s => s.id === this.selectedStoveId);
+            if (stove) {
+                details.push({ name: stove.name, price: stove.price || 0 });
+            }
+
+            // 3. Отделка
+            const finish = appData.finishes.find(f => f.id === this.selectedFinishId);
+            if (finish && finish.price) {
+                let finishPrice = 0;
+                if (typeof finish.price === 'object') {
+                    finishPrice = finish.price[this.selectedSizeId] || 0;
+                } else {
+                    finishPrice = finish.price || 0;
+                }
+                if (finishPrice > 0) {
+                    details.push({ name: `Отделка: ${finish.name}`, price: finishPrice });
+                }
+            }
+
+            // 4. Лестница
+            const ladder = appData.extras.find(e => e.id === this.selectedLadderId);
+            if (ladder) {
+                details.push({ name: ladder.name, price: ladder.price || 0 });
+            }
+
+            // 5. Дымоход
+            const chimney = appData.extras.find(e => e.id === this.selectedChimneyId);
+            if (chimney) {
+                details.push({ name: chimney.name, price: chimney.price || 0 });
+            }
+
+            // 6. Дополнительные опции
+            this.selectedExtrasIds.forEach(id => {
+                const extra = appData.extras.find(e => e.id === id);
+                if (extra) {
+                    details.push({ name: extra.name, price: extra.price || 0 });
+                }
+            });
+
+            return details;
+        },
+
+        // Цена со скидкой (оригинальная из data.js) - показываем внизу зеленым
+        get discountedPrice() {
+            return this.totalPrice;
+        },
+
+        // Оригинальная цена (завышенная на 30%) - показываем зачеркнутой
+        get originalPrice() {
+            return Math.round(this.totalPrice * 1.3);
         },
 
         // Отправка в Telegram
         sendToTelegram() {
-            const itemsText = this.cartItems.map(i => `- ${i.name}`).join('\n');
-            const text = `🔥 Новый заказ!\n\n${itemsText}\n\n💰 Итого: ${this.formatPrice(this.totalPrice)}`;
+            const extrasNames = this.selectedExtrasIds.map(id => {
+                const e = appData.extras.find(ext => ext.id === id);
+                return e ? e.name : '';
+            }).filter(Boolean).join(', ');
 
+            const sizeName = this.selectedSize ? this.selectedSize.name : 'Не выбрано';
+            const materialName = this.selectedMaterial ? this.selectedMaterial.name : 'Не выбрано';
+            const stoveName = this.selectedStove ? this.selectedStove.name : 'Не выбрано';
+            const finishName = this.selectedFinish ? this.selectedFinish.name : 'Не выбрано';
+            const ladderName = this.selectedLadder ? this.selectedLadder.name : 'Не выбрано';
+            const chimneyName = this.selectedChimney ? this.selectedChimney.name : 'Не выбрано';
+
+            const text = `🔥 Новый заказ! (из 3D калькулятора)\n\n` +
+                `📏 Размер: ${sizeName}\n` +
+                `🛡 Материал: ${materialName}\n` +
+                `🔥 Печь: ${stoveName}\n` +
+                `✨ Отделка: ${finishName}\n` +
+                `🪜 Лестница: ${ladderName}\n` +
+                `💨 Дымоход: ${chimneyName}\n` +
+                `➕ Дополнительно: ${extrasNames || 'Нет'}\n\n` +
+                `💰 Сумма заказа: ${this.formatPrice(this.totalPrice)}`;
+
+            // Если открыто в Telegram Mini App
             if (this.isTelegram) {
-                window.Telegram.WebApp.sendData(JSON.stringify({ items: this.cartItems, total: this.totalPrice }));
-            } else {
-                // Если открыто в браузере — копируем и переходим в тг
+                // Открываем личку с менеджером с предзаполненным текстом
                 const url = `https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`;
-                
-                // Пробуем скопировать, но не блокируем переход, если не выйдет
-                try {
-                    navigator.clipboard.writeText(text);
-                } catch (e) {}
-                
-                window.open(url, '_blank');
+                window.Telegram.WebApp.openTelegramLink(url);
+            } else {
+                // Fallback для браузера - копируем и открываем
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Заказ скопирован! Открываю чат с менеджером...');
+                    window.open(`https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`, '_blank');
+                }).catch(() => {
+                    window.open(`https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`, '_blank');
+                });
             }
         },
 
-        sendToWebhook() {
-            // Место для отправки данных в CRM
-            // const data = { ... };
-            // fetch(...)
-        },
-
         updateUrl() {
-            if (this.isRestoringUrl) return;
+            if (this.isRestoringUrl) return; // Не обновляем URL пока восстанавливаемся
+
             const params = new URLSearchParams();
             if (this.selectedSizeId) params.set('s', this.selectedSizeId);
             if (this.selectedMaterialId) params.set('m', this.selectedMaterialId);
@@ -251,17 +297,52 @@ document.addEventListener('alpine:init', () => {
             if (this.selectedLadderId) params.set('l', this.selectedLadderId);
             if (this.selectedChimneyId) params.set('c', this.selectedChimneyId);
             if (this.selectedExtrasIds.length) params.set('e', this.selectedExtrasIds.join(','));
-            
-            const newUrl = `${window.location.pathname}?${params.toString()}`;
+
+            const newQuery = params.toString();
+            const newUrl = `${window.location.pathname}?${newQuery}`;
             window.history.replaceState({}, '', newUrl);
+
+            // Возвращаем полный абсолютный URL для копирования
+            return `${window.location.origin}${newUrl}`;
         },
 
         loadFromUrl() {
-            this.isRestoringUrl = true;
+            this.isRestoringUrl = true; // Блокируем обновление URL
+            alert('Debug: Start Loading URL. Search: ' + window.location.search); // DEBUG
+
+            // 1. Попытка загрузить из Deep Link (start_param) - для поддержки старых ссылок
+            let startParam = new URLSearchParams(window.location.search).get('tgWebAppStartParam');
+            if (window.Telegram?.WebApp?.initDataUnsafe?.start_param) {
+                startParam = window.Telegram.WebApp.initDataUnsafe.start_param;
+            }
+
+            if (startParam) {
+                try {
+                    const jsonStr = atob(startParam);
+                    const state = JSON.parse(jsonStr);
+                    if (state.s) this.selectedSizeId = state.s;
+                    if (state.m) this.selectedMaterialId = state.m;
+                    if (state.st) this.selectedStoveId = state.st;
+                    if (state.f) this.selectedFinishId = state.f;
+                    if (state.l) this.selectedLadderId = state.l;
+                    if (state.c) this.selectedChimneyId = state.c;
+                    if (state.e) this.selectedExtrasIds = state.e;
+                    this.isRestoringUrl = false;
+                    return; // Успех
+                } catch (e) {
+                    console.error('Deep link error:', e);
+                }
+            }
+
+            // 2. Fallback: Обычные GET-параметры (s, m, st...)
             const params = new URLSearchParams(window.location.search);
-            if (params.has('s')) this.selectedSizeId = params.get('s');
-            
-            // Загружаем остальное только если выбран размер
+            // Считываем параметры
+            if (params.has('s')) {
+                alert('Debug: Found Size ' + params.get('s')); // DEBUG
+                this.selectedSizeId = params.get('s');
+            }
+
+            // Если есть размер, считываем остальное
             if (this.selectedSizeId) {
                 if (params.has('m')) this.selectedMaterialId = params.get('m');
                 if (params.has('st')) this.selectedStoveId = params.get('st');
@@ -270,7 +351,24 @@ document.addEventListener('alpine:init', () => {
                 if (params.has('c')) this.selectedChimneyId = params.get('c');
                 if (params.has('e')) this.selectedExtrasIds = params.get('e').split(',');
             }
-            this.isRestoringUrl = false;
+            this.isRestoringUrl = false; // Разблокируем обновление
+        },
+
+        shareConfig() {
+            const url = this.updateUrl(); // Обновляем и берем текущую ссылку
+            const title = 'Мой банный чан';
+            // Безопасная проверка на наличие selectedSize (вдруг share нажали на заглушке)
+            const sizeName = this.selectedSize ? this.selectedSize.name : 'Чан';
+            const text = `Посмотри, какой чан я собрал(а): ${sizeName}`;
+
+            if (navigator.share) {
+                navigator.share({ title, text, url })
+                    .catch((error) => console.log('Error sharing', error));
+            } else {
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Ссылка скопирована!\n' + url);
+                });
+            }
         }
     }));
 });
