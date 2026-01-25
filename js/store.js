@@ -16,6 +16,13 @@ document.addEventListener('alpine:init', () => {
         isVisualizerMinimized: false,
         isRestoringUrl: false,
 
+        // Синхронизация (Abandoned Cart)
+        syncTimeout: null,
+        isSyncing: false,
+        // ЗАМЕНИТЕ НА ВАШ WEBHOOK (например, make.com, n8n, или свой сервер)
+        webhookUrl: 'https://your-webhook-url.com/sync-cart',
+
+
         // Инициализация
         init() {
             console.log('Калькулятор запущен.');
@@ -34,13 +41,14 @@ document.addEventListener('alpine:init', () => {
                 this.loadFromUrl();
 
                 // Watchers for URL update
-                this.$watch('selectedSizeId', () => this.updateUrl());
-                this.$watch('selectedMaterialId', () => this.updateUrl());
-                this.$watch('selectedStoveId', () => this.updateUrl());
-                this.$watch('selectedFinishId', () => this.updateUrl());
-                this.$watch('selectedLadderId', () => this.updateUrl());
-                this.$watch('selectedChimneyId', () => this.updateUrl());
-                this.$watch('selectedExtrasIds', () => this.updateUrl());
+                // Watchers for URL update & Sync
+                this.$watch('selectedSizeId', () => { this.updateUrl(); this.triggerSync(); });
+                this.$watch('selectedMaterialId', () => { this.updateUrl(); this.triggerSync(); });
+                this.$watch('selectedStoveId', () => { this.updateUrl(); this.triggerSync(); });
+                this.$watch('selectedFinishId', () => { this.updateUrl(); this.triggerSync(); });
+                this.$watch('selectedLadderId', () => { this.updateUrl(); this.triggerSync(); });
+                this.$watch('selectedChimneyId', () => { this.updateUrl(); this.triggerSync(); });
+                this.$watch('selectedExtrasIds', () => { this.updateUrl(); this.triggerSync(); });
 
                 if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
                     this.isTelegram = true;
@@ -368,6 +376,57 @@ document.addEventListener('alpine:init', () => {
                 navigator.clipboard.writeText(url).then(() => {
                     alert('Ссылка скопирована!\n' + url);
                 });
+            }
+        },
+
+        // --- ABANDONED CART SYNC ---
+        triggerSync() {
+            // Если нет размера, нет смысла сохранять "пустую" корзину
+            if (!this.selectedSizeId) return;
+
+            // Debounce: ждем 3 секунды после последнего изменения
+            if (this.syncTimeout) clearTimeout(this.syncTimeout);
+
+            this.syncTimeout = setTimeout(() => {
+                this.sendDataToBackend();
+            }, 3000);
+        },
+
+        sendDataToBackend() {
+            // Проверка на URL вебхука
+            if (!this.webhookUrl || this.webhookUrl.includes('your-webhook-url')) {
+                // console.log('Webhook URL не настроен, синхронизация пропущена.'); 
+                return;
+            }
+
+            const data = {
+                user: window.Telegram?.WebApp?.initDataUnsafe?.user || 'Unknown User',
+                initData: window.Telegram?.WebApp?.initData || '',
+                config: {
+                    size: this.selectedSizeId,
+                    material: this.selectedMaterialId,
+                    stove: this.selectedStoveId,
+                    finish: this.selectedFinishId,
+                    ladder: this.selectedLadderId,
+                    chimney: this.selectedChimneyId,
+                    extras: this.selectedExtrasIds,
+                },
+                price: this.totalPrice,
+                status: 'browsing', // Статус "смотрит"
+                timestamp: new Date().toISOString()
+            };
+
+            // Отправляем beacon (работает даже при закрытии страницы) или fetch
+            try {
+                // Используем fetch keepalive, если поддерживается, или обычный fetch
+                fetch(this.webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                    keepalive: true
+                }).catch(err => console.error('Sync error:', err));
+            } catch (e) {
+                console.error('Sync failed', e);
             }
         }
     }));
