@@ -17,7 +17,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
-<body class="bg-[#F3F5F6] text-[#333] font-body min-h-screen pb-48 lg:pb-0">
+<body class="bg-[#F3F5F6] text-[#333] font-body min-h-screen pb-24 lg:pb-0">
     <div x-data="calculator()" class="max-w-[1200px] mx-auto px-4 py-8 lg:px-8">
 
         <!-- ... content ... -->
@@ -402,7 +402,7 @@
         <!-- Итого и кнопка (на десктопе внизу, чтобы не перекрывать) -->
         <!-- Sticky Footer for Mobile / Card for Desktop -->
         <div
-            class="fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 p-4 z-40 lg:static lg:bg-white lg:border lg:border-gray-100 lg:p-6 lg:rounded-2xl lg:shadow-lg lg:mt-6 lg:z-auto safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] lg:shadow-none">
+            class="fixed bottom-16 inset-x-0 bg-white border-t border-gray-200 p-4 z-40 lg:static lg:bg-white lg:border lg:border-gray-100 lg:p-6 lg:rounded-2xl lg:shadow-lg lg:mt-6 lg:z-auto safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] lg:shadow-none">
 
             <!-- Desktop Title -->
             <p class="hidden lg:block text-xs text-gray-400 uppercase tracking-wide font-bold mb-1">Сумма заказа
@@ -505,7 +505,8 @@
                     <span class="text-xs text-[#5fb856] font-bold uppercase tracking-wider mb-1">Ваша выгода:
                         ~30%</span>
                 </div>
-                <span class="font-oswald font-bold text-4xl text-[#5fb856]" x-text="formatPrice(totalPrice)"></span>
+                <span class="font-oswald font-bold text-3xl text-[#5fb856] whitespace-nowrap"
+                    x-text="formatPrice(totalPrice)"></span>
             </div>
         </div>
 
@@ -562,6 +563,43 @@
 </a>
 
 </div> <!-- Close x-data div -->
+
+
+<!-- Bottom Navigation Bar (Mobile & Desktop) -->
+<div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 lg:hidden pb-safe">
+    <div class="flex justify-around items-center h-16">
+        <!-- Calculator Tab -->
+        <button @click="currentView = 'calculator'"
+            class="flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors duration-200"
+            :class="currentView === 'calculator' ? 'text-[#5fb856]' : 'text-gray-400 hover:text-gray-600'">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                </path>
+            </svg>
+            <span class="text-[10px] font-medium">Калькулятор</span>
+        </button>
+
+        <!-- Cart Tab -->
+        <button @click="currentView = 'cart'"
+            class="flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors duration-200 relative"
+            :class="currentView === 'cart' ? 'text-[#5fb856]' : 'text-gray-400 hover:text-gray-600'">
+            <div class="relative">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                    </path>
+                </svg>
+                <!-- Badge -->
+                <div x-show="selectedSizeId" x-transition.scale
+                    class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm border border-white">
+                    1
+                </div>
+            </div>
+            <span class="text-[10px] font-medium">Корзина</span>
+        </button>
+    </div>
+</div>
 
 <script src="js/data.js?v=4"></script>
 <script src="js/store.js?v=4"></script>
