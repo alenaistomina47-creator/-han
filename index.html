@@ -410,38 +410,25 @@
 
             <div class="max-w-7xl mx-auto flex flex-col gap-3">
 
-                <!-- Price Row -->
-                <div class="flex items-end justify-between lg:block">
-                    <div class="lg:mb-4">
-                        <!-- Оригинальная цена -->
-                        <p class="text-sm lg:text-lg font-oswald text-gray-400 line-through mb-0 lg:mb-1"
-                            x-text="formatPrice(originalPrice)">
-                        </p>
-                        <!-- Цена со скидкой -->
-                        <div class="flex flex-col lg:block">
-                            <p class="text-2xl lg:text-3xl font-oswald font-bold text-[#5fb856]"
+                <!-- Price Info Only (Status Bar) -->
+                <div class="flex items-center justify-between w-full">
+                    <div>
+                        <p class="text-[10px] text-gray-400 uppercase tracking-wide font-bold mb-0 leading-none">
+                            Итоговая стоимость</p>
+                        <div class="flex items-baseline gap-2 mt-0.5">
+                            <p class="text-3xl font-oswald font-bold text-[#5fb856] leading-none"
                                 x-text="formatPrice(totalPrice)"></p>
+                            <p class="text-sm font-oswald text-gray-300 line-through leading-none"
+                                x-text="formatOriginalPrice(originalPrice)"></p>
                         </div>
                     </div>
 
-                    <!-- Промо -->
-                    <div class="hidden lg:block bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 mb-4">
-                        <p class="text-xs font-bold text-yellow-800">🔥 Цена 2025 года</p>
-                        <p class="text-xs text-yellow-700">Актуальна до конца недели</p>
+                    <!-- Promo Badge (Compact) -->
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg px-2 py-1 flex flex-col items-end">
+                        <p class="text-[10px] font-bold text-yellow-800 leading-tight">🔥 Цена 2025</p>
+                        <p class="text-[9px] text-yellow-600 leading-tight">-30%</p>
                     </div>
                 </div>
-
-                <!-- CTA Button -->
-                <button @click="currentView = 'cart'" x-show="!isTelegram" :disabled="!selectedSizeId"
-                    :class="{'opacity-50 grayscale cursor-not-allowed': !selectedSizeId}"
-                    class="w-full border-2 border-[#5fb856] text-[#5fb856] hover:bg-[#5fb856] hover:text-white rounded-xl py-3 font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 group">
-                    <span>Перейти в корзину</span>
-                    <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
-                        </path>
-                    </svg>
-                </button>
 
                 <div class="hidden lg:block mt-3 text-center">
                     <p class="text-[10px] text-gray-500 font-medium">🎁 Получите подарки на <span
@@ -566,7 +553,7 @@
 
 
 <!-- Bottom Navigation Bar (Mobile & Desktop) -->
-<div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 lg:hidden pb-safe">
+<div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-[100] lg:hidden pb-safe">
     <div class="flex justify-around items-center h-16">
         <!-- Calculator Tab -->
         <button @click="currentView = 'calculator'"
