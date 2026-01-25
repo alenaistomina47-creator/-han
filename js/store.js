@@ -380,7 +380,8 @@ document.addEventListener('alpine:init', () => {
 
         loadFromUrl() {
             this.isRestoringUrl = true; // Блокируем обновление URL
-            alert('Debug: Start Loading URL. Search: ' + window.location.search); // DEBUG
+            this.isRestoringUrl = true; // Блокируем обновление URL
+            // alert('Debug: Start Loading URL. Search: ' + window.location.search); // DEBUG removed
 
             // 1. Попытка загрузить из Deep Link (start_param) - для поддержки старых ссылок
             let startParam = new URLSearchParams(window.location.search).get('tgWebAppStartParam');
@@ -410,7 +411,7 @@ document.addEventListener('alpine:init', () => {
             const params = new URLSearchParams(window.location.search);
             // Считываем параметры
             if (params.has('s')) {
-                alert('Debug: Found Size ' + params.get('s')); // DEBUG
+                // alert('Debug: Found Size ' + params.get('s')); // DEBUG removed
                 this.selectedSizeId = params.get('s');
             }
 
