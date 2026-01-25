@@ -20,6 +20,7 @@ document.addEventListener('alpine:init', () => {
         // Синхронизация (Abandoned Cart)
         syncTimeout: null,
         isSyncing: false,
+        isLoading: true, // Состояние загрузки изображений
         // ЗАМЕНИТЕ НА ВАШ WEBHOOK (например, make.com, n8n, или свой сервер)
         webhookUrl: 'https://your-webhook-url.com/sync-cart',
 
@@ -38,18 +39,22 @@ document.addEventListener('alpine:init', () => {
 
                 this.preloadImages();
 
-                // --- URL STATE SYNC START ---
+                // 1. Попытка восстановить из LocalStorage (если нет параметров в URL)
+                if (window.location.search.length < 2) {
+                    this.loadFromLocalStorage();
+                }
+
+                // 2. Затем из URL (приоритет URL выше)
                 this.loadFromUrl();
 
-                // Watchers for URL update
-                // Watchers for URL update & Sync
-                this.$watch('selectedSizeId', () => { this.updateUrl(); this.triggerSync(); });
-                this.$watch('selectedMaterialId', () => { this.updateUrl(); this.triggerSync(); });
-                this.$watch('selectedStoveId', () => { this.updateUrl(); this.triggerSync(); });
-                this.$watch('selectedFinishId', () => { this.updateUrl(); this.triggerSync(); });
-                this.$watch('selectedLadderId', () => { this.updateUrl(); this.triggerSync(); });
-                this.$watch('selectedChimneyId', () => { this.updateUrl(); this.triggerSync(); });
-                this.$watch('selectedExtrasIds', () => { this.updateUrl(); this.triggerSync(); });
+                // Watchers for URL update & Sync & LocalStorage
+                this.$watch('selectedSizeId', () => { this.updateUrl(); this.triggerSync(); this.saveToLocalStorage(); });
+                this.$watch('selectedMaterialId', () => { this.updateUrl(); this.triggerSync(); this.saveToLocalStorage(); });
+                this.$watch('selectedStoveId', () => { this.updateUrl(); this.triggerSync(); this.saveToLocalStorage(); });
+                this.$watch('selectedFinishId', () => { this.updateUrl(); this.triggerSync(); this.saveToLocalStorage(); });
+                this.$watch('selectedLadderId', () => { this.updateUrl(); this.triggerSync(); this.saveToLocalStorage(); });
+                this.$watch('selectedChimneyId', () => { this.updateUrl(); this.triggerSync(); this.saveToLocalStorage(); });
+                this.$watch('selectedExtrasIds', () => { this.updateUrl(); this.triggerSync(); this.saveToLocalStorage(); });
 
                 // Scroll to top on view change
                 this.$watch('currentView', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
@@ -160,7 +165,62 @@ document.addEventListener('alpine:init', () => {
             return null;
         },
 
-        // ... preloadImages ...
+        async preloadImages() {
+            this.isLoading = true;
+            const images = [];
+            // Собираем все URL картинок из data.js
+            appData.sizes.forEach(s => { if (s.image) images.push(s.image); if (s.imageInside) images.push(s.imageInside); });
+            appData.stoves.forEach(s => { if (s.image) images.push(s.image); });
+            appData.finishes.forEach(s => { if (s.image) images.push(s.image); if (s.imageInside) images.push(s.imageInside); });
+            appData.extras.forEach(s => { if (s.image) images.push(s.image); if (s.imageInside) images.push(s.imageInside); });
+            // Материалы (overlay)
+            Object.values(appData.materialMetadata).forEach(m => { if (m.overlayImage) images.push(m.overlayImage); });
+
+            const promises = images.map(src => {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.src = src;
+                    img.onload = resolve;
+                    img.onerror = resolve; // Не блокируем если нет картинки
+                });
+            });
+
+            await Promise.all(promises);
+            this.isLoading = false;
+            console.log('Images preloaded');
+        },
+
+        saveToLocalStorage() {
+            const state = {
+                s: this.selectedSizeId,
+                m: this.selectedMaterialId,
+                st: this.selectedStoveId,
+                f: this.selectedFinishId,
+                l: this.selectedLadderId,
+                c: this.selectedChimneyId,
+                e: this.selectedExtrasIds
+            };
+            localStorage.setItem('chan_config', JSON.stringify(state));
+        },
+
+        loadFromLocalStorage() {
+            const saved = localStorage.getItem('chan_config');
+            if (saved) {
+                try {
+                    const state = JSON.parse(saved);
+                    if (state.s) this.selectedSizeId = state.s;
+                    if (state.m) this.selectedMaterialId = state.m;
+                    if (state.st) this.selectedStoveId = state.st;
+                    if (state.f) this.selectedFinishId = state.f;
+                    if (state.l) this.selectedLadderId = state.l;
+                    if (state.c) this.selectedChimneyId = state.c;
+                    if (state.e) this.selectedExtrasIds = state.e;
+                    console.log('Restored from LocalStorage');
+                } catch (e) {
+                    console.error('LS Error', e);
+                }
+            }
+        },
 
         get totalPrice() {
             let total = 0;
