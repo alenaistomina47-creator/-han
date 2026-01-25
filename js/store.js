@@ -51,6 +51,9 @@ document.addEventListener('alpine:init', () => {
                 this.$watch('selectedChimneyId', () => { this.updateUrl(); this.triggerSync(); });
                 this.$watch('selectedExtrasIds', () => { this.updateUrl(); this.triggerSync(); });
 
+                // Scroll to top on view change
+                this.$watch('currentView', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
                 if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
                     this.isTelegram = true;
                     // ... (Telegram init logic)
