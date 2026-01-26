@@ -22,7 +22,7 @@ document.addEventListener('alpine:init', () => {
         isSyncing: false,
         isLoading: true, // Состояние загрузки изображений
         // ЗАМЕНИТЕ НА ВАШ WEBHOOK (например, make.com, n8n, или свой сервер)
-        webhookUrl: 'https://your-webhook-url.com/sync-cart',
+        webhookUrl: 'https://kuklin2022.app.n8n.cloud/webhook-test/test',
 
 
         // Инициализация
@@ -62,13 +62,13 @@ document.addEventListener('alpine:init', () => {
                 if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
                     this.isTelegram = true;
                     // ... (Telegram init logic)
-                    // const tg = window.Telegram.WebApp;
-                    // tg.ready();
-                    // tg.expand();
+                    const tg = window.Telegram.WebApp;
+                    tg.ready();
+                    tg.expand();
 
-                    // Native MainButton disabled in favor of custom UI
-                    // tg.MainButton.setText(`ЗАФИКСИРОВАТЬ: 0 ₽`);
-                    // tg.MainButton.show();
+                    // Explicitly hide native button to prevent ghosting
+                    tg.MainButton.hide();
+                    tg.MainButton.isVisible = false; // Force internal state if needed
                 }
 
                 // ... (Business Logic watchers remain)
@@ -440,6 +440,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         // --- ABANDONED CART SYNC ---
+        // --- ABANDONED CART SYNC (Shadow Tracking) ---
         triggerSync() {
             // Если нет размера, нет смысла сохранять "пустую" корзину
             if (!this.selectedSizeId) return;
@@ -448,46 +449,53 @@ document.addEventListener('alpine:init', () => {
             if (this.syncTimeout) clearTimeout(this.syncTimeout);
 
             this.syncTimeout = setTimeout(() => {
-                this.sendDataToBackend();
+                this.sendToWebhook();
             }, 3000);
         },
 
-        sendDataToBackend() {
+        sendToWebhook() {
             // Проверка на URL вебхука
-            if (!this.webhookUrl || this.webhookUrl.includes('your-webhook-url')) {
-                // console.log('Webhook URL не настроен, синхронизация пропущена.'); 
-                return;
-            }
+            if (!this.webhookUrl) return;
 
-            const data = {
-                user: window.Telegram?.WebApp?.initDataUnsafe?.user || 'Unknown User',
-                initData: window.Telegram?.WebApp?.initData || '',
-                config: {
-                    size: this.selectedSizeId,
-                    material: this.selectedMaterialId,
-                    stove: this.selectedStoveId,
-                    finish: this.selectedFinishId,
-                    ladder: this.selectedLadderId,
-                    chimney: this.selectedChimneyId,
-                    extras: this.selectedExtrasIds,
-                },
-                price: this.totalPrice,
-                status: 'browsing', // Статус "смотрит"
-                timestamp: new Date().toISOString()
+            // Собираем данные пользователя из Telegram (если есть)
+            const user = window.Telegram?.WebApp?.initDataUnsafe?.user || {
+                id: 'unknown',
+                first_name: 'Anonymous',
+                username: ''
             };
 
-            // Отправляем beacon (работает даже при закрытии страницы) или fetch
-            try {
-                // Используем fetch keepalive, если поддерживается, или обычный fetch
-                fetch(this.webhookUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
-                    keepalive: true
-                }).catch(err => console.error('Sync error:', err));
-            } catch (e) {
-                console.error('Sync failed', e);
-            }
+            // Собираем данные корзины
+            const cart = {
+                selectedSizeId: this.selectedSizeId,
+                selectedStoveId: this.selectedStoveId,
+                selectedMaterialId: this.selectedMaterialId,
+                selectedFinishId: this.selectedFinishId,
+                totalSum: this.totalPrice
+            };
+
+            const data = {
+                user: user,
+                cart: cart,
+                date: new Date().toISOString()
+            };
+
+            // Отправляем данные на сервер
+            fetch(this.webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        console.log('Shadow tracking sent successfully');
+                    } else {
+                        console.error('Shadow tracking failed', response.status);
+                    }
+                })
+                .catch(err => console.error('Webhook error:', err));
         }
     }));
 });
