@@ -69,6 +69,9 @@ document.addEventListener('alpine:init', () => {
                     // Explicitly hide native button to prevent ghosting
                     tg.MainButton.hide();
                     tg.MainButton.isVisible = false; // Force internal state if needed
+
+                    // Analytics: App Open
+                    this.sendAppOpenEvent();
                 }
 
                 // ... (Business Logic watchers remain)
@@ -496,6 +499,23 @@ document.addEventListener('alpine:init', () => {
                     }
                 })
                 .catch(err => console.error('Webhook error:', err));
+        },
+
+        sendAppOpenEvent() {
+            const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+            if (!userId) return;
+
+            const url = 'https://kuklin2022.app.n8n.cloud/webhook-test/app-open';
+            const data = {
+                telegram_id: userId,
+                action: 'app_open'
+            };
+
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).catch(err => console.error('Analytics error:', err));
         }
     }));
 });
