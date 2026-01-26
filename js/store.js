@@ -505,7 +505,7 @@ document.addEventListener('alpine:init', () => {
             const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
             if (!userId) return;
 
-            const url = 'https://kuklin2022.app.n8n.cloud/webhook-test/app-open';
+            const url = 'https://kuklin2022.app.n8n.cloud/webhook/app-open';
             const data = {
                 telegram_id: userId,
                 action: 'app_open'
