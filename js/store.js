@@ -442,104 +442,106 @@ document.addEventListener('alpine:init', () => {
                 navigator.clipboard.writeText(url).then(() => {
                     alert('Ссылка скопирована!\n' + url);
                 });
-                // --- ABANDONED CART SYNC ---
-                // --- ABANDONED CART SYNC (Shadow Tracking) ---
-                // --- ABANDONED CART SYNC (Autosave) ---
-                triggerSync() {
-                    console.log('[Store] triggerSync called. Selected Size:', this.selectedSizeId);
-                    // Если нет размера, нет смысла сохранять "пустую" корзину
-                    if (!this.selectedSizeId) {
-                        console.log('[Store] No size selected, skipping sync.');
-                        return;
-                    }
+            }
+        },
+        // --- ABANDONED CART SYNC ---
+        // --- ABANDONED CART SYNC (Shadow Tracking) ---
+        // --- ABANDONED CART SYNC (Autosave) ---
+        triggerSync() {
+            console.log('[Store] triggerSync called. Selected Size:', this.selectedSizeId);
+            // Если нет размера, нет смысла сохранять "пустую" корзину
+            if (!this.selectedSizeId) {
+                console.log('[Store] No size selected, skipping sync.');
+                return;
+            }
 
-                    // Debounce: ждем 2 секунды после последнего изменения
-                    if (this.syncTimeout) clearTimeout(this.syncTimeout);
+            // Debounce: ждем 2 секунды после последнего изменения
+            if (this.syncTimeout) clearTimeout(this.syncTimeout);
 
-                    this.syncTimeout = setTimeout(() => {
-                        console.log('[Store] Debounce passed. Calling sendToWebhook...');
-                        this.sendToWebhook();
-                    }, 2000);
+            this.syncTimeout = setTimeout(() => {
+                console.log('[Store] Debounce passed. Calling sendToWebhook...');
+                this.sendToWebhook();
+            }, 2000);
+        },
+
+        sendToWebhook() {
+            // Проверка на URL вебхука
+            if (!this.webhookUrl) {
+                console.error('[Store] Webhook URL is missing!');
+                return;
+            }
+
+            console.log('[Store] Preparing data for n8n...');
+
+            const telegramId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || 'unknown';
+
+            // Генерируем читаемую строку (Чан + Печь + Допы)
+            const sizeName = this.selectedSize ? this.selectedSize.name : '';
+            const materialName = this.selectedMaterial ? this.selectedMaterial.name : '';
+            const stoveName = this.selectedStove ? this.selectedStove.name : '';
+            const finishName = this.selectedFinish ? this.selectedFinish.name : '';
+            const ladderName = this.selectedLadder ? this.selectedLadder.name : '';
+            const chimneyName = this.selectedChimney ? this.selectedChimney.name : '';
+
+            const extrasNames = this.selectedExtrasIds.map(id => {
+                const e = appData.extras.find(ext => ext.id === id);
+                return e ? e.name : '';
+            }).filter(Boolean).join(', ');
+
+            // Собираем строку "Чан ... + Печь ... + ..."
+            const parts = [
+                sizeName ? `Чан: ${sizeName} (${materialName})` : '',
+                stoveName ? `Печь: ${stoveName}` : '',
+                finishName ? `Отделка: ${finishName}` : '',
+                ladderName ? `Лестница: ${ladderName}` : '',
+                chimneyName ? `Дымоход: ${chimneyName}` : '',
+                extrasNames ? `Допы: ${extrasNames}` : ''
+            ].filter(Boolean);
+
+            const cartContent = parts.join(' + ');
+
+            const data = {
+                telegram_id: telegramId,
+                cart_content: cartContent,
+                total_price: this.totalPrice
+            };
+
+            console.log('[Store] Sending to n8n...', data);
+
+            // Отправляем данные на сервер
+            fetch(this.webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
-
-                sendToWebhook() {
-                    // Проверка на URL вебхука
-                    if (!this.webhookUrl) {
-                        console.error('[Store] Webhook URL is missing!');
-                        return;
+                body: JSON.stringify(data)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        console.log('[Store] Cart autosave sent successfully! Status:', response.status);
+                    } else {
+                        console.error('[Store] Cart autosave failed. Status:', response.status);
                     }
+                })
+                .catch(err => console.error('[Store] Webhook connection error:', err));
+        },
 
-                    console.log('[Store] Preparing data for n8n...');
+        sendAppOpenEvent() {
+            const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+            if (!userId) return;
 
-                    const telegramId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || 'unknown';
+            const url = 'https://kuklin2022.app.n8n.cloud/webhook/app-open';
+            const data = {
+                telegram_id: userId,
+                action: 'app_open'
+            };
 
-                    // Генерируем читаемую строку (Чан + Печь + Допы)
-                    const sizeName = this.selectedSize ? this.selectedSize.name : '';
-                    const materialName = this.selectedMaterial ? this.selectedMaterial.name : '';
-                    const stoveName = this.selectedStove ? this.selectedStove.name : '';
-                    const finishName = this.selectedFinish ? this.selectedFinish.name : '';
-                    const ladderName = this.selectedLadder ? this.selectedLadder.name : '';
-                    const chimneyName = this.selectedChimney ? this.selectedChimney.name : '';
-
-                    const extrasNames = this.selectedExtrasIds.map(id => {
-                        const e = appData.extras.find(ext => ext.id === id);
-                        return e ? e.name : '';
-                    }).filter(Boolean).join(', ');
-
-                    // Собираем строку "Чан ... + Печь ... + ..."
-                    const parts = [
-                        sizeName ? `Чан: ${sizeName} (${materialName})` : '',
-                        stoveName ? `Печь: ${stoveName}` : '',
-                        finishName ? `Отделка: ${finishName}` : '',
-                        ladderName ? `Лестница: ${ladderName}` : '',
-                        chimneyName ? `Дымоход: ${chimneyName}` : '',
-                        extrasNames ? `Допы: ${extrasNames}` : ''
-                    ].filter(Boolean);
-
-                    const cartContent = parts.join(' + ');
-
-                    const data = {
-                        telegram_id: telegramId,
-                        cart_content: cartContent,
-                        total_price: this.totalPrice
-                    };
-
-                    console.log('[Store] Sending to n8n...', data);
-
-                    // Отправляем данные на сервер
-                    fetch(this.webhookUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify(data)
-                    })
-                        .then(response => {
-                            if (response.ok) {
-                                console.log('[Store] Cart autosave sent successfully! Status:', response.status);
-                            } else {
-                                console.error('[Store] Cart autosave failed. Status:', response.status);
-                            }
-                        })
-                        .catch(err => console.error('[Store] Webhook connection error:', err));
-                },
-
-                sendAppOpenEvent() {
-                    const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
-                    if (!userId) return;
-
-                    const url = 'https://kuklin2022.app.n8n.cloud/webhook/app-open';
-                    const data = {
-                        telegram_id: userId,
-                        action: 'app_open'
-                    };
-
-                    fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    }).catch(err => console.error('Analytics error:', err));
-                }
-            }));
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).catch(err => console.error('Analytics error:', err));
+        }
+    }));
 });
