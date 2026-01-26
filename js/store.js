@@ -21,8 +21,8 @@ document.addEventListener('alpine:init', () => {
         syncTimeout: null,
         isSyncing: false,
         isLoading: true, // Состояние загрузки изображений
-        // ЗАМЕНИТЕ НА ВАШ WEBHOOK (например, make.com, n8n, или свой сервер)
-        // ЗАМЕНИТЕ НА ВАШ WEBHOOK (например, make.com, n8n, или свой сервер)
+
+        // WEBHOOK URL
         webhookUrl: 'https://kuklin2022.app.n8n.cloud/webhook-test/save-cart',
 
 
@@ -35,12 +35,9 @@ document.addEventListener('alpine:init', () => {
             });
 
             if (typeof appData !== 'undefined') {
-                // НЕ выбираем ничего по умолчанию (чистый лист)
-                // this.selectedSizeId = ... 
-
                 this.preloadImages();
 
-                // 1. Попытка восстановить из LocalStorage (если нет параметров в URL)
+                // 1. Попытка восстановить из LocalStorage
                 if (window.location.search.length < 2) {
                     this.loadFromLocalStorage();
                 }
@@ -62,22 +59,22 @@ document.addEventListener('alpine:init', () => {
                 // Scroll to top on view change
                 this.$watch('currentView', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
+                // Telegram Init
                 if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
                     this.isTelegram = true;
-                    // ... (Telegram init logic)
                     const tg = window.Telegram.WebApp;
                     tg.ready();
                     tg.expand();
 
-                    // Explicitly hide native button to prevent ghosting
+                    // Explicitly hide native button
                     tg.MainButton.hide();
-                    tg.MainButton.isVisible = false; // Force internal state if needed
+                    tg.MainButton.isVisible = false;
 
                     // Analytics: App Open
                     this.sendAppOpenEvent();
                 }
 
-                // ... (Business Logic watchers remain)
+                // Business Logic Watchers
                 this.$watch('selectedChimneyId', (val) => {
                     if (val === 'pipe_sandwich') {
                         this.selectedExtrasIds = this.selectedExtrasIds.filter(id => id !== 'protection');
@@ -143,24 +140,8 @@ document.addEventListener('alpine:init', () => {
         },
 
         getBaseImage() {
-            // Если ничего не выбрано, вернем null (в HTML обработаем вывод заглушки)
             if (!this.selectedSizeId) return null;
-
-            // Если выбран размер, но не материал - покажем просто размер (если есть картинка размера)
-            // Но у нас картинки привязаны к металлу скорее. 
-            // Хотя в data.js: sizes имеет 'image'.
-
-            // Логика:
-            // 1. Если выбрана 430 - берем её картинку.
-            // 2. Если 304 - её.
-            // 3. Если ничего - берем картинку из selectedSize (если она есть).
-
-            // В data.js у sizes есть image: '.../small.png'
             if (this.selectedSize && this.selectedSize.image) {
-                // Но мы хотим overlay?
-                // В старом коде было: <img :src="selectedSize.image"> как база.
-                // Тогда getBaseImage мб и не нужен, если мы вернемся к слоям.
-                // Оставим пока старую логику слоев в HTML.
                 return null;
             }
             return null;
@@ -169,20 +150,19 @@ document.addEventListener('alpine:init', () => {
         async preloadImages() {
             this.isLoading = true;
             const images = [];
-            // Собираем все URL картинок из data.js
+
             appData.sizes.forEach(s => { if (s.image) images.push(s.image); if (s.imageInside) images.push(s.imageInside); });
             appData.stoves.forEach(s => { if (s.image) images.push(s.image); });
             appData.finishes.forEach(s => { if (s.image) images.push(s.image); if (s.imageInside) images.push(s.imageInside); });
             appData.extras.forEach(s => { if (s.image) images.push(s.image); if (s.imageInside) images.push(s.imageInside); });
-            // Материалы (overlay)
             Object.values(appData.materialMetadata).forEach(m => { if (m.overlayImage) images.push(m.overlayImage); });
 
             const promises = images.map(src => {
-                return new Promise((resolve, reject) => {
+                return new Promise((resolve) => {
                     const img = new Image();
                     img.src = src;
                     img.onload = resolve;
-                    img.onerror = resolve; // Не блокируем если нет картинки
+                    img.onerror = resolve;
                 });
             });
 
@@ -239,7 +219,7 @@ document.addEventListener('alpine:init', () => {
                     total += this.selectedFinish.price || 0;
                 }
             }
-            // ... ladders, chimneys, extras ...
+            // Extras
             if (this.selectedLadder) total += this.selectedLadder.price || 0;
             if (this.selectedChimney) total += this.selectedChimney.price || 0;
             this.selectedExtrasIds.forEach(id => {
@@ -249,13 +229,10 @@ document.addEventListener('alpine:init', () => {
             return total;
         },
 
-        // Детализация цены (Смета)
         get priceDetails() {
             const details = [];
 
-            // 1. Чаша (Размер + Материал)
             const size = appData.sizes.find(s => s.id === this.selectedSizeId);
-            // Use currentMaterials helper if available, or finding manually
             const material = this.currentMaterials ? this.currentMaterials.find(m => m.id === this.selectedMaterialId) : null;
 
             if (size && material) {
@@ -266,13 +243,9 @@ document.addEventListener('alpine:init', () => {
                 });
             }
 
-            // 2. Печь
             const stove = appData.stoves.find(s => s.id === this.selectedStoveId);
-            if (stove) {
-                details.push({ name: stove.name, price: stove.price || 0 });
-            }
+            if (stove) details.push({ name: stove.name, price: stove.price || 0 });
 
-            // 3. Отделка
             const finish = appData.finishes.find(f => f.id === this.selectedFinishId);
             if (finish && finish.price) {
                 let finishPrice = 0;
@@ -286,40 +259,23 @@ document.addEventListener('alpine:init', () => {
                 }
             }
 
-            // 4. Лестница
             const ladder = appData.extras.find(e => e.id === this.selectedLadderId);
-            if (ladder) {
-                details.push({ name: ladder.name, price: ladder.price || 0 });
-            }
+            if (ladder) details.push({ name: ladder.name, price: ladder.price || 0 });
 
-            // 5. Дымоход
             const chimney = appData.extras.find(e => e.id === this.selectedChimneyId);
-            if (chimney) {
-                details.push({ name: chimney.name, price: chimney.price || 0 });
-            }
+            if (chimney) details.push({ name: chimney.name, price: chimney.price || 0 });
 
-            // 6. Дополнительные опции
             this.selectedExtrasIds.forEach(id => {
                 const extra = appData.extras.find(e => e.id === id);
-                if (extra) {
-                    details.push({ name: extra.name, price: extra.price || 0 });
-                }
+                if (extra) details.push({ name: extra.name, price: extra.price || 0 });
             });
 
             return details;
         },
 
-        // Цена со скидкой (оригинальная из data.js) - показываем внизу зеленым
-        get discountedPrice() {
-            return this.totalPrice;
-        },
+        get discountedPrice() { return this.totalPrice; },
+        get originalPrice() { return Math.round(this.totalPrice * 1.3); },
 
-        // Оригинальная цена (завышенная на 30%) - показываем зачеркнутой
-        get originalPrice() {
-            return Math.round(this.totalPrice * 1.3);
-        },
-
-        // Отправка в Telegram
         sendToTelegram() {
             const extrasNames = this.selectedExtrasIds.map(id => {
                 const e = appData.extras.find(ext => ext.id === id);
@@ -343,13 +299,10 @@ document.addEventListener('alpine:init', () => {
                 `➕ Дополнительно: ${extrasNames || 'Нет'}\n\n` +
                 `💰 Сумма заказа: ${this.formatPrice(this.totalPrice)}`;
 
-            // Если открыто в Telegram Mini App
             if (this.isTelegram) {
-                // Открываем личку с менеджером с предзаполненным текстом
                 const url = `https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`;
                 window.Telegram.WebApp.openTelegramLink(url);
             } else {
-                // Fallback для браузера - копируем и открываем
                 navigator.clipboard.writeText(text).then(() => {
                     alert('Заказ скопирован! Открываю чат с менеджером...');
                     window.open(`https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`, '_blank');
@@ -360,7 +313,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         updateUrl() {
-            if (this.isRestoringUrl) return; // Не обновляем URL пока восстанавливаемся
+            if (this.isRestoringUrl) return;
 
             const params = new URLSearchParams();
             if (this.selectedSizeId) params.set('s', this.selectedSizeId);
@@ -375,16 +328,12 @@ document.addEventListener('alpine:init', () => {
             const newUrl = `${window.location.pathname}?${newQuery}`;
             window.history.replaceState({}, '', newUrl);
 
-            // Возвращаем полный абсолютный URL для копирования
             return `${window.location.origin}${newUrl}`;
         },
 
         loadFromUrl() {
-            this.isRestoringUrl = true; // Блокируем обновление URL
-            this.isRestoringUrl = true; // Блокируем обновление URL
-            // alert('Debug: Start Loading URL. Search: ' + window.location.search); // DEBUG removed
+            this.isRestoringUrl = true;
 
-            // 1. Попытка загрузить из Deep Link (start_param) - для поддержки старых ссылок
             let startParam = new URLSearchParams(window.location.search).get('tgWebAppStartParam');
             if (window.Telegram?.WebApp?.initDataUnsafe?.start_param) {
                 startParam = window.Telegram.WebApp.initDataUnsafe.start_param;
@@ -402,21 +351,13 @@ document.addEventListener('alpine:init', () => {
                     if (state.c) this.selectedChimneyId = state.c;
                     if (state.e) this.selectedExtrasIds = state.e;
                     this.isRestoringUrl = false;
-                    return; // Успех
-                } catch (e) {
-                    console.error('Deep link error:', e);
-                }
+                    return;
+                } catch (e) { console.error('Deep link error:', e); }
             }
 
-            // 2. Fallback: Обычные GET-параметры (s, m, st...)
             const params = new URLSearchParams(window.location.search);
-            // Считываем параметры
-            if (params.has('s')) {
-                // alert('Debug: Found Size ' + params.get('s')); // DEBUG removed
-                this.selectedSizeId = params.get('s');
-            }
+            if (params.has('s')) this.selectedSizeId = params.get('s');
 
-            // Если есть размер, считываем остальное
             if (this.selectedSizeId) {
                 if (params.has('m')) this.selectedMaterialId = params.get('m');
                 if (params.has('st')) this.selectedStoveId = params.get('st');
@@ -425,13 +366,12 @@ document.addEventListener('alpine:init', () => {
                 if (params.has('c')) this.selectedChimneyId = params.get('c');
                 if (params.has('e')) this.selectedExtrasIds = params.get('e').split(',');
             }
-            this.isRestoringUrl = false; // Разблокируем обновление
+            this.isRestoringUrl = false;
         },
 
         shareConfig() {
-            const url = this.updateUrl(); // Обновляем и берем текущую ссылку
+            const url = this.updateUrl();
             const title = 'Мой банный чан';
-            // Безопасная проверка на наличие selectedSize (вдруг share нажали на заглушке)
             const sizeName = this.selectedSize ? this.selectedSize.name : 'Чан';
             const text = `Посмотри, какой чан я собрал(а): ${sizeName}`;
 
@@ -444,38 +384,32 @@ document.addEventListener('alpine:init', () => {
                 });
             }
         },
-        // --- ABANDONED CART SYNC ---
-        // --- ABANDONED CART SYNC (Shadow Tracking) ---
-        // --- ABANDONED CART SYNC (Autosave) ---
+
+        // --- AUTOSAVE CART ---
         triggerSync() {
-            console.log('[Store] triggerSync called. Selected Size:', this.selectedSizeId);
-            // Если нет размера, нет смысла сохранять "пустую" корзину
+            console.log('[Store] triggerSync called. Size:', this.selectedSizeId);
             if (!this.selectedSizeId) {
-                console.log('[Store] No size selected, skipping sync.');
+                console.log('[Store] No size selected, skipping.');
                 return;
             }
 
-            // Debounce: ждем 2 секунды после последнего изменения
             if (this.syncTimeout) clearTimeout(this.syncTimeout);
 
             this.syncTimeout = setTimeout(() => {
-                console.log('[Store] Debounce passed. Calling sendToWebhook...');
+                console.log('[Store] Debounce passed. Sending...');
                 this.sendToWebhook();
             }, 2000);
         },
 
         sendToWebhook() {
-            // Проверка на URL вебхука
             if (!this.webhookUrl) {
-                console.error('[Store] Webhook URL is missing!');
+                console.error('[Store] Webhook URL missing!');
                 return;
             }
 
-            console.log('[Store] Preparing data for n8n...');
-
+            console.log('[Store] Preparing data...');
             const telegramId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || 'unknown';
 
-            // Генерируем читаемую строку (Чан + Печь + Допы)
             const sizeName = this.selectedSize ? this.selectedSize.name : '';
             const materialName = this.selectedMaterial ? this.selectedMaterial.name : '';
             const stoveName = this.selectedStove ? this.selectedStove.name : '';
@@ -488,7 +422,6 @@ document.addEventListener('alpine:init', () => {
                 return e ? e.name : '';
             }).filter(Boolean).join(', ');
 
-            // Собираем строку "Чан ... + Печь ... + ..."
             const parts = [
                 sizeName ? `Чан: ${sizeName} (${materialName})` : '',
                 stoveName ? `Печь: ${stoveName}` : '',
@@ -506,9 +439,8 @@ document.addEventListener('alpine:init', () => {
                 total_price: this.totalPrice
             };
 
-            console.log('[Store] Sending to n8n...', data);
+            console.log('[Store] POST:', data);
 
-            // Отправляем данные на сервер
             fetch(this.webhookUrl, {
                 method: 'POST',
                 headers: {
@@ -517,14 +449,11 @@ document.addEventListener('alpine:init', () => {
                 },
                 body: JSON.stringify(data)
             })
-                .then(response => {
-                    if (response.ok) {
-                        console.log('[Store] Cart autosave sent successfully! Status:', response.status);
-                    } else {
-                        console.error('[Store] Cart autosave failed. Status:', response.status);
-                    }
+                .then(res => {
+                    if (res.ok) console.log('[Store] Autosave OK');
+                    else console.error('[Store] Autosave Error:', res.status);
                 })
-                .catch(err => console.error('[Store] Webhook connection error:', err));
+                .catch(err => console.error('[Store] Fetch Error:', err));
         },
 
         sendAppOpenEvent() {
@@ -532,16 +461,12 @@ document.addEventListener('alpine:init', () => {
             if (!userId) return;
 
             const url = 'https://kuklin2022.app.n8n.cloud/webhook/app-open';
-            const data = {
-                telegram_id: userId,
-                action: 'app_open'
-            };
-
             fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+                body: JSON.stringify({ telegram_id: userId, action: 'app_open' })
             }).catch(err => console.error('Analytics error:', err));
         }
+
     }));
 });
