@@ -49,7 +49,9 @@ document.addEventListener('alpine:init', () => {
                 this.loadFromUrl();
 
                 // Watchers for URL update & Sync & LocalStorage
-                this.$watch('selectedSizeId', () => { this.updateUrl(); this.triggerSync(); this.saveToLocalStorage(); });
+                const logChange = (field) => console.log(`[Store] Changed: ${field}, triggering sync...`);
+
+                this.$watch('selectedSizeId', () => { logChange('size'); this.updateUrl(); this.triggerSync(); this.saveToLocalStorage(); });
                 this.$watch('selectedMaterialId', () => { this.updateUrl(); this.triggerSync(); this.saveToLocalStorage(); });
                 this.$watch('selectedStoveId', () => { this.updateUrl(); this.triggerSync(); this.saveToLocalStorage(); });
                 this.$watch('selectedFinishId', () => { this.updateUrl(); this.triggerSync(); this.saveToLocalStorage(); });
@@ -444,20 +446,30 @@ document.addEventListener('alpine:init', () => {
                 // --- ABANDONED CART SYNC (Shadow Tracking) ---
                 // --- ABANDONED CART SYNC (Autosave) ---
                 triggerSync() {
+                    console.log('[Store] triggerSync called. Selected Size:', this.selectedSizeId);
                     // Если нет размера, нет смысла сохранять "пустую" корзину
-                    if (!this.selectedSizeId) return;
+                    if (!this.selectedSizeId) {
+                        console.log('[Store] No size selected, skipping sync.');
+                        return;
+                    }
 
-                    // Debounce: ждем 2 секунды после последнего изменения (было 3)
+                    // Debounce: ждем 2 секунды после последнего изменения
                     if (this.syncTimeout) clearTimeout(this.syncTimeout);
 
                     this.syncTimeout = setTimeout(() => {
+                        console.log('[Store] Debounce passed. Calling sendToWebhook...');
                         this.sendToWebhook();
                     }, 2000);
                 },
 
                 sendToWebhook() {
                     // Проверка на URL вебхука
-                    if (!this.webhookUrl) return;
+                    if (!this.webhookUrl) {
+                        console.error('[Store] Webhook URL is missing!');
+                        return;
+                    }
+
+                    console.log('[Store] Preparing data for n8n...');
 
                     const telegramId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || 'unknown';
 
@@ -492,6 +504,8 @@ document.addEventListener('alpine:init', () => {
                         total_price: this.totalPrice
                     };
 
+                    console.log('[Store] Sending to n8n...', data);
+
                     // Отправляем данные на сервер
                     fetch(this.webhookUrl, {
                         method: 'POST',
@@ -503,12 +517,12 @@ document.addEventListener('alpine:init', () => {
                     })
                         .then(response => {
                             if (response.ok) {
-                                console.log('Cart autosave sent successfully');
+                                console.log('[Store] Cart autosave sent successfully! Status:', response.status);
                             } else {
-                                console.error('Cart autosave failed', response.status);
+                                console.error('[Store] Cart autosave failed. Status:', response.status);
                             }
                         })
-                        .catch(err => console.error('Webhook error:', err));
+                        .catch(err => console.error('[Store] Webhook connection error:', err));
                 },
 
                 sendAppOpenEvent() {
