@@ -300,8 +300,14 @@ document.addEventListener('alpine:init', () => {
                 `💰 Сумма заказа: ${this.formatPrice(this.totalPrice)}`;
 
             if (this.isTelegram) {
-                const url = `https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`;
-                window.Telegram.WebApp.openTelegramLink(url);
+                // Fix: Use tg://resolve for reliable in-app chat opening
+                const tgUrl = `tg://resolve?domain=ivan_ural_chan&text=${encodeURIComponent(text)}`;
+                try {
+                    window.Telegram.WebApp.openTelegramLink(tgUrl);
+                } catch (e) {
+                    console.error('TG Link Error:', e);
+                    window.open(`https://t.me/ivan_ural_chan?text=${encodeURIComponent(text)}`, '_blank');
+                }
             } else {
                 navigator.clipboard.writeText(text).then(() => {
                     alert('Заказ скопирован! Открываю чат с менеджером...');
