@@ -467,6 +467,17 @@
                                     class="text-[#5fb856] font-bold">25 000 ₽</span></p>
                             <p class="text-[9px] text-gray-400">при фиксации условий сегодня</p>
                         </div>
+
+                        <!-- Desktop Checkout Button -->
+                        <button @click="currentView = 'cart'; window.scrollTo({top: 0, behavior: 'smooth'})"
+                            class="hidden lg:flex w-full bg-[#5fb856] hover:bg-[#4ca344] text-white rounded-xl py-3 mt-2 font-bold uppercase tracking-wider text-sm shadow-md transition-all items-center justify-center gap-2 active:scale-[0.98]">
+                            <span>Перейти в корзину</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 8l4 4m0 0l-4 4m4-4H3">
+                                </path>
+                            </svg>
+                        </button>
                     </div>
                 </div>
 
