@@ -23,7 +23,7 @@ document.addEventListener('alpine:init', () => {
         isLoading: true, // Состояние загрузки изображений
 
         // WEBHOOK URL
-        webhookUrl: 'https://kuklin2022.app.n8n.cloud/webhook/save-cart',
+        webhookUrl: 'https://kuklin-n8n-bot.ru/webhook/app-open',
 
 
         // Инициализация
