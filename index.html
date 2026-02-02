@@ -19,6 +19,11 @@
 
 <body class="bg-[#F3F5F6] text-[#333] font-body min-h-screen pb-24 lg:pb-0">
     <div x-data="calculator()" class="max-w-[1200px] mx-auto px-4 py-8 lg:px-8">
+        <!-- DEBUG BAR -->
+        <div
+            class="fixed top-0 left-0 right-0 bg-red-600 text-white text-[10px] z-[9999] p-1 text-center font-mono select-all">
+            DEBUG URL: <span x-text="webhookUrl"></span>
+        </div>
 
         <!-- ... content ... -->
 
@@ -636,7 +641,7 @@
 
     <!-- Scripts -->
     <script src="js/data.js?v=7"></script>
-    <script src="js/store.js?v=11"></script>
+    <script src="js/store.js?v=12"></script>
 </body>
 
 </html>
