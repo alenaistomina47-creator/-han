@@ -466,7 +466,7 @@ document.addEventListener('alpine:init', () => {
             const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
             if (!userId) return;
 
-            const url = 'https://kuklin2022.app.n8n.cloud/webhook/app-open';
+            const url = 'https://kuklin-n8n-bot.ru/webhook/app-open';
             fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
