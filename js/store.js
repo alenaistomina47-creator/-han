@@ -440,6 +440,7 @@ document.addEventListener('alpine:init', () => {
             const cartContent = parts.join(' + ');
 
             const data = {
+                action: 'save_cart',
                 telegram_id: telegramId,
                 cart_content: cartContent,
                 total_price: this.totalPrice
