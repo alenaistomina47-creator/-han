@@ -23,7 +23,7 @@ document.addEventListener('alpine:init', () => {
         isLoading: true, // Состояние загрузки изображений
 
         // WEBHOOK URL
-        webhookUrl: 'https://acknowledged-chemistry-memory-soviet.trycloudflare.com/webhook-test/save-cart',
+        webhookUrl: 'https://acknowledged-chemistry-memory-soviet.trycloudflare.com/webhook/save-cart',
 
 
         // Инициализация
