@@ -44,7 +44,7 @@ const appData = {
     extras: [
         { id: 'stairs_wood', name: 'Лестница дерево', price: 9200, image: 'https://i.1.creatium.io/disk2/e0/0b/3f/6d68b442326ca542ea325b9e367a6622a2/lestnica_derevo_result.webp', type: 'stairs', zIndex: 30 },
         { id: 'stairs_metal', name: 'Лестница металл', price: 17250, image: 'https://i.1.creatium.io/disk2/b4/47/90/bc71b75a0b49f60c88ba8226c1ba45e573/lestnica_s_ploshadkoy_result.webp', type: 'stairs', zIndex: 8 },
-        { id: 'lid', name: 'Крышка чана', price: 14950, image: 'https://i.1.creatium.io/disk2/48/ed/a5/4b90aa9d0cfbc75e06d394990323c172ec/krishka_result.webp', imageInside: 'https://i.1.creatium.io/disk2/e3/d5/33/a24bec5770dd3e9554eb1ec0b2565e279f/vverh_krishka_result.webp', zIndex: 50 },
+        { id: 'lid', name: 'Крышка чана', price: 18400, image: 'https://i.1.creatium.io/disk2/48/ed/a5/4b90aa9d0cfbc75e06d394990323c172ec/krishka_result.webp', imageInside: 'https://i.1.creatium.io/disk2/e3/d5/33/a24bec5770dd3e9554eb1ec0b2565e279f/vverh_krishka_result.webp', zIndex: 50 },
         { id: 'pipe', name: 'Труба простая', price: 9000, image: 'https://i.1.creatium.io/disk2/a5/2d/c0/b5417b7c7ce47d64d8935a9bfc47619313/truba_obichnaya_result.webp', type: 'pipe', zIndex: 1 },
         { id: 'pipe_sandwich', name: 'Труба сэндвич', price: 22000, image: 'https://i.1.creatium.io/disk2/66/8f/94/65ea8886a969e77cd2f9800eea459de49a/truba_sendvich_result.webp', type: 'pipe', zIndex: 1 },
         { id: 'protection', name: 'Защита дымохода', price: 3450, image: 'https://i.1.creatium.io/disk2/4e/3f/1c/7d733b24ca08f23acd488a3e9de1f168c3/zashita_trubi_result.webp', zIndex: 25 },
