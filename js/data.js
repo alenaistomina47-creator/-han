@@ -32,9 +32,9 @@ const appData = {
         { id: 'stand', name: 'Подставка (без печи)', price: 10200, image: 'https://i.1.creatium.io/disk2/77/b3/d8/353e905bc23d7489b1d1399842f5a7c48f/podstavka_result.webp', zIndex: 5 },
         { id: 'wind', name: 'Ветрозащита', price: 26300, image: 'https://i.1.creatium.io/disk2/09/8e/c1/538b956b9f526cf7bf80898a5d815bbfd6/vindgard_result.webp', zIndex: 5 },
         { id: 'simple', name: 'Печь-подставка', price: 38950, image: 'https://i.1.creatium.io/disk2/b4/31/61/bd99e3a713ad36d9d5f537b0e90c447853/pech_podstavka_result.webp', zIndex: 5 },
-        { id: 'welded_430', name: 'Печь приварная (AISI 430)', price: 47000, image: 'https://i.1.creatium.io/disk2/89/f1/c6/e8339e162a5e77541df28eab6fae9bafa7/vodyanaya_result.webp', zIndex: 5 },
-        { id: 'welded_304', name: 'Печь приварная (AISI 304)', price: 56200, image: 'https://i.1.creatium.io/disk2/89/f1/c6/e8339e162a5e77541df28eab6fae9bafa7/vodyanaya_result.webp', zIndex: 5 },
-        { id: 'jacket', name: 'С водяной рубашкой', price: 96450, image: 'https://i.1.creatium.io/disk2/89/f1/c6/e8339e162a5e77541df28eab6fae9bafa7/vodyanaya_result.webp', zIndex: 5 }
+        { id: 'welded_430', name: 'Печь приварная (AISI 430)', price: 48000, image: 'https://i.1.creatium.io/disk2/89/f1/c6/e8339e162a5e77541df28eab6fae9bafa7/vodyanaya_result.webp', zIndex: 5 },
+        { id: 'welded_304', name: 'Печь приварная (AISI 304)', price: 57200, image: 'https://i.1.creatium.io/disk2/89/f1/c6/e8339e162a5e77541df28eab6fae9bafa7/vodyanaya_result.webp', zIndex: 5 },
+        { id: 'jacket', name: 'С водяной рубашкой', price: 97450, image: 'https://i.1.creatium.io/disk2/89/f1/c6/e8339e162a5e77541df28eab6fae9bafa7/vodyanaya_result.webp', zIndex: 5 }
     ],
     finishes: [
         { id: 'min', name: 'Минимум', price: { small: 19400, medium: 19400, large: 24000 }, image: 'https://i.1.creatium.io/disk2/89/cd/95/30c96399ab24a35874c4c9e5efd305795e/otdelka_minimum_result.webp', imageInside: 'https://i.1.creatium.io/disk2/02/13/08/5bb366dcaccb9f7066864ab224e360185d/vverh_minimum_result.webp', zIndex: 15 },
