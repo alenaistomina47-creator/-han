@@ -1,643 +1,358 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Калькулятор Банного Чана</title>
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="css/variables.css">
-    <link rel="stylesheet" href="css/layout.css">
-    <link rel="stylesheet" href="css/visualizer.css">
-    <link rel="stylesheet" href="css/controls.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Каталог банных чанов 2026 — Уральские Банные Чаны</title>
+  <meta name="description" content="Каталог банных чанов 2026 года напрямую от производителя. Собственное производство, надежная толстая сталь, ручная работа и честная гарантия 15 лет на чашу. Доставка по всей России! Выберите свой идеальный чан со скидкой и подарками.">
+  
+  <!-- Open Graph / Facebook / Telegram -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://kuklin-katalog.ru/">
+  <meta property="og:title" content="Каталог банных чанов 2026 — Уральские Банные Чаны">
+  <meta property="og:description" content="Каталог банных чанов 2026 года напрямую от производителя. Собственное производство, надежная толстая сталь, ручная работа и честная гарантия 15 лет на чашу. Доставка по всей России! Выберите свой идеальный чан со скидкой и подарками.">
+  <meta property="og:image" content="https://kuklin-katalog.ru/assets/og_preview.jpg?v=1">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://kuklin-katalog.ru/">
+  <meta name="twitter:title" content="Каталог банных чанов 2026 — Уральские Банные Чаны">
+  <meta name="twitter:description" content="Каталог банных чанов 2026 года напрямую от производителя. Собственное производство, надежная толстая сталь, ручная работа и честная гарантия 15 лет на чашу. Доставка по всей России! Выберите свой идеальный чан со скидкой и подарками.">
+  <meta name="twitter:image" content="https://kuklin-katalog.ru/assets/og_preview.jpg?v=1">
+  
+  <!-- Google Fonts: Manrope -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome for beautiful icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Style Sheet -->
+  <link rel="stylesheet" href="style.css?v=1.1">
 </head>
-
-<body class="bg-[#F3F5F6] text-[#333] font-body min-h-screen pb-24 lg:pb-0">
-    <div x-data="calculator()" class="max-w-[1200px] mx-auto px-4 py-8 lg:px-8">
-
-
-        <!-- ... content ... -->
-
-
-
-
-
-        <!-- Заголовок -->
-        <div class="text-center mb-8 flex flex-col items-center">
-            <img src="https://i.1.creatium.io/disk2/06/1c/38/527e3e8070543a6b740baa2d13ab5211ec/logotip_chernii.png"
-                alt="Logo" class="h-16 mb-4">
-            <h1 class="font-oswald font-bold uppercase text-4xl lg:text-5xl mb-2">СОБЕРИТЕ СВОЙ ЧАН</h1>
-        </div>
-
-        <div x-show="currentView === 'calculator'" x-transition.opacity.duration.300ms
-            class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
-            <!-- Левая колонка: Визуализация + Табы (7 колонок) -->
-            <div
-                class="lg:col-span-8 sticky top-2 z-50 lg:top-4 bg-white rounded-2xl lg:rounded-[30px] p-3 lg:p-6 shadow-sm relative">
-
-                <!-- Табы (скрываем при свертывании) -->
-                <div class="flex justify-center mb-2 lg:mb-6 transition-all duration-300"
-                    x-show="!isVisualizerMinimized" x-transition:enter="transition ease-out duration-200"
-                    x-transition:enter-start="opacity-0 -translate-y-2"
-                    x-transition:enter-end="opacity-100 translate-y-0"
-                    x-transition:leave="transition ease-in duration-150"
-                    x-transition:leave-start="opacity-100 translate-y-0"
-                    x-transition:leave-end="opacity-0 -translate-y-2">
-                    <div class="bg-gray-100 p-1 rounded-full flex gap-1 scale-90 lg:scale-100 origin-top">
-                        <button @click="activeTab = 'outside'"
-                            :class="activeTab === 'outside' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-gray-700'"
-                            class="px-6 py-2 rounded-full text-sm font-medium transition-all">
-                            Вид снаружи
-                        </button>
-                        <button @click="activeTab = 'inside'"
-                            :class="activeTab === 'inside' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-gray-700'"
-                            class="px-6 py-2 rounded-full text-sm font-medium transition-all">
-                            Вид внутри
-                        </button>
-                        <button @click="activeTab = 'desc'"
-                            :class="activeTab === 'desc' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-gray-700'"
-                            class="px-6 py-2 rounded-full text-sm font-medium transition-all">
-                            Описание
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Контент визуализации -->
-                <div :class="isVisualizerMinimized ? 'w-[85%] mx-auto shadow-md' : 'w-full shadow-sm'"
-                    class="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gray-50 flex items-center justify-center transition-all duration-300 ease-in-out">
-
-                    <!-- LOADER -->
-                    <div x-show="isLoading"
-                        class="absolute inset-0 z-50 flex items-center justify-center bg-gray-100/50 backdrop-blur-sm"
-                        x-transition.opacity>
-                        <div class="w-10 h-10 border-4 border-[#5fb856] border-t-transparent rounded-full animate-spin">
-                        </div>
-                    </div>
-
-                    <!-- Кнопка Свернуть/Развернуть -->
-                    <button @click="isVisualizerMinimized = !isVisualizerMinimized"
-                        class="absolute top-3 left-3 bg-white/80 hover:bg-white text-gray-700 backdrop-blur-sm p-2 rounded-lg transition-colors z-40 shadow-sm border border-gray-100 group"
-                        :title="isVisualizerMinimized ? 'Развернуть' : 'Свернуть'">
-                        <!-- Иконка меняется или вращается -->
-                        <svg class="w-4 h-4 transition-transform duration-300"
-                            :class="isVisualizerMinimized ? '' : 'rotate-180'" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
-                            </path>
-                        </svg>
-                    </button>
-
-                    <!-- Вид снаружи (Слои) -->
-                    <div x-show="activeTab === 'outside'" class="w-full h-full relative">
-
-                        <!-- Placeholder: Если ничего не выбрано -->
-                        <div x-show="!selectedSizeId"
-                            class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 z-20"
-                            x-transition.opacity>
-                            <div
-                                class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-gray-100 max-w-xs transform transition-all hover:scale-105">
-                                <div
-                                    class="w-12 h-12 bg-[#5fb856]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                                    <svg class="w-6 h-6 text-[#5fb856]" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                    </svg>
-                                </div>
-                                <p class="text-lg font-bold text-gray-800 mb-1">Соберите свой чан</p>
-                                <p class="text-xs text-gray-500">Выберите размер, чтобы начать</p>
-                            </div>
-                        </div>
-
-                        <!-- Контент визуализатора (только если выбран размер) -->
-                        <div x-show="selectedSizeId" class="contents" x-transition.opacity>
-                            <!-- Базовый чан (Main) -->
-                            <img :src="selectedSize.image" alt="Основа"
-                                class="absolute inset-0 w-full h-full object-contain pointer-events-none z-10">
-
-                            <!-- Наложение материала (Нержавейка) -->
-                            <img :src="getMaterialOverlay()" x-show="getMaterialOverlay()" alt="Материал"
-                                class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                style="z-index: 11;">
-
-                            <!-- Отделка -->
-                            <template x-for="finish in appData.finishes" :key="finish.id">
-                                <img x-show="selectedFinishId === finish.id && finish.image" :src="finish.image"
-                                    class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                    :style="`z-index: ${finish.zIndex};`">
-                            </template>
-
-                            <!-- Печи (Main) -->
-                            <template x-for="stove in appData.stoves" :key="stove.id">
-                                <img x-show="selectedStoveId === stove.id && stove.image" :src="stove.image"
-                                    class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                    :style="`z-index: ${stove.zIndex};`">
-                            </template>
-
-                            <!-- Лестница -->
-                            <template x-if="selectedLadder && selectedLadder.image">
-                                <img :src="selectedLadder.image"
-                                    class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                    :style="`z-index: ${selectedLadder.zIndex};`">
-                            </template>
-
-                            <!-- Дымоход -->
-                            <template x-if="selectedChimney && selectedChimney.image">
-                                <img :src="selectedChimney.image"
-                                    class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                    :style="`z-index: ${selectedChimney.zIndex};`">
-                            </template>
-
-                            <!-- Остальные допы -->
-                            <template x-for="extra in otherExtras.filter(e => e.image)" :key="extra.id">
-                                <img x-show="selectedExtrasIds.includes(extra.id)" :src="extra.image"
-                                    class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                    :style="`z-index: ${extra.zIndex};`">
-                            </template>
-                        </div>
-                    </div>
-
-                    <!-- Вид внутри -->
-                    <div x-show="activeTab === 'inside'" class="w-full h-full relative">
-
-                        <!-- Placeholder внутри -->
-                        <div x-show="!selectedSizeId"
-                            class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 z-20">
-                            <p class="text-gray-400 text-sm">Выберите размер чана</p>
-                        </div>
-
-                        <div x-show="selectedSizeId" class="contents">
-                            <!-- Базовый чан внутри (Основа) -->
-                            <img :src="selectedSize.imageInside" alt="Основа внутри"
-                                class="absolute inset-0 w-full h-full object-contain pointer-events-none z-10">
-
-                            <!-- Наложение материала внутри -->
-                            <img :src="getMaterialOverlay()" x-show="getMaterialOverlay()" alt="Материал внутри"
-                                class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                style="z-index: 11;">
-
-                            <!-- Отделка внутри -->
-                            <template x-for="finish in appData.finishes" :key="finish.id">
-                                <img x-show="selectedFinishId === finish.id && finish.imageInside"
-                                    :src="finish.imageInside"
-                                    class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                    :style="`z-index: ${finish.zIndex};`">
-                            </template>
-
-                            <!-- Допы внутри (если есть imageInside) -->
-                            <template x-for="id in selectedExtrasIds" :key="id">
-                                <div x-data="{ extra: appData.extras.find(e => e.id === id) }" class="contents">
-                                    <img x-show="extra && extra.imageInside" :src="extra.imageInside"
-                                        class="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                        :style="`z-index: ${extra.zIndex};`">
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-
-                    <!-- Описание -->
-                    <div x-show="activeTab === 'desc'" class="absolute inset-0 p-8 overflow-y-auto text-left"
-                        x-transition.opacity>
-
-                        <template x-if="!selectedSizeId">
-                            <div class="h-full flex items-center justify-center text-gray-400 text-center">
-                                <p>Выберите комплектацию, чтобы увидеть описание</p>
-                            </div>
-                        </template>
-
-                        <template x-if="selectedSizeId">
-                            <div class="contents">
-                                <h3 class="font-oswald text-2xl font-bold mb-4" x-text="selectedSize.name"></h3>
-                                <p class="text-gray-600 mb-4">
-                                    Банный чан — это уникальная купель на дровах для купания на свежем воздухе круглый
-                                    год.
-                                    Вода нагревается до комфортных 38-40 градусов.
-                                </p>
-                                <ul class="list-disc list-inside text-gray-600 space-y-2 mb-6">
-                                    <li>Вместимость: <span x-text="selectedSize.people"></span></li>
-                                    <li>Материал: <span
-                                            x-text="selectedMaterial ? selectedMaterial.name : 'Не выбрано'"></span>
-                                    </li>
-                                    <li>Гарантия качества и долговечности</li>
-                                </ul>
-
-                                <!-- Описание материала -->
-                                <div x-show="selectedMaterial" class="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                                    <h4 class="font-bold text-[#333] mb-2" x-text="selectedMaterial?.name"></h4>
-                                    <p class="text-sm text-gray-600 mb-3" x-text="selectedMaterial?.description"></p>
-                                    <p class="text-xs font-bold text-[#5fb856] uppercase tracking-wider"
-                                        x-text="selectedMaterial?.life"></p>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Правая колонка: Форма (4 колонки) -->
-            <div class="lg:col-span-4 space-y-4">
-
-                <!-- Размер -->
-                <div
-                    class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors">
-                    <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите размер
-                        *</label>
-                    <div class="relative">
-                        <select x-model="selectedSizeId"
-                            class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
-                            <option value="" disabled>Выберите размер</option>
-                            <template x-for="size in appData.sizes" :key="size.id">
-                                <option :value="size.id" x-text="`${size.name.split('(')[0]} (${size.people})`">
-                                </option>
-                            </template>
-                        </select>
-                        <div
-                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Материал -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors"
-                    :class="{'opacity-50 pointer-events-none': !selectedSizeId}">
-                    <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите материал
-                        *</label>
-                    <div class="relative">
-                        <select x-model="selectedMaterialId" :disabled="!selectedSizeId"
-                            class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
-                            <option value="" disabled>Выберите материал</option>
-                            <template x-for="material in currentMaterials" :key="material.id">
-                                <option :value="material.id" x-text="material.name"></option>
-                            </template>
-                        </select>
-                        <div
-                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Тип подогрева (Печь) -->
-                <div
-                    class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors">
-                    <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите тип
-                        подогрева *</label>
-                    <div class="relative">
-                        <select x-model="selectedStoveId"
-                            class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
-                            <option value="">Не выбрано</option>
-                            <template x-for="stove in appData.stoves" :key="stove.id">
-                                <option :value="stove.id"
-                                    x-text="`${stove.name} (+${formatOriginalPrice(stove.price)})`">
-                                </option>
-                            </template>
-                        </select>
-                        <div
-                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Отделка -->
-                <div
-                    class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors">
-                    <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите отделку
-                        чана *</label>
-                    <div class="relative">
-                        <select x-model="selectedFinishId"
-                            class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
-                            <option value="">Не выбрано</option>
-                            <template x-for="finish in appData.finishes" :key="finish.id">
-                                <option :value="finish.id"
-                                    x-text="`${finish.name} (+${formatOriginalPrice(typeof finish.price === 'object' ? (finish.price[selectedSizeId] || 0) : finish.price)})`">
-                                </option>
-                            </template>
-                        </select>
-                        <div
-                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Лестница -->
-                <div
-                    class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors">
-                    <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите
-                        лестницу</label>
-                    <div class="relative">
-                        <select x-model="selectedLadderId"
-                            class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
-                            <option value="">Не выбрано</option>
-                            <template x-for="ladder in ladders" :key="ladder.id">
-                                <option :value="ladder.id"
-                                    x-text="`${ladder.name} (+${formatOriginalPrice(ladder.price)})`"
-                                    :disabled="ladder.id === 'stairs_wood' && selectedExtrasIds.includes('rim_finish')">
-                                </option>
-                            </template>
-                        </select>
-                        <div
-                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Дымоход -->
-                <div
-                    class="bg-white p-5 rounded-2xl shadow-sm border border-transparent hover:border-[#5fb856]/30 transition-colors">
-                    <label class="block text-xs uppercase font-bold text-gray-500 mb-2 tracking-wider">Выберите
-                        дымоход</label>
-                    <div class="relative">
-                        <select x-model="selectedChimneyId"
-                            class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg outline-none focus:ring-2 focus:ring-[#5fb856] focus:border-transparent block p-3 pr-8 cursor-pointer font-medium">
-                            <option value="">Не выбрано</option>
-                            <template x-for="chimney in chimneys" :key="chimney.id">
-                                <option :value="chimney.id"
-                                    x-text="`${chimney.name} (+${formatOriginalPrice(chimney.price)})`">
-                                </option>
-                            </template>
-                        </select>
-                        <div
-                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Комплектация (Чекбоксы) -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm mt-4">
-                    <label class="block text-xs uppercase font-bold text-gray-500 mb-3 tracking-wider">Выберите
-                        комплектацию</label>
-                    <div class="grid grid-cols-1 gap-2">
-                        <template x-for="extra in otherExtras" :key="extra.id">
-                            <label
-                                class="flex items-center p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors group"
-                                :class="{ 'opacity-50 cursor-not-allowed': (extra.id === 'protection' && selectedChimneyId === 'pipe_sandwich') || (extra.id === 'thermometer' && selectedExtrasIds.includes('rim_finish')) || ((extra.id === 'jacuzzi' || extra.id === 'rim_finish') && selectedStoveId && selectedStoveId !== 'jacket') }">
-                                <input type="checkbox" :value="extra.id" x-model="selectedExtrasIds"
-                                    :disabled="(extra.id === 'protection' && selectedChimneyId === 'pipe_sandwich') || (extra.id === 'thermometer' && selectedExtrasIds.includes('rim_finish')) || ((extra.id === 'jacuzzi' || extra.id === 'rim_finish') && selectedStoveId && selectedStoveId !== 'jacket')"
-                                    class="w-4 h-4 text-[#5fb856] focus:ring-[#5fb856] rounded border-gray-300 cursor-pointer disabled:cursor-not-allowed">
-                                <div class="ml-3 flex flex-col flex-1">
-                                    <span class="text-sm text-gray-700 font-medium group-hover:text-gray-900">
-                                        <span x-text="extra.name"></span>
-                                    </span>
-                                    <!-- Warning Message: Protection -->
-                                    <template x-if="extra.id === 'protection' && selectedChimneyId === 'pipe_sandwich'">
-                                        <span class="text-xs text-red-500 mt-0.5">Недоступно для сэндвич-трубы</span>
-                                    </template>
-                                    <!-- Warning Message: Thermometer -->
-                                    <template
-                                        x-if="extra.id === 'thermometer' && selectedExtrasIds.includes('rim_finish')">
-                                        <span class="text-xs text-red-500 mt-0.5">Несовместимо с внешней отделкой</span>
-                                    </template>
-                                    <!-- Warning Message: Jacuzzi/Rim requires Water Jacket -->
-                                    <template
-                                        x-if="(extra.id === 'jacuzzi' || extra.id === 'rim_finish') && selectedStoveId && selectedStoveId !== 'jacket'">
-                                        <span class="text-xs text-red-500 mt-0.5">Доступно только для печи с водяной
-                                            рубашкой</span>
-                                    </template>
-                                </div>
-                                <span class="text-xs text-gray-500 font-bold"
-                                    x-text="formatOriginalPrice(extra.price)"></span>
-                            </label>
-                        </template>
-                    </div>
-                </div>
-
-                <!-- Итого и кнопка (на десктопе внизу, чтобы не перекрывать) -->
-                <!-- Sticky Footer for Mobile / Card for Desktop -->
-                <div
-                    class="fixed bottom-16 inset-x-0 bg-white border-t border-gray-200 p-4 z-40 lg:static lg:bg-white lg:border lg:border-gray-100 lg:p-6 lg:rounded-2xl lg:shadow-lg lg:mt-6 lg:z-auto safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] lg:shadow-none">
-
-                    <!-- Desktop Title -->
-                    <p class="hidden lg:block text-xs text-gray-400 uppercase tracking-wide font-bold mb-1">Сумма заказа
-                    </p>
-
-                    <div class="max-w-7xl mx-auto flex flex-col gap-3">
-
-                        <!-- Price Info Only (Status Bar) -->
-                        <div class="flex items-center justify-between w-full">
-                            <div>
-                                <p
-                                    class="text-[10px] text-gray-400 uppercase tracking-wide font-bold mb-0 leading-none">
-                                    Итоговая стоимость</p>
-                                <div class="flex items-baseline gap-2 mt-0.5">
-                                    <p class="text-3xl font-oswald font-bold text-[#5fb856] leading-none"
-                                        x-text="formatPrice(totalPrice)"></p>
-                                    <p class="text-sm font-oswald text-gray-300 line-through leading-none"
-                                        x-text="formatOriginalPrice(originalPrice)"></p>
-                                </div>
-                            </div>
-
-                            <!-- Promo Badge (Compact) -->
-                            <div
-                                class="bg-yellow-50 border border-yellow-200 rounded-lg px-2 py-1 flex flex-col items-end">
-                                <p class="text-[10px] font-bold text-yellow-800 leading-tight">🔥 Цена 2025</p>
-                                <p class="text-[9px] text-yellow-600 leading-tight">-30%</p>
-                            </div>
-                        </div>
-
-                        <div class="hidden lg:block mt-3 text-center">
-                            <p class="text-[10px] text-gray-500 font-medium">🎁 Получите подарки на <span
-                                    class="text-[#5fb856] font-bold">25 000 ₽</span></p>
-                            <p class="text-[9px] text-gray-400">при фиксации условий сегодня</p>
-                        </div>
-
-                        <!-- Desktop Checkout Button -->
-                        <button @click="currentView = 'cart'; window.scrollTo({top: 0, behavior: 'smooth'})"
-                            class="hidden lg:flex w-full bg-[#5fb856] hover:bg-[#4ca344] text-white rounded-xl py-3 mt-2 font-bold uppercase tracking-wider text-sm shadow-md transition-all items-center justify-center gap-2 active:scale-[0.98]">
-                            <span>Перейти в корзину</span>
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 8l4 4m0 0l-4 4m4-4H3">
-                                </path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Spacer for mobile to prevent content hide behind sticky footer -->
-                <div class="h-32 lg:hidden"></div>
-
-            </div>
-        </div>
-
-        <!-- VIEW: CART -->
-        <div x-show="currentView === 'cart'" x-transition.opacity.duration.300ms class="max-w-2xl mx-auto"
-            style="display: none;">
-
-            <!-- Back Button -->
-            <div class="mb-6 flex items-center">
-                <button @click="currentView = 'calculator'"
-                    class="flex items-center text-gray-500 hover:text-gray-800 transition-colors">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10 19l-7-7m0 0l7-7m-7 7h18">
-                        </path>
-                    </svg>
-                    <span class="font-bold text-sm uppercase tracking-wide">Вернуться к сборке</span>
-                </button>
-            </div>
-
-            <div class="bg-white rounded-[30px] p-6 shadow-sm border border-gray-100 relative">
-                <h2 class="font-oswald font-bold text-3xl mb-6 flex items-center gap-3">
-                    <span class="text-[#5fb856]">🛒</span> ВАШ БУДУЩИЙ ЧАН
-                </h2>
-
-                <!-- Items List -->
-                <div class="space-y-4 mb-8">
-                    <div x-show="priceDetails.length === 0" class="text-center text-gray-400 py-8">
-                        Вы еще не собрали свой идеальный чан
-                    </div>
-                    <template x-for="(item, index) in priceDetails" :key="index">
-                        <div
-                            class="flex justify-between items-center py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 px-2 rounded-lg transition-colors">
-                            <span class="text-gray-700 font-medium text-sm" x-text="item.name"></span>
-                            <span class="font-bold text-gray-900 whitespace-nowrap text-base"
-                                x-text="formatPrice(item.price)"></span>
-                        </div>
-                    </template>
-                </div>
-
-                <!-- Total -->
-                <div class="bg-gray-50 rounded-2xl p-6 mb-8 border border-gray-100">
-                    <div class="flex justify-between items-end mb-2">
-                        <span class="font-bold text-gray-500 uppercase text-xs tracking-wider">Итоговая стоимость</span>
-                        <span class="text-gray-400 line-through text-sm font-oswald"
-                            x-text="formatOriginalPrice(totalPrice)"></span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <div class="flex flex-col">
-                            <span class="text-xs text-[#5fb856] font-bold uppercase tracking-wider mb-1">Ваша выгода:
-                                ~30%</span>
-                        </div>
-                        <span class="font-oswald font-bold text-3xl text-[#5fb856] whitespace-nowrap"
-                            x-text="formatPrice(totalPrice)"></span>
-                    </div>
-                </div>
-
-                <!-- Gifts -->
-                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-8 flex items-start gap-4">
-                    <div class="text-3xl">🎁</div>
-                    <div>
-                        <p class="font-bold text-gray-800 text-sm uppercase mb-1">Подарки включены!</p>
-                        <p class="text-xs text-gray-600 leading-relaxed">Поздравляем! При оформлении заявки сегодня вы
-                            получаете
-                            полный комплект аксессуаров в подарок. Это предложение сэкономит вам 25 000 ₽.</p>
-                    </div>
-                </div>
-
-                <!-- Checkout Action -->
-                <button @click="sendToTelegram()"
-                    class="w-full bg-[#5fb856] hover:bg-[#4ca344] text-white rounded-xl py-4 font-bold uppercase tracking-wider text-lg shadow-lg shadow-[#5fb856]/30 transition-all duration-300 flex items-center justify-center gap-3 active:scale-[0.98]">
-                    <span>Зафиксировать условия</span>
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
-                        </path>
-                    </svg>
-                </button>
-                <p class="text-center text-xs text-gray-400 mt-4">Менеджер свяжется с вами в течение 5 минут</p>
-
-            </div>
-        </div>
-
-
-        <!-- Подвал -->
-        <div class="mt-12 text-center text-gray-400 pb-8 border-t border-gray-200 pt-8">
-            <p class="text-[10px] uppercase tracking-wider font-bold mb-1">Реквизиты</p>
-            <p class="text-[10px]">ИП Куклин Иван Андреевич</p>
-            <p class="text-[10px]">ИНН: 381404122559</p>
-            <a href="#" class="text-[10px] underline hover:text-gray-600 mt-2 block w-max mx-auto">Политика
-                конфиденциальности</a>
-        </div>
-
-        <!-- Модалка детализации цены -->
-        <!-- Модалка убрана в пользу отдельной страницы -->
-        <!-- Кнопка "Помощь" (Floating) -->
-        <a href="https://t.me/ivan_ural_chan?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5!%20%D0%9D%D1%83%D0%B6%D0%BD%D0%B0%20%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%20%D1%81%20%D0%B2%D1%8B%D0%B1%D0%BE%D1%80%D0%BE%D0%BC."
-            target="_blank"
-            class="fixed bottom-[140px] right-4 z-[90] lg:bottom-10 lg:right-10 bg-[#2AABEE] text-white p-4 rounded-full shadow-xl hover:scale-110 hover:bg-[#229ED9] transition-all duration-300 flex items-center justify-center group"
-            title="Написать в Telegram">
-            <!-- Icon: Telegram Plane -->
-            <svg class="w-6 h-6 transform -translate-x-0.5 translate-y-0.5" fill="currentColor" viewBox="0 0 24 24">
-                <path
-                    d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42l10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701l-.164.168l.184.465l1.58 4.029c.17.434.34.606.77.606c.465 0 .806-.213.92-.328l2.21-2.142l4.595 3.397c.848.468 1.46.227 1.67-.785l3.035-14.288c.31-1.248-.445-1.815-1.423-1.423z" />
-            </svg>
-            <span
-                class="absolute right-full mr-3 bg-white text-gray-700 text-xs font-bold px-3 py-1.5 rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none hidden lg:block">
-                Написать в Telegram
-            </span>
-        </a>
-
-
-
-
-        <!-- Bottom Navigation Bar (Mobile & Desktop) -->
-        <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-[100] lg:hidden pb-safe">
-            <div class="flex justify-around items-center h-16">
-                <!-- Calculator Tab -->
-                <button @click="currentView = 'calculator'"
-                    class="flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors duration-200"
-                    :class="currentView === 'calculator' ? 'text-[#5fb856]' : 'text-gray-400 hover:text-gray-600'">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
-                        </path>
-                    </svg>
-                    <span class="text-[10px] font-medium">Калькулятор</span>
-                </button>
-
-                <!-- Cart Tab -->
-                <button @click="currentView = 'cart'"
-                    class="flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors duration-200 relative"
-                    :class="currentView === 'cart' ? 'text-[#5fb856]' : 'text-gray-400 hover:text-gray-600'">
-                    <div class="relative">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
-                            </path>
-                        </svg>
-                        <!-- Badge -->
-                        <div x-show="priceDetails.length > 0" x-transition.scale
-                            class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm border border-white"
-                            x-text="priceDetails.length">
-                        </div>
-                    </div>
-                    <span class="text-[10px] font-medium">Корзина</span>
-                </button>
-            </div>
-        </div>
+<body>
+
+  <!-- Premium Header -->
+  <header class="main-header" id="main-header">
+    <div class="header-container">
+      <div class="brand-logo">
+        <img src="assets/logo.webp" alt="Уральские Банные Чаны" class="brand-logo-img">
+      </div>
+      
+      <!-- Mini Timer in Header -->
+      <div class="header-timer" id="header-timer">
+        <i class="fa-regular fa-clock icon-pulse"></i>
+        <span class="header-timer-countdown">
+          <span id="h-days">00</span>д&nbsp;
+          <span id="h-hours">00</span>:
+          <span id="h-minutes">00</span>:
+          <span id="h-seconds">00</span>
+        </span>
+      </div>
+
+      <div class="header-badge">
+        <span class="status-dot"></span>
+        <span class="status-text">ООО «ЧЗНК»</span>
+      </div>
     </div>
+  </header>
 
-    <!-- Scripts -->
-    <script src="js/data.js?v=7"></script>
-    <script src="js/store.js?v=13"></script>
+  <main class="catalog-content">
+    
+    <!-- Hero Banner with Promo Timer -->
+    <section class="hero-section" id="hero-section">
+      <div class="hero-overlay"></div>
+      <div class="hero-body">
+        <div class="hero-header-text">
+          <h1 class="hero-title">Горячие предложения от завода "ЧЗНК" 🔥</h1>
+          <p class="hero-subtitle">Выбирайте комплектацию напрямую от производителя с выгодой от 33 000 ₽ и получите тканевый чехол + LED-подсветку в подарок 🎁</p>
+        </div>
+        
+        <!-- Timer Block -->
+        <div class="timer-container" id="timer-container">
+          <div class="timer-header">
+            <i class="fa-regular fa-clock icon-pulse"></i>
+            <span>Зафиксируйте спеццену и 2 подарка к заказу:</span>
+          </div>
+          <div class="timer-countdown" id="countdown">
+            <div class="timer-segment">
+              <span class="timer-val" id="days">00</span>
+              <span class="timer-lbl">дн</span>
+            </div>
+            <div class="timer-divider">:</div>
+            <div class="timer-segment">
+              <span class="timer-val" id="hours">00</span>
+              <span class="timer-lbl">час</span>
+            </div>
+            <div class="timer-divider">:</div>
+            <div class="timer-segment">
+              <span class="timer-val" id="minutes">00</span>
+              <span class="timer-lbl">мин</span>
+            </div>
+            <div class="timer-divider">:</div>
+            <div class="timer-segment">
+              <span class="timer-val" id="seconds">00</span>
+              <span class="timer-lbl">сек</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+
+    <!-- Capacity Filter Section (Переключатель по вместимости) -->
+    <div id="capacity-sentinel"></div>
+    <section class="capacity-filter-section" id="capacity-filter-section">
+      <div class="capacity-filter-container">
+        <h2 class="capacity-filter-heading">
+          <i class="fa-solid fa-users-gear"></i> Выберите вместимость банного чана:
+        </h2>
+        <div class="capacity-tabs" role="tablist" aria-label="Вместимость банных чанов">
+          <button class="capacity-tab-btn" data-capacity="small" role="tab" aria-selected="false">
+            <span class="tab-badge">на 3 чел.</span>
+            <span class="tab-title"><i class="fa-solid fa-user-group"></i> <span class="title-full">Малые чаны</span><span class="title-short" style="display:none">Малые</span></span>
+            <span class="tab-sub">Ø 180 см</span>
+          </button>
+          
+          <button class="capacity-tab-btn active" data-capacity="medium" role="tab" aria-selected="true">
+            <span class="tab-badge popular">Хит продаж 🔥</span>
+            <span class="tab-title"><i class="fa-solid fa-users"></i> <span class="title-full">4–6 человек</span><span class="title-short" style="display:none">4–6 чел.</span></span>
+            <span class="tab-sub">Ø 200 см (Средние)</span>
+          </button>
+          
+          <button class="capacity-tab-btn" data-capacity="large" role="tab" aria-selected="false">
+            <span class="tab-badge popular">👑 Премиум SPA</span>
+            <span class="tab-title"><i class="fa-solid fa-hot-tub-person"></i> <span class="title-full">Гидромассаж</span><span class="title-short" style="display:none">Гидромассаж</span></span>
+            <span class="tab-sub">Массаж + Подсветка</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Product Feed -->
+    <section class="products-feed" id="products-feed">
+      <!-- Cards will be dynamically injected here by app.js -->
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Загрузка лучших предложений...</p>
+      </div>
+    </section>
+
+    <!-- Production Video Tour Section -->
+    <section class="video-tour-section" id="video-tour-section">
+      <div class="video-tour-container">
+        <div class="video-tour-header">
+          <h2 class="video-tour-title">
+            <i class="fa-solid fa-industry"></i> Видеоэкскурсия по производству
+          </h2>
+          <p class="video-tour-subtitle">Посмотрите, как мы вручную и на современном оборудовании создаем долговечные чаны</p>
+        </div>
+        
+        <div class="video-player-wrapper" id="video-player-wrapper">
+          <div class="video-cover" id="video-cover" style="background-image: url('assets/workshop_preview.jpg');">
+            <div class="video-cover-overlay"></div>
+            <button class="video-play-btn" id="video-play-btn" aria-label="Смотреть видеообзор">
+              <span class="play-icon-triangle"></span>
+              <span class="play-btn-pulse"></span>
+            </button>
+            <div class="video-cover-info">
+              <span class="video-duration"><i class="fa-solid fa-play"></i> Смотреть обзор</span>
+            </div>
+          </div>
+          <div class="video-iframe-container" id="video-iframe-container"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Certificates Section -->
+    <section class="certificates-section" id="certificates-section">
+      <div class="certificates-header">
+        <h2 class="certificates-title">
+          <i class="fa-solid fa-file-shield"></i> Сертификаты качества
+        </h2>
+        <div class="certificates-controls">
+          <button class="cert-ctrl-btn cert-prev" aria-label="Предыдущий сертификат">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <button class="cert-ctrl-btn cert-next" aria-label="Следующий сертификат">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="certificates-slider-wrapper">
+        <div class="certificates-slider" id="certificates-slider">
+          <div class="certificate-card">
+            <img src="assets/cert_3.jpg" alt="Сертификат соответствия Промтехстандарт" class="cert-image" loading="lazy">
+            <div class="cert-card-title">Сертификат Промтехстандарт</div>
+          </div>
+          <div class="certificate-card">
+            <img src="assets/cert_4.jpg" alt="Сертификат пожарной безопасности" class="cert-image" loading="lazy">
+            <div class="cert-card-title">Пожарная безопасность</div>
+          </div>
+          <div class="certificate-card">
+            <img src="assets/cert_1.jpg" alt="Сертификат экологической безопасности" class="cert-image" loading="lazy">
+            <div class="cert-card-title">Экопромбезопасность</div>
+          </div>
+          <div class="certificate-card">
+            <img src="assets/cert_2.jpg" alt="Разрешение на применение знака соответствия" class="cert-image" loading="lazy">
+            <div class="cert-card-title">Экологический знак</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="certificates-dots" id="certificates-dots">
+        <span class="cert-dot active" data-index="0"></span>
+        <span class="cert-dot" data-index="1"></span>
+        <span class="cert-dot" data-index="2"></span>
+        <span class="cert-dot" data-index="3"></span>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section" id="faq-section">
+      <h2 class="faq-title"><i class="fa-solid fa-circle-question"></i> Ответы на часто задаваемые вопросы при выборе банного чана</h2>
+      <div class="faq-accordion">
+        <details class="faq-item" id="faq-1">
+          <summary class="faq-question">Как долго греется вода в банном чане?</summary>
+          <div class="faq-answer">
+            <p>Время нагрева зависит от объема чана, температуры воздуха и мощности печи. В среднем, для нагрева воды до комфортных 38-40°C летом требуется 1,5-2 часа, зимой — 3-4 часа.</p>
+          </div>
+        </details>
+        <details class="faq-item" id="faq-2">
+          <summary class="faq-question">Нужен ли специальный фундамент для установки чана?</summary>
+          <div class="faq-answer">
+            <p>Да, основание необходимо. Это может быть ровная бетонная площадка, терраса из доски или площадка, отсыпанная щебнем и выложенная тротуарной плиткой. Главное — чтобы основание было ровным и выдерживало вес чана с водой и людьми (1,5–3 тонны).</p>
+          </div>
+        </details>
+        <details class="faq-item" id="faq-3">
+          <summary class="faq-question">Можно ли пользоваться банным чаном зимой?</summary>
+          <div class="faq-answer">
+            <p>Да, зима — это самое волшебное время для парения в чане. Контраст горячей воды и морозного воздуха доставляет незабываемые ощущения и закаляет организм. Важно не оставлять воду в чане и трубах после использования, чтобы она не замерзла и не повредила конструкцию.</p>
+          </div>
+        </details>
+        <details class="faq-item" id="faq-4">
+          <summary class="faq-question">Какие аксессуары купить в первую очередь?</summary>
+          <div class="faq-answer">
+            <p>Самые полезные аксессуары — это термокрышка (значительно ускоряет нагрев и защищает от мусора), удобная лестница (если не идет в комплекте), весло для перемешивания воды и плавающий термометр для контроля температуры.</p>
+        </details>
+        <details class="faq-item" id="faq-steel">
+          <summary class="faq-question">Какую сталь выбрать для чана: AISI 304 или AISI 430?</summary>
+          <div class="faq-answer">
+            <p>Выбор марки нержавеющей стали напрямую влияет на срок службы и особенности ухода за чаном в уличных условиях:</p>
+            <div class="steel-compare-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Параметр</th>
+                    <th>AISI 304 (Премиум)</th>
+                    <th>AISI 430 (Стандарт)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Никель в составе</strong></td>
+                    <td>8–10% (высокая стойкость)</td>
+                    <td>Практически отсутствует (0%)</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Срок службы</strong></td>
+                    <td>20–30 лет (вечная сталь)</td>
+                    <td>15-18 лет</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Стойкость к коррозии</strong></td>
+                    <td>Исключительная (не боится осадков)</td>
+                    <td>Слабая у швов во влажной среде</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Сварные швы</strong></td>
+                    <td>Остаются прочными и не ржавеют</td>
+                    <td>Могут темнеть и требовать ухода</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Проверка магнитом</strong></td>
+                    <td>Не магнитится</td>
+                    <td>Сильно магнитится</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="steel-compare-tip">
+              <i class="fa-solid fa-magnet animate-wiggle"></i>
+              <span><strong>Совет эксперта:</strong> Возьмите обычный магнит. К чану из качественной стали AISI 304 магнит не прилипнет совсем (или будет держаться крайне слабо). Это самый надежный способ проверить материал перед покупкой.</span>
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Premium Footer -->
+  <footer class="main-footer" id="main-footer">
+    <div class="footer-container">
+      <div class="footer-info">
+        <p class="footer-note">
+          <i class="fa-solid fa-circle-info"></i>
+          Скопируйте название понравившегося комплекта и отправьте его менеджеру в диалог.
+        </p>
+      </div>
+      <p class="footer-copyright">© Уральские Банные Чаны</p>
+      <p class="footer-legal" style="font-size: 11px; color: var(--text-muted); margin-top: 4px; opacity: 0.85;">ИНН 381404122559 | ОГРНИП 321385000062371</p>
+    </div>
+  </footer>
+
+  <!-- Fullscreen Lightbox Modal -->
+  <div id="lightbox-modal" class="lightbox-modal" aria-hidden="true" role="dialog">
+    <button class="lightbox-close" aria-label="Закрыть просмотр"><i class="fa-solid fa-xmark"></i></button>
+    <button class="lightbox-arrow lightbox-prev" aria-label="Предыдущее фото" id="lightbox-prev"><i class="fa-solid fa-chevron-left"></i></button>
+    <div class="lightbox-content">
+      <div class="lightbox-wrapper">
+        <img id="lightbox-img" src="" alt="Увеличенное изображение чана">
+        <div class="lightbox-watermark"></div>
+      </div>
+    </div>
+    <button class="lightbox-arrow lightbox-next" aria-label="Следующее фото" id="lightbox-next"><i class="fa-solid fa-chevron-right"></i></button>
+  </div>
+
+  <!-- Fullscreen Gifts Preview Modal -->
+  <div id="gifts-modal" class="gifts-modal" aria-hidden="true" role="dialog">
+    <div class="gifts-modal-container">
+      <button class="gifts-modal-close" aria-label="Закрыть"><i class="fa-solid fa-xmark"></i></button>
+      <div class="gifts-modal-header">
+        <i class="fa-solid fa-gift modal-gift-icon"></i>
+        <h3>Ваши подарки при заказе</h3>
+      </div>
+      <div class="gifts-modal-body">
+        <div class="gift-preview-card">
+          <div class="gift-preview-img-wrapper">
+            <img src="assets/chan_uch8_spec_cover.png" alt="Тканевый чехол в подарок" class="gift-preview-img">
+          </div>
+          <div class="gift-preview-info">
+            <h4>Фирменный водонепроницаемый чехол</h4>
+            <p>Прочный тканевый чехол защищает чашу от пыли, листьев, осадков и солнечных лучей во время хранения чана.</p>
+          </div>
+        </div>
+        <div class="gift-preview-card">
+          <div class="gift-preview-img-wrapper">
+            <img src="assets/chan_uch8_spec_lighting.png" alt="Разноцветная диодная подсветка" class="gift-preview-img">
+          </div>
+          <div class="gift-preview-info">
+            <h4>Яркая многоцветная подсветка</h4>
+            <p>Подводная диодная подсветка с пультом управления создает волшебную и расслабляющую атмосферу во время ночного парения.</p>
+          </div>
+        </div>
+      </div>
+      <button class="gifts-modal-btn">Отлично, хочу подарки!</button>
+    </div>
+  </div>
+
+  <!-- Web App Logic -->
+  <script src="app.js?v=1.1"></script>
 </body>
-
 </html>
